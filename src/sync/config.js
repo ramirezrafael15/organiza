@@ -4,14 +4,14 @@
 //
 // Mientras estén vacíos, la app funciona igual pero solo en este dispositivo (sin cuenta ni avisos al móvil).
 export const firebaseConfig = {
-  apiKey: '',
-  authDomain: '',
-  projectId: '',
-  storageBucket: '',
-  messagingSenderId: '',
-  appId: '',
+  apiKey: 'AIzaSyAjpOZjwnd8Fpb3y_w6IX-rhIbExi-NBiY',
+  authDomain: 'organiza-27532.firebaseapp.com',
+  projectId: 'organiza-27532',
+  storageBucket: 'organiza-27532.firebasestorage.app',
+  messagingSenderId: '239293780327',
+  appId: '1:239293780327:web:f7754de341e558f1511fc2',
 };
 
-export const VAPID_PUBLIC_KEY = '';
+export const VAPID_PUBLIC_KEY = 'BIOdsQKHBKq3X1mxJKk0_OV91rdte1cPUsPjw9dYf0yKpdPx3p0fjFFywf3_DgX8KNQiXIaavX8KzHFD_zkvX-Q';
 
 export const isConfigured = () => Boolean(firebaseConfig.apiKey && firebaseConfig.projectId);
