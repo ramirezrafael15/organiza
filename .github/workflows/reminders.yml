@@ -1,0 +1,37 @@
+# RESPALDO de los avisos al móvil: cada 15 minutos manda los que el servidor puntual (scripts/daemon.mjs) no haya podido enviar a tiempo.
+# Necesita 3 secretos en el repo (Settings -> Secrets and variables -> Actions):
+#   FIREBASE_SERVICE_ACCOUNT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY   (ver README, fase 2)
+# Para probar: pestaña Actions -> "Enviar avisos" -> Run workflow -> marca "test".
+name: Enviar avisos
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      test:
+        description: 'Enviar solo una notificación de prueba'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: reminders
+  cancel-in-progress: false
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node scripts/send-reminders.mjs # respaldo: solo envía lo que el servidor puntual no haya podido enviar
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          TEST_PUSH: ${{ inputs.test }}
+          GRACE_MINUTES: '10'

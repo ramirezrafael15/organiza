@@ -1,0 +1,21 @@
+# Servicio de systemd para el servidor de avisos. Instalación (en tu servidor):
+#   sudo cp scripts/organiza-avisos.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now organiza-avisos
+#   journalctl -u organiza-avisos -f      (ver lo que hace)
+# Ajusta User y WorkingDirectory si tu carpeta o usuario son otros.
+[Unit]
+Description=Organiza - avisos puntuales
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=organiza
+WorkingDirectory=/opt/organiza
+EnvironmentFile=/etc/organiza-avisos.env
+ExecStart=/usr/bin/node scripts/daemon.mjs
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
