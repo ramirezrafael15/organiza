@@ -79,7 +79,6 @@ export function UrgencyPicker({ value, onChange }) {
 
 /** Con cuántos días de antelación quieres que te avise (varios a la vez: 7, 3, 1 y el mismo día). */
 export function ReminderPicker({ value, onChange, label = 'Avisarme antes', time, onTime }) {
-  const { settings } = useAppState();
   const days = value ?? [];
   const toggle = (d) => onChange(days.includes(d) ? days.filter((x) => x !== d) : [...days, d].sort((a, b) => b - a));
   return (
@@ -94,9 +93,8 @@ export function ReminderPicker({ value, onChange, label = 'Avisarme antes', time
       {onTime && days.length > 0 && (
         <div className="row" style={{ marginTop: 8 }}>
           <span className="small muted">A las</span>
-          <input type="time" style={{ width: 'auto' }} value={time ?? ''} onChange={(e) => onTime(e.target.value)} />
-          {time ? <button type="button" className="link-btn" onClick={() => onTime('')}>Usar la de Ajustes</button>
-            : <span className="small muted">(por defecto {String(settings.notifyHour ?? 8).padStart(2, '0')}:00)</span>}
+          <input type="time" required style={{ width: 'auto' }} value={time || '08:00'} onChange={(e) => onTime(e.target.value)} />
+          <span className="small muted">cada aviso salta a esta hora</span>
         </div>
       )}
     </Field>

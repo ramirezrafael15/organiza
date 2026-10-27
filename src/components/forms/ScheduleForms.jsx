@@ -64,6 +64,7 @@ export function EventForm({ item, defaults, onClose }) {
     title: '', kind: 'personal', date: todayISO(), start: '', end: '', place: '',
     ...defaults, ...item,
     reminderDays: item ? item.reminderDays ?? [] : DEFAULT_EVENT_REMINDERS,
+    reminderTime: item?.reminderTime || '08:00',
   });
   return (
     <FormShell

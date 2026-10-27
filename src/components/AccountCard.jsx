@@ -119,11 +119,6 @@ export function NotificationsCard() {
           {permission === 'denied' && <p className="small" style={{ color: 'var(--danger)', margin: 0 }}>Las notificaciones están bloqueadas para Organiza en este dispositivo.</p>}
           {msg && <p className="small" style={{ margin: 0 }}>{msg}</p>}
           {!VAPID_PUBLIC_KEY && <p className="small muted" style={{ margin: 0 }}>Falta la clave VAPID pública en src/sync/config.js.</p>}
-          <Field label="Hora por defecto de los avisos" hint="Cada examen, entrega o evento puede tener su propia hora en su formulario.">
-            <select value={settings.notifyHour ?? 8} onChange={(e) => actions.updateSettings({ notifyHour: Number(e.target.value) })}>
-              {HOURS.map((h) => <option key={h} value={h}>{String(h).padStart(2, '0')}:00</option>)}
-            </select>
-          </Field>
         </>
       )}
     </section>

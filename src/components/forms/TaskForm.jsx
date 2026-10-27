@@ -12,6 +12,7 @@ export default function TaskForm({ item, defaults, onClose }) {
     status: 'pendiente', progress: 0, urgencyManual: null,
     ...defaults, ...item,
     reminderDays: item?.reminderDays ?? settings.reminderDays,
+    reminderTime: item?.reminderTime || '08:00',
   });
 
   const changeStatus = (status) => {

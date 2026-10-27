@@ -12,6 +12,7 @@ export default function ExamForm({ item, defaults, onClose }) {
     ...defaults, ...item,
     // Los avisos de un examen antiguo sin lista usan los de Ajustes.
     reminderDays: item?.reminderDays ?? settings.reminderDays,
+    reminderTime: item?.reminderTime || '08:00',
   });
 
   const save = () =>
