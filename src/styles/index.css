@@ -325,3 +325,13 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 .kind-label { display: inline-flex; align-items: center; gap: 4px; color: var(--c); font-weight: 700; }
 .kind-label svg.icon { width: 14px; height: 14px; }
 .item-title .prog-pill { margin-left: 6px; }
+
+.sync-badge {
+  position: fixed; z-index: 100; right: 12px; top: calc(env(safe-area-inset-top) + 8px);
+  padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600;
+  background: var(--surface); color: var(--text, #fff); border: 1px solid var(--border, #334155);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .3); pointer-events: none;
+}
+.sync-badge.ok { color: #22c55e; }
+.sync-badge.busy { color: #f59e0b; }
+.sync-badge.bad { color: #ef4444; }

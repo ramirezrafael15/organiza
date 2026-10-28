@@ -6,6 +6,7 @@ import FormHost, { QuickAdd } from './components/forms/FormHost.jsx';
 import Icon from './components/Icon.jsx';
 import Modal from './components/Modal.jsx';
 import ProgramFilter from './components/ProgramFilter.jsx';
+import SyncBadge from './components/SyncBadge.jsx';
 import { UIContext } from './components/ui.js';
 import { useAppState } from './data/index.js';
 import { DEFAULT_KIND_COLORS } from './lib/kinds.js';
@@ -80,6 +81,7 @@ export default function App() {
 
   return (
     <UIContext.Provider value={ui}>
+      <SyncBadge />
       <div className="app">
         <nav className="sidebar" aria-label="Principal">
           <div className="brand"><img src={`${import.meta.env.BASE_URL}icons/icon.svg`} alt="" /> Organiza</div>
