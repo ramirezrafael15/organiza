@@ -34,12 +34,17 @@ export const resetPassword = (email) => sendPasswordResetEmail(services().auth, 
 const clean = (obj) => JSON.parse(JSON.stringify(obj));
 
 /** Adaptador de la nube para el motor de sincronización (ver engine.js). Todo cuelga de users/{uid}. */
-export function createRemote(uid) {
+export function createRemote(uid, onStatus = () => {}) {
   const { db } = services();
   const items = collection(db, 'users', uid, 'items');
   const settingsDoc = doc(db, 'users', uid, 'meta', 'settings');
   const docId = (col, id) => `${col}__${id}`;
-  const warn = (e) => console.warn('[sync]', e);
+  const warn = (e) => { console.warn('[sync]', e); onStatus({ error: e?.code || e?.message || 'error', pending: 0 }); };
+  let pending = 0;
+  const track = (p) => {
+    onStatus({ pending: ++pending });
+    return p.then(() => onStatus({ pending: --pending, lastOk: Date.now(), error: '' })).catch((e) => { pending--; warn(e); });
+  };
 
   return {
     listen(onItems, onSettings) {
@@ -52,6 +57,7 @@ export function createRemote(uid) {
           else upserts.push({ col: d.col, id: d.id, data: d.data, updatedAt: d.updatedAt });
         });
         const allKeys = snap.docs.map((x) => `${x.data().col}/${x.data().id}`);
+        onStatus({ fromCache: snap.metadata.fromCache, ...(snap.metadata.fromCache ? {} : { lastRead: Date.now() }) });
         onItems({ upserts, removed, allKeys, fromCache: snap.metadata.fromCache });
       }, warn);
       const stopSettings = onSnapshot(settingsDoc, (s) => {
@@ -59,9 +65,9 @@ export function createRemote(uid) {
       }, warn);
       return () => { stopItems(); stopSettings(); };
     },
-    set: (col, id, data, updatedAt) => setDoc(doc(items, docId(col, id)), { col, id, data: clean(data), updatedAt }).catch(warn),
-    remove: (col, id) => deleteDoc(doc(items, docId(col, id))).catch(warn),
-    setSettings: (data, updatedAt) => setDoc(settingsDoc, { data: clean(data), updatedAt }).catch(warn),
+    set: (col, id, data, updatedAt) => track(setDoc(doc(items, docId(col, id)), { col, id, data: clean(data), updatedAt })),
+    remove: (col, id) => track(deleteDoc(doc(items, docId(col, id)))),
+    setSettings: (data, updatedAt) => track(setDoc(settingsDoc, { data: clean(data), updatedAt })),
   };
 }
 

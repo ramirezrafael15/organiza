@@ -5,7 +5,7 @@ import { repo } from '../data/repo.js';
 import { isConfigured } from './config.js';
 import { SyncEngine } from './engine.js';
 
-let state = { status: isConfigured() ? 'loading' : 'off', user: null, error: '' }; // off | loading | out | in
+let state = { status: isConfigured() ? 'loading' : 'off', user: null, error: '', sync: {} }; // off | loading | out | in
 const listeners = new Set();
 const set = (patch) => {
   state = { ...state, ...patch };
@@ -38,7 +38,7 @@ export function initAccount() {
         stopEngine = null;
         if (user) {
           const engine = new SyncEngine({
-            repo, remote: m.createRemote(user.uid), storage: window.localStorage, storeKey: `organiza:synced:${user.uid}`,
+            repo, remote: m.createRemote(user.uid, (p) => set({ sync: { ...state.sync, ...p } })), storage: window.localStorage, storeKey: `organiza:synced:${user.uid}`,
           });
           stopEngine = engine.start();
           set({ status: 'in', user: { uid: user.uid, email: user.email }, error: '' });

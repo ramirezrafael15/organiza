@@ -49,6 +49,12 @@ export function AccountCard() {
       {acc.status === 'in' && (
         <>
           <p style={{ margin: 0 }}>Sesión iniciada como <b>{acc.user.email}</b>. Tus datos se sincronizan solos.</p>
+          <p className="small muted" style={{ margin: 0 }}>
+            {acc.sync.error ? <span style={{ color: 'var(--danger)' }}>Error al guardar en la nube: {acc.sync.error}. </span> : null}
+            {acc.sync.lastRead ? `Nube conectada (${new Date(acc.sync.lastRead).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}). ` : 'Conectando con la nube… '}
+            {acc.sync.lastOk ? `Último guardado: ${new Date(acc.sync.lastOk).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}. ` : ''}
+            {acc.sync.pending ? `Pendientes de subir: ${acc.sync.pending}.` : ''}
+          </p>
           <button className="btn small" style={{ alignSelf: 'flex-start' }} onClick={() => account.signOut()}>Cerrar sesión</button>
         </>
       )}
