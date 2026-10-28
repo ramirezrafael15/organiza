@@ -53,7 +53,8 @@ export function AccountCard() {
             {acc.sync.error ? <span style={{ color: 'var(--danger)' }}>Error al guardar en la nube: {acc.sync.error}. </span> : null}
             {acc.sync.lastRead ? `Nube conectada (${new Date(acc.sync.lastRead).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}). ` : 'Conectando con la nube… '}
             {acc.sync.lastOk ? `Último guardado: ${new Date(acc.sync.lastOk).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}. ` : ''}
-            {acc.sync.pending ? `Pendientes de subir: ${acc.sync.pending}.` : ''}
+            {acc.sync.pending ? `Pendientes de subir: ${acc.sync.pending}. ` : ''}
+            <span>Versión {typeof __BUILD__ === 'undefined' ? 'dev' : __BUILD__} (UTC).</span>
           </p>
           <button className="btn small" style={{ alignSelf: 'flex-start' }} onClick={() => account.signOut()}>Cerrar sesión</button>
         </>

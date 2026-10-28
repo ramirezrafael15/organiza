@@ -5,8 +5,7 @@ import {
   signInWithEmailAndPassword, signOut as fbSignOut,
 } from 'firebase/auth';
 import {
-  collection, deleteDoc, doc, initializeFirestore, onSnapshot, persistentLocalCache,
-  persistentMultipleTabManager, setDoc,
+  collection, deleteDoc, doc, initializeFirestore, memoryLocalCache, onSnapshot, setDoc,
 } from 'firebase/firestore';
 import { firebaseConfig } from './config.js';
 
@@ -16,9 +15,9 @@ function services() {
     const app = initializeApp(firebaseConfig);
     cached = {
       auth: getAuth(app),
-      // Caché en el dispositivo: la app sigue funcionando sin conexión y se sincroniza al volver.
-      db: initializeFirestore(app, {
-        localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+            db: initializeFirestore(app, {
+        // Sin caché en disco: la app ya guarda todo en el propio dispositivo y la caché de Safari se cuelga a veces.
+        localCache: memoryLocalCache(),
         // Conexión compatible: en iPhone/Safari la normal (WebChannel) a veces no llega a conectar.
         experimentalForceLongPolling: true,
       }),
