@@ -17,7 +17,11 @@ function services() {
     cached = {
       auth: getAuth(app),
       // Caché en el dispositivo: la app sigue funcionando sin conexión y se sincroniza al volver.
-      db: initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) }),
+      db: initializeFirestore(app, {
+        localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+        // Conexión compatible: en iPhone/Safari la normal (WebChannel) a veces no llega a conectar.
+        experimentalForceLongPolling: true,
+      }),
     };
   }
   return cached;
