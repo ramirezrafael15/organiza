@@ -12,7 +12,7 @@ export default function TaskForm({ item, defaults, onClose }) {
     status: 'pendiente', progress: 0, urgencyManual: null,
     ...defaults, ...item,
     reminderDays: item?.reminderDays ?? settings.reminderDays,
-    reminderTime: item?.reminderTime || '08:00',
+    reminderTime: item?.reminderTime || '',
   });
 
   const changeStatus = (status) => {
@@ -42,7 +42,7 @@ export default function TaskForm({ item, defaults, onClose }) {
       <Field label="Progreso">
         <ProgressSlider value={f.progress} onCommit={set('progress')} />
       </Field>
-      <ReminderPicker value={f.reminderDays} onChange={set('reminderDays')} time={f.reminderTime} onTime={set('reminderTime')} />
+      <ReminderPicker value={f.reminderDays} onChange={set('reminderDays')} time={f.reminderTime} itemTime={f.time} onTime={set('reminderTime')} />
       <UrgencyPicker value={f.urgencyManual} onChange={set('urgencyManual')} />
     </FormShell>
   );

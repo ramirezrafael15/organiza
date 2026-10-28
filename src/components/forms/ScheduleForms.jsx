@@ -64,7 +64,7 @@ export function EventForm({ item, defaults, onClose }) {
     title: '', kind: 'personal', date: todayISO(), start: '', end: '', place: '',
     ...defaults, ...item,
     reminderDays: item ? item.reminderDays ?? [] : DEFAULT_EVENT_REMINDERS,
-    reminderTime: item?.reminderTime || '08:00',
+    reminderTime: item?.reminderTime || '',
   });
   return (
     <FormShell
@@ -81,7 +81,7 @@ export function EventForm({ item, defaults, onClose }) {
         <Field label="Termina"><input type="time" {...bind('end')} /></Field>
       </div>
       <Field label="Lugar (opcional)"><input type="text" {...bind('place')} /></Field>
-      <ReminderPicker value={f.reminderDays} onChange={set('reminderDays')} time={f.reminderTime} onTime={set('reminderTime')} />
+      <ReminderPicker value={f.reminderDays} onChange={set('reminderDays')} time={f.reminderTime} itemTime={f.start} onTime={set('reminderTime')} />
     </FormShell>
   );
 }

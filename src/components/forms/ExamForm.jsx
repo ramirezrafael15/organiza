@@ -12,7 +12,7 @@ export default function ExamForm({ item, defaults, onClose }) {
     ...defaults, ...item,
     // Los avisos de un examen antiguo sin lista usan los de Ajustes.
     reminderDays: item?.reminderDays ?? settings.reminderDays,
-    reminderTime: item?.reminderTime || '08:00',
+    reminderTime: item?.reminderTime || '',
   });
 
   const save = () =>
@@ -44,7 +44,7 @@ export default function ExamForm({ item, defaults, onClose }) {
       <Field label="¿Cuánto llevas preparado?">
         <ProgressSlider value={f.progress} onCommit={set('progress')} label="Preparación" />
       </Field>
-      <ReminderPicker value={f.reminderDays} onChange={set('reminderDays')} time={f.reminderTime} onTime={set('reminderTime')} />
+      <ReminderPicker value={f.reminderDays} onChange={set('reminderDays')} time={f.reminderTime} itemTime={f.time} onTime={set('reminderTime')} />
       <UrgencyPicker value={f.urgencyManual} onChange={set('urgencyManual')} />
     </FormShell>
   );

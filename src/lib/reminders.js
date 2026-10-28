@@ -70,7 +70,7 @@ export function activeReminders(state, today = todayISO()) {
     out.push({
       key: `${col}-${item.id}`, kind, col, item, date, daysLeft, subjectId: item.subjectId,
       isNew: days.includes(daysLeft),
-      reminderTime: item.reminderTime || null, // 'HH:mm' propia de este aviso; null = la de Ajustes
+      reminderTime: item.reminderTime || item.time || item.start || null, // 'HH:mm': la del aviso; si no, la del propio examen/entrega/evento; si no, 08:00
       message: reminderMessage({ kind, title, subjectName: subjectName(item.subjectId), daysLeft, progress }),
       hint: kind === 'evento' ? null : paceHint(progress ?? 0, daysLeft),
     });
