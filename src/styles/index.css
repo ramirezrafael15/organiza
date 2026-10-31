@@ -245,30 +245,35 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 .cal-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
 .cal-title { font-size: 1.15rem; font-weight: 750; text-transform: capitalize; min-width: 150px; }
 .cal-bar .seg { margin-left: auto; }
-.month { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
-.month-head { text-align: center; font-size: 0.74rem; font-weight: 700; color: var(--muted); padding: 4px 0; }
+.month { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+.month-head { text-align: center; font-size: 0.72rem; font-weight: 700; color: var(--muted); padding: 4px 0; }
+/* Estilo Google Calendar: cada día muestra sus cosas como barritas de color con el título. */
 .day-cell {
-  min-height: 62px; padding: 5px; border-radius: 10px; text-align: left;
+  min-height: 96px; padding: 3px 2px; border-radius: 6px; text-align: left;
   background: var(--surface); border: 1px solid var(--border);
-  display: flex; flex-direction: column; gap: 3px; overflow: hidden;
+  display: flex; flex-direction: column; gap: 2px; overflow: hidden;
 }
 .day-cell.out { opacity: 0.45; }
 .day-cell.today .num { background: var(--primary); color: var(--primary-ink); }
 .day-cell.sel { border-color: var(--primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 30%, transparent); }
-.num { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 0.8rem; font-weight: 700; }
-.dots { display: flex; gap: 3px; flex-wrap: wrap; }
-.dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--k); }
-.mini { display: none; font-size: 0.7rem; font-weight: 650; padding: 1px 5px; border-radius: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  background: color-mix(in srgb, var(--k) 18%, var(--surface)); color: var(--text); border-left: 3px solid var(--k); }
-.more { display: none; font-size: 0.68rem; color: var(--muted); }
-.mini { box-shadow: inset -4px 0 0 var(--p, transparent); } /* franja derecha = color del estudio */
+.num { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 0.74rem; font-weight: 700; align-self: center; }
+.dots { display: none; }
+.mini {
+  display: block; font-size: 0.62rem; font-weight: 700; line-height: 1.35; padding: 1px 4px; border-radius: 4px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  background: var(--k); color: #fff;
+  box-shadow: inset -3px 0 0 var(--p, transparent); /* franja derecha = color del estudio */
+}
+.mini.done { opacity: 0.45; text-decoration: line-through; }
+.more { display: block; font-size: 0.62rem; font-weight: 700; color: var(--muted); padding-left: 3px; }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.78rem; font-weight: 600; margin: -4px 0 12px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
 @media (min-width: 700px) {
-  .day-cell { min-height: 108px; }
-  .dots { display: none; }
-  .mini, .more { display: block; }
+  .day-cell { min-height: 120px; padding: 5px 4px; gap: 3px; }
+  .num { align-self: flex-start; font-size: 0.8rem; }
+  .mini { font-size: 0.74rem; padding: 2px 6px; }
+  .more { font-size: 0.72rem; }
 }
 .week { display: grid; gap: 12px; }
 .week-col { display: flex; flex-direction: column; gap: 6px; }

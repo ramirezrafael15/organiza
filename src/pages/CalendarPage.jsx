@@ -120,7 +120,7 @@ function MonthView({ state, today, cursor, selected, onSelect, onOpenDay, onAdd 
                 {entries.slice(0, 4).map((e) => <i key={e.key} style={{ '--k': entryColor(e, state) }} />)}
               </span>
               {entries.slice(0, 3).map((e) => (
-                <span key={e.key} className="mini" style={{ '--k': entryColor(e, state), '--p': programColor(e, state) ?? 'transparent' }}>{mark(e)}{e.title}</span>
+                <span key={e.key} className={`mini ${e.status === 'entregado' ? 'done' : ''}`} style={{ '--k': entryColor(e, state), '--p': programColor(e, state) ?? 'transparent' }}>{mark(e)}{e.title}</span>
               ))}
               {entries.length > 3 && <span className="more">+{entries.length - 3} más</span>}
             </button>
