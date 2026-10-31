@@ -249,7 +249,7 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 .month-head { text-align: center; font-size: 0.72rem; font-weight: 700; color: var(--muted); padding: 4px 0; }
 /* Estilo Google Calendar: cada día muestra sus cosas como barritas de color con el título. */
 .day-cell {
-  min-height: 96px; padding: 3px 2px; border-radius: 6px; text-align: left;
+  min-height: 88px; padding: 3px 1px; border-radius: 6px; text-align: left;
   background: var(--surface); border: 1px solid var(--border);
   display: flex; flex-direction: column; gap: 2px; overflow: hidden;
 }
@@ -259,10 +259,10 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 .num { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 0.74rem; font-weight: 700; align-self: center; }
 .dots { display: none; }
 .mini {
-  display: block; font-size: 0.62rem; font-weight: 700; line-height: 1.35; padding: 1px 4px; border-radius: 4px;
+  display: block; font-size: 0.58rem; font-weight: 700; line-height: 1.4; letter-spacing: -0.2px; padding: 1px 2px; border-radius: 3px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   background: var(--k); color: #fff;
-  box-shadow: inset -3px 0 0 var(--p, transparent); /* franja derecha = color del estudio */
+  box-shadow: inset -2px 0 0 var(--p, transparent); /* franja derecha = color del estudio */
 }
 .mini.done { opacity: 0.45; text-decoration: line-through; }
 .more { display: block; font-size: 0.62rem; font-weight: 700; color: var(--muted); padding-left: 3px; }
@@ -275,12 +275,34 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
   .mini { font-size: 0.74rem; padding: 2px 6px; }
   .more { font-size: 0.72rem; }
 }
-.week { display: grid; gap: 12px; }
-.week-col { display: flex; flex-direction: column; gap: 6px; }
-.week-col h3 { font-size: 0.9rem; display: flex; align-items: center; gap: 8px; text-transform: capitalize; }
-.week-col h3 .num { font-size: 0.85rem; }
-.week-col.today h3 .num { background: var(--primary); color: var(--primary-ink); }
-@media (min-width: 1000px) { .week { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
+/* Semana: en móvil una fila por día (día a la izquierda, cosas a la derecha); en pantalla grande 7 columnas. */
+.week { display: grid; gap: 4px; }
+.week-col { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; align-items: start; padding: 10px 0; border-top: 1px solid var(--border); }
+.week-head { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.week-head .wd { font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+.week-head .num { width: 34px; height: 34px; font-size: 1.05rem; }
+.week-col.today .week-head .num { background: var(--primary); color: var(--primary-ink); }
+.week-col.today .week-head .wd { color: var(--primary); }
+.week-items { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.week-item {
+  display: flex; flex-direction: column; gap: 1px; text-align: left; min-width: 0;
+  padding: 6px 8px; border-radius: 8px; border-left: 4px solid var(--k);
+  background: color-mix(in srgb, var(--k) 16%, var(--surface));
+  box-shadow: inset -3px 0 0 var(--p, transparent);
+}
+.week-item.done { opacity: 0.5; }
+.week-item.done .wi-title { text-decoration: line-through; }
+.wi-time { font-size: 0.7rem; font-weight: 700; color: var(--muted); }
+.wi-title { font-size: 0.86rem; font-weight: 700; overflow-wrap: anywhere; }
+.wi-place { font-size: 0.7rem; color: var(--muted); overflow-wrap: anywhere; }
+@media (min-width: 1000px) {
+  .week { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+  .week-col { display: flex; flex-direction: column; gap: 8px; padding: 8px 6px; min-height: 280px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+  .week-col.today { border-color: var(--primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 25%, transparent); }
+  .week-head { flex-direction: row; justify-content: center; gap: 8px; }
+  .week-head .wd { font-size: 0.78rem; }
+  .week-head .num { width: 30px; height: 30px; font-size: 0.95rem; }
+}
 
 /* ===== Exámenes / entregas ===== */
 .tabs { margin-bottom: 14px; }

@@ -4,10 +4,10 @@ import { useMemo, useState } from 'react';
 import EntryRow from '../components/EntryRow.jsx';
 import Icon from '../components/Icon.jsx';
 import { Empty } from '../components/bits.jsx';
-import { useUI } from '../components/ui.js';
+import { FORM_FOR_COL, useUI } from '../components/ui.js';
 import { useAppState, useToday } from '../data/index.js';
 import { entriesByDay, entriesOn } from '../lib/agenda.js';
-import { WEEKDAYS_3, addDaysISO, fmt, fromISO, monthGrid, toISO, weekDays } from '../lib/dates.js';
+import { WEEKDAYS_3, addDaysISO, fmt, fromISO, monthGrid, timeLabel, toISO, weekDays } from '../lib/dates.js';
 import { entryColor, programColor } from '../lib/color.js';
 import { filterState } from '../lib/filter.js';
 import { DEFAULT_KIND_COLORS, KINDS } from '../lib/kinds.js';
@@ -148,20 +148,37 @@ function WeekView({ state, today, cursor, onOpenDay }) {
   return (
     <div className="week">
       {days.map((iso, i) => (
-        <div key={iso} className={`week-col ${iso === today ? 'today' : ''}`}>
-          <h3>
-            <button className="row" onClick={() => onOpenDay(iso)} style={{ gap: 8 }}>
-              <span className="num">{Number(iso.slice(8))}</span> {WEEKDAYS_3[i]}
-            </button>
-          </h3>
-          {byDay[iso].length ? (
-            <div className="entries">{byDay[iso].map((e) => <EntryRow key={e.key} entry={e} compact />)}</div>
-          ) : (
-            <span className="small muted">Libre</span>
-          )}
-        </div>
+        <section key={iso} className={`week-col ${iso === today ? 'today' : ''}`}>
+          <button className="week-head" onClick={() => onOpenDay(iso)} aria-label={fmt(iso, "EEEE d 'de' MMMM")}>
+            <span className="wd">{WEEKDAYS_3[i]}</span>
+            <span className="num">{Number(iso.slice(8))}</span>
+          </button>
+          <div className="week-items">
+            {byDay[iso].length
+              ? byDay[iso].map((e) => <WeekItem key={e.key} entry={e} state={state} />)
+              : <span className="small muted">Libre</span>}
+          </div>
+        </section>
       ))}
     </div>
+  );
+}
+
+/** Bloque de color de la vista semanal: hora arriba, título debajo (puede ocupar varias líneas). */
+function WeekItem({ entry, state }) {
+  const { openForm } = useUI();
+  const done = entry.status === 'entregado';
+  const mark = entry.kind === 'entrega' ? '⚑ ' : entry.kind === 'examen' ? '★ ' : '';
+  return (
+    <button
+      className={`week-item ${done ? 'done' : ''}`}
+      style={{ '--k': entryColor(entry, state), '--p': programColor(entry, state) ?? 'transparent' }}
+      onClick={() => openForm(FORM_FOR_COL[entry.col], entry.item)}
+    >
+      <span className="wi-time">{timeLabel(entry.start, entry.end)}</span>
+      <span className="wi-title">{mark}{entry.title}</span>
+      {entry.place && <span className="wi-place">{entry.place}</span>}
+    </button>
   );
 }
 
