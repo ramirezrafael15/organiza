@@ -2,7 +2,14 @@
 // Prueba de humo: monta la app entera con datos de ejemplo, recorre todas las pantallas
 // y comprueba que los formularios guardan y que las medias/urgencias salen en pantalla.
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+// La config real ya está rellena; los tests simulan la app sin nube.
+vi.mock('./sync/config.js', () => ({
+  firebaseConfig: {},
+  VAPID_PUBLIC_KEY: '',
+  isConfigured: () => false,
+}));
 import App from './App.jsx';
 import { repo } from './data/repo.js';
 import { buildDemoState } from './data/demo.js';
