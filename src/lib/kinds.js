@@ -6,6 +6,7 @@ export const KINDS = {
   entrega: { label: 'Entrega', color: 'var(--k-entrega)', icon: 'flag' },
   laboral: { label: 'Trabajo', color: 'var(--k-laboral)', icon: 'tasks' },
   personal: { label: 'Personal', color: 'var(--k-personal)', icon: 'home' },
+  pendiente: { label: 'Pendiente', color: 'var(--k-pendiente)', icon: 'check' },
 };
 
 // Colores por defecto de cada tipo (mismos valores que --k-* en styles/index.css).
@@ -16,6 +17,7 @@ export const DEFAULT_KIND_COLORS = {
   entrega: '#0d9488',
   laboral: '#db2777',
   personal: '#78716c',
+  pendiente: '#64748b',
 };
 
 // Tipos que se pueden elegir al crear una clase del horario o un evento suelto.

@@ -59,5 +59,14 @@ export function buildDemoState(today = todayISO()) {
     { id: 'demo-n3', title: 'Comprar', body: 'Pendrive y cuaderno cuadriculado.', subjectId: null, linkType: null, linkId: null },
   ].map((n) => ({ ...n, ...meta }));
 
-  return { programs, subjects, classes, events, exams, tasks, grades, notes, settings: { ...DEFAULT_SETTINGS } };
+  const todos = [
+    { id: 'demo-t1', title: 'Comprar el cargador del portátil', date: today, time: '', done: false },
+    { id: 'demo-t2', title: 'Llamar al banco', date: today, time: '12:00', done: false },
+    { id: 'demo-t3', title: 'Repasar apuntes de Bases de Datos', date: today, time: '', subjectId: 'demo-bd', done: true, doneAt: t },
+    { id: 'demo-t4', title: 'Pedir cita en el médico', date: d(-1), time: '', done: false },
+    { id: 'demo-t5', title: 'Preparar el currículum', date: d(2), time: '', done: false },
+    { id: 'demo-t6', title: 'Ordenar el escritorio', date: '', time: '', done: false },
+  ].map((x) => ({ ...x, ...meta }));
+
+  return { programs, subjects, classes, events, exams, tasks, todos, grades, notes, settings: { ...DEFAULT_SETTINGS } };
 }

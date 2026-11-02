@@ -1,0 +1,35 @@
+{
+  "programs": [
+    { "name": "DAW", "color": "#2563eb" },
+    { "name": "Marketing", "color": "#c026d3" }
+  ],
+  "subjects": [
+    { "name": "Inglés", "program": "DAW" },
+    { "name": "Desarrollo Web Servidor", "program": "DAW" },
+    { "name": "Despliegue de Aplicaciones Web", "program": "DAW" },
+    { "name": "Diseño de Interfaces Web", "program": "DAW" },
+    { "name": "Desarrollo Web Cliente", "program": "DAW" },
+    { "name": "Proyecto Integrado", "program": "DAW" },
+    { "name": "IPE II", "program": "DAW" },
+    { "name": "Profundización en Digitalización", "program": "DAW" },
+    { "name": "IMK", "program": "Marketing" },
+    { "name": "FDAE", "program": "Marketing" }
+  ],
+  "classes": [
+    { "title": "Inglés", "subject": "Inglés", "weekdays": [0], "start": "15:30", "end": "17:30" },
+    { "title": "Desarrollo Web Servidor", "subject": "Desarrollo Web Servidor", "weekdays": [0], "start": "17:30", "end": "21:30" },
+    { "title": "Despliegue de Aplicaciones Web", "subject": "Despliegue de Aplicaciones Web", "weekdays": [1], "start": "15:30", "end": "17:30" },
+    { "title": "Diseño de Interfaces Web", "subject": "Diseño de Interfaces Web", "weekdays": [1, 2], "start": "17:30", "end": "18:30" },
+    { "title": "Desarrollo Web Cliente", "subject": "Desarrollo Web Cliente", "weekdays": [1, 3], "start": "18:30", "end": "21:30" },
+    { "title": "Proyecto Integrado", "subject": "Proyecto Integrado", "weekdays": [2], "start": "15:30", "end": "17:30" },
+    { "title": "Desarrollo Web Servidor", "subject": "Desarrollo Web Servidor", "weekdays": [2], "start": "18:30", "end": "21:30" },
+    { "title": "IPE II", "subject": "IPE II", "weekdays": [3], "start": "15:30", "end": "18:30" },
+    { "title": "Profundización en Digitalización", "subject": "Profundización en Digitalización", "weekdays": [4], "start": "15:30", "end": "18:30" },
+    { "title": "Diseño de Interfaces Web", "subject": "Diseño de Interfaces Web", "weekdays": [4], "start": "18:30", "end": "21:30" },
+
+    { "title": "IMK", "subject": "IMK", "weekdays": [0], "start": "08:30", "end": "10:30", "place": "Aula D22" },
+    { "title": "FDAE", "subject": "FDAE", "weekdays": [1], "start": "08:30", "end": "10:30", "place": "Aula D22" },
+    { "title": "IMK", "subject": "IMK", "weekdays": [1], "start": "12:30", "end": "14:30", "place": "Aula D22" },
+    { "title": "FDAE", "subject": "FDAE", "weekdays": [3], "start": "10:30", "end": "12:30", "place": "Aula D22" }
+  ]
+}

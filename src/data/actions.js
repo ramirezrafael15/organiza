@@ -41,6 +41,11 @@ export const actions = {
     return actions.save('tasks', { ...task, status });
   },
 
+  /** Marca o desmarca un pendiente del día a día. */
+  toggleTodo(todo) {
+    return repo.upsert('todos', { ...todo, done: !todo.done, doneAt: todo.done ? null : Date.now() });
+  },
+
   setProgress(col, item, progress) {
     return actions.save(col, { ...item, progress });
   },

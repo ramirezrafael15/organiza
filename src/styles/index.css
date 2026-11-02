@@ -16,6 +16,7 @@
   --k-clase: #2563eb;
   --k-examen: #9333ea;
   --k-entrega: #0d9488;
+  --k-pendiente: #64748b;
   --k-laboral: #db2777;
   --k-personal: #78716c;
 
@@ -266,6 +267,7 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 /* Forma según el tipo (se nota aunque los colores sean los del estudio) */
 .mini.k-examen { background: var(--k); color: #fff; font-weight: 800; }
 .mini.k-entrega { background: var(--surface); color: var(--text); outline: 1.5px solid var(--k); outline-offset: -1.5px; }
+.mini.k-pend { background: transparent; color: var(--text); outline: 1.5px dashed var(--k); outline-offset: -1.5px; }
 .mini.k-otro { background: color-mix(in srgb, var(--k) 18%, var(--surface)); color: var(--text); border-left: 3px solid var(--k); }
 .mini.done { opacity: 0.45; text-decoration: line-through; }
 .more { display: block; font-size: 0.62rem; font-weight: 700; color: var(--muted); padding-left: 3px; }
@@ -296,6 +298,7 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 }
 .week-item.k-examen { background: var(--k); border-left-color: var(--k); }
 .week-item.k-examen .wi-title, .week-item.k-examen .wi-time, .week-item.k-examen .wi-place { color: #fff; }
+.week-item.k-pend { background: transparent; border: 1.5px dashed var(--k); border-left-width: 1.5px; }
 .week-item.k-entrega { background: var(--surface); border: 1.5px solid var(--k); border-left-width: 1.5px; }
 .week-item.done { opacity: 0.5; }
 .week-item.done .wi-title { text-decoration: line-through; }
@@ -369,3 +372,18 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 .sync-badge.ok { color: #22c55e; }
 .sync-badge.busy { color: #f59e0b; }
 .sync-badge.bad { color: #ef4444; }
+
+/* ===== Pendientes del día a día ===== */
+.todo-add { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.todo-list { padding: 4px 0; }
+.todo-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 14px; border-top: 1px solid var(--border); }
+.todo-row:first-child { border-top: none; }
+.todo-check {
+  flex: none; width: 26px; height: 26px; border-radius: 50%; margin-top: 1px;
+  border: 2px solid var(--muted); display: grid; place-items: center; font-weight: 800; color: var(--primary-ink);
+}
+.todo-row.done .todo-check { background: var(--primary); border-color: var(--primary); }
+.todo-main { flex: 1; min-width: 0; text-align: left; display: flex; flex-direction: column; gap: 2px; }
+.todo-title { font-weight: 650; overflow-wrap: anywhere; }
+.todo-row.done .todo-title { text-decoration: line-through; color: var(--muted); }
+.todo-meta { display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.78rem; color: var(--muted); }

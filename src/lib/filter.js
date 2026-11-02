@@ -14,6 +14,7 @@ export function filterState(state, filter) {
     events: state.events.filter((x) => inScope(x.subjectId)),
     exams: state.exams.filter((x) => inScope(x.subjectId)),
     tasks: state.tasks.filter((x) => inScope(x.subjectId)),
+    todos: (state.todos ?? []).filter((x) => inScope(x.subjectId)),
     grades: state.grades.filter((x) => inScope(x.subjectId)),
     notes: state.notes.filter((x) => inScope(x.subjectId)),
   };

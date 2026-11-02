@@ -16,6 +16,7 @@ const PATHS = {
   grid: 'M5 5h4v4H5zM15 5h4v4h-4zM5 15h4v4H5zM15 15h4v4h-4z',
   exam: 'M8 3h8l3 3v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM9 12l2 2 4-4',
   flag: 'M5 21V4M5 4h11l-2 4 2 4H5',
+  check: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8 12l3 3 5-6',
 };
 
 export default function Icon({ name }) {

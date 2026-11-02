@@ -54,7 +54,7 @@ export default function CalendarPage() {
       <div className="page-head">
         <div>
           <h1>Calendario</h1>
-          <p className="sub">Todo en un mismo sitio: clases, trabajo, exámenes, entregas y eventos.</p>
+          <p className="sub">Todo en un mismo sitio: clases, trabajo, exámenes, entregas, pendientes y eventos.</p>
         </div>
       </div>
 
@@ -94,15 +94,15 @@ export default function CalendarPage() {
   );
 }
 
-// Cada tipo se distingue por su FORMA (además del color): examen = bloque relleno ★, tarea/entrega = solo borde ☐, el resto = suave.
-const shapeOf = (e) => (e.kind === 'examen' ? 'k-examen' : e.kind === 'entrega' ? 'k-entrega' : 'k-otro');
-const markOf = (e) => (e.kind === 'examen' ? '★ ' : e.kind === 'entrega' ? (e.status === 'entregado' ? '☑ ' : '☐ ') : '');
+// Cada tipo se distingue por su FORMA (además del color): examen = bloque relleno ★, entrega = borde ☐, pendiente del día a día = borde discontinuo ○, el resto = suave.
+const shapeOf = (e) => (e.kind === 'examen' ? 'k-examen' : e.kind === 'entrega' ? 'k-entrega' : e.kind === 'pendiente' ? 'k-pend' : 'k-otro');
+const markOf = (e) => (e.kind === 'examen' ? '★ ' : e.kind === 'entrega' ? (e.status === 'entregado' ? '☑ ' : '☐ ') : e.kind === 'pendiente' ? (e.status === 'entregado' ? '✔ ' : '○ ') : '');
 
 function MonthView({ state, today, cursor, selected, onSelect, onOpenDay, onAdd }) {
   const days = monthGrid(cursor);
   const byDay = entriesByDay(state, days, today);
   // En cada casilla del mes, lo importante (exámenes y entregas) va primero: si hay muchas clases no queda escondido en "+N más".
-  const rank = (e) => (e.kind === 'examen' || e.kind === 'entrega' ? 0 : 1);
+  const rank = (e) => (e.kind === 'examen' || e.kind === 'entrega' ? 0 : e.kind === 'pendiente' ? 1 : 2);
   for (const d of days) byDay[d] = [...byDay[d]].sort((a, b) => rank(a) - rank(b));
   const mark = (e) => markOf(e);
   const month = cursor.slice(0, 7);
@@ -224,6 +224,7 @@ function Legend({ state }) {
     <div className="legend" aria-label="Leyenda">
       <span className="mini k-examen" style={{ '--k': '#9333ea' }}>★ Examen</span>
       <span className="mini k-entrega" style={{ '--k': '#0d9488' }}>☐ Tarea / entrega</span>
+      <span className="mini k-pend" style={{ '--k': '#64748b' }}>○ Pendiente</span>
       <span className="mini k-otro" style={{ '--k': '#2563eb' }}>Clases y eventos</span>
       {state.programs.length > 0 && (
         <span className="muted">· {byProgram ? 'el color es el de cada estudio' : 'la franja de color a la derecha marca el estudio'}</span>

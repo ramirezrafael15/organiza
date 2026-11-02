@@ -12,6 +12,7 @@ import { KINDS } from '../lib/kinds.js';
 import { getUrgency } from '../lib/urgency.js';
 import { activeReminders } from '../lib/reminders.js';
 import { FORM_FOR_COL } from '../components/ui.js';
+import { TodoRow } from './Todos.jsx';
 
 const Section = ({ title, action, children }) => (
   <section className="section">
@@ -29,7 +30,7 @@ export default function Dashboard() {
   const today = useToday();
   const { openForm, openQuickAdd, navigate } = useUI();
 
-  const isEmpty = !full.subjects.length && !full.exams.length && !full.tasks.length && !full.classes.length && !full.events.length;
+  const isEmpty = !full.subjects.length && !full.exams.length && !full.tasks.length && !full.classes.length && !full.events.length && !(full.todos ?? []).length;
   if (isEmpty) {
     return (
       <>
@@ -58,6 +59,8 @@ export default function Dashboard() {
   const subjectOf = (id) => state.subjects.find((s) => s.id === id);
 
   const pendingTasks = state.tasks.filter((t) => t.status !== 'entregado').length;
+  // Pendientes del día a día que tocan hoy o se quedaron atrás.
+  const dueTodos = (state.todos ?? []).filter((t) => !t.done && t.date && t.date <= today).sort((a, b) => a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || ''));
 
   return (
     <>
@@ -73,6 +76,15 @@ export default function Dashboard() {
         <div className="card stat"><b style={{ color: urgent.length ? 'var(--u-3)' : undefined }}>{urgent.length}</b><span>urgentes</span></div>
         <div className="card stat"><b>{pendingTasks}</b><span>entregas pendientes</span></div>
       </div>
+
+      {dueTodos.length > 0 && (
+        <Section title="Pendientes de hoy" action={<button className="link-btn" onClick={() => navigate('pendientes')}>Ver todos</button>}>
+          <div className="card todo-list">
+            {dueTodos.slice(0, 6).map((t) => <TodoRow key={t.id} todo={t} today={today} subjects={state.subjects} showDate={t.date < today} />)}
+            {dueTodos.length > 6 && <p className="small muted" style={{ margin: 0, padding: '8px 14px' }}>+{dueTodos.length - 6} más</p>}
+          </div>
+        </Section>
+      )}
 
       {reminders.length > 0 && (
         <Section title="Avisos" action={<span className="small muted">{reminders.filter((r) => r.isNew).length ? 'Hay avisos nuevos hoy' : 'En curso'}</span>}>

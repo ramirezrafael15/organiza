@@ -12,6 +12,7 @@ export const useUI = () => useContext(UIContext);
 export const FORM_FOR_COL = {
   exams: 'exam',
   tasks: 'task',
+  todos: 'todo',
   classes: 'class',
   events: 'event',
   notes: 'note',

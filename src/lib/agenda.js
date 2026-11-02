@@ -60,6 +60,13 @@ export function entriesOn(state, iso, today = todayISO()) {
       urgency: getUrgency(t, 'task', today), col: 'tasks', item: t,
     });
   }
+  for (const t of state.todos ?? []) {
+    if (t.date !== iso) continue;
+    out.push({
+      key: `todo-${t.id}`, kind: 'pendiente', title: t.title, date: iso, start: t.time,
+      subjectId: t.subjectId, status: t.done ? 'entregado' : undefined, col: 'todos', item: t,
+    });
+  }
   return out.sort(byTime);
 }
 

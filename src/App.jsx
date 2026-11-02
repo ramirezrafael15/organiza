@@ -17,19 +17,21 @@ import Notes from './pages/Notes.jsx';
 import Schedule from './pages/Schedule.jsx';
 import Settings from './pages/Settings.jsx';
 import Tasks from './pages/Tasks.jsx';
+import Todos from './pages/Todos.jsx';
 import { useTheme } from './lib/theme.js';
 import { initAccount } from './sync/account.js';
 
 const ROUTES = [
   { id: 'panel', label: 'Panel', icon: 'home', Page: Dashboard },
   { id: 'calendario', label: 'Calendario', icon: 'calendar', Page: CalendarPage },
-  { id: 'tareas', label: 'Tareas', icon: 'tasks', Page: Tasks },
+  { id: 'tareas', label: 'Entregas', icon: 'tasks', Page: Tasks },
+  { id: 'pendientes', label: 'Pendientes', icon: 'check', Page: Todos },
   { id: 'notas', label: 'Bloc', icon: 'note', Page: Notes },
   { id: 'horario', label: 'Horario', icon: 'clock', Page: Schedule },
   { id: 'calificaciones', label: 'Notas', icon: 'grades', Page: Grades },
   { id: 'ajustes', label: 'Ajustes', icon: 'settings', Page: Settings },
 ];
-const MOBILE_MAIN = ['panel', 'calendario', 'tareas', 'notas']; // el resto va en "Más"
+const MOBILE_MAIN = ['panel', 'calendario', 'tareas', 'pendientes']; // el resto va en "Más"
 
 const routeFromHash = () => {
   const id = window.location.hash.replace(/^#\/?/, '');

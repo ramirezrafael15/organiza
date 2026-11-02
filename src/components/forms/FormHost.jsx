@@ -6,10 +6,12 @@ import { GradeForm, ProgramForm, SubjectForm } from './GradeForms.jsx';
 import NoteForm from './NoteForm.jsx';
 import { ClassForm, EventForm } from './ScheduleForms.jsx';
 import TaskForm from './TaskForm.jsx';
+import TodoForm from './TodoForm.jsx';
 
 const FORMS = {
   exam: ExamForm,
   task: TaskForm,
+  todo: TodoForm,
   class: ClassForm,
   event: EventForm,
   note: NoteForm,
@@ -22,6 +24,7 @@ const FORMS = {
 const QUICK = [
   { form: 'exam', label: 'Examen', icon: 'exam', color: 'var(--k-examen)' },
   { form: 'task', label: 'Entrega', icon: 'flag', color: 'var(--k-entrega)' },
+  { form: 'todo', label: 'Pendiente del día', icon: 'check', color: 'var(--k-pendiente)' },
   { form: 'class', label: 'Horario semanal', icon: 'clock', color: 'var(--k-clase)' },
   { form: 'event', label: 'Evento', icon: 'calendar', color: 'var(--k-personal)' },
   { form: 'note', label: 'Nota rápida', icon: 'note', color: 'var(--k-laboral)' },
@@ -29,7 +32,7 @@ const QUICK = [
 
 // El calendario pasa { date }; cada formulario lo usa con su propio nombre de campo.
 const defaultsFor = (form, d = {}) =>
-  !d.date ? {} : form === 'task' ? { due: d.date } : form === 'exam' || form === 'event' ? { date: d.date } : {};
+  !d.date ? {} : form === 'task' ? { due: d.date } : form === 'exam' || form === 'event' || form === 'todo' ? { date: d.date } : {};
 
 export function QuickAdd({ defaults, onPick, onClose }) {
   return (
