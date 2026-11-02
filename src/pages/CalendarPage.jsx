@@ -10,7 +10,6 @@ import { entriesByDay, entriesOn } from '../lib/agenda.js';
 import { WEEKDAYS_3, addDaysISO, fmt, fromISO, monthGrid, timeLabel, toISO, weekDays } from '../lib/dates.js';
 import { entryColor, programColor } from '../lib/color.js';
 import { filterState } from '../lib/filter.js';
-import { DEFAULT_KIND_COLORS, KINDS } from '../lib/kinds.js';
 
 const VIEWS = [
   { value: 'mes', label: 'Mes' },
@@ -95,13 +94,17 @@ export default function CalendarPage() {
   );
 }
 
+// Cada tipo se distingue por su FORMA (además del color): examen = bloque relleno ★, tarea/entrega = solo borde ☐, el resto = suave.
+const shapeOf = (e) => (e.kind === 'examen' ? 'k-examen' : e.kind === 'entrega' ? 'k-entrega' : 'k-otro');
+const markOf = (e) => (e.kind === 'examen' ? '★ ' : e.kind === 'entrega' ? (e.status === 'entregado' ? '☑ ' : '☐ ') : '');
+
 function MonthView({ state, today, cursor, selected, onSelect, onOpenDay, onAdd }) {
   const days = monthGrid(cursor);
   const byDay = entriesByDay(state, days, today);
   // En cada casilla del mes, lo importante (exámenes y entregas) va primero: si hay muchas clases no queda escondido en "+N más".
   const rank = (e) => (e.kind === 'examen' || e.kind === 'entrega' ? 0 : 1);
   for (const d of days) byDay[d] = [...byDay[d]].sort((a, b) => rank(a) - rank(b));
-  const mark = (e) => (e.kind === 'entrega' ? '⚑ ' : e.kind === 'examen' ? '★ ' : '');
+  const mark = (e) => markOf(e);
   const month = cursor.slice(0, 7);
 
   return (
@@ -120,7 +123,7 @@ function MonthView({ state, today, cursor, selected, onSelect, onOpenDay, onAdd 
                 {entries.slice(0, 4).map((e) => <i key={e.key} style={{ '--k': entryColor(e, state) }} />)}
               </span>
               {entries.slice(0, 3).map((e) => (
-                <span key={e.key} className={`mini ${e.status === 'entregado' ? 'done' : ''}`} style={{ '--k': entryColor(e, state), '--p': programColor(e, state) ?? 'transparent' }}>{mark(e)}{e.title}</span>
+                <span key={e.key} className={`mini ${shapeOf(e)} ${e.status === 'entregado' ? 'done' : ''}`} style={{ '--k': entryColor(e, state), '--p': programColor(e, state) ?? 'transparent' }}>{mark(e)}{e.title}</span>
               ))}
               {entries.length > 3 && <span className="more">+{entries.length - 3} más</span>}
             </button>
@@ -168,10 +171,10 @@ function WeekView({ state, today, cursor, onOpenDay }) {
 function WeekItem({ entry, state }) {
   const { openForm } = useUI();
   const done = entry.status === 'entregado';
-  const mark = entry.kind === 'entrega' ? '⚑ ' : entry.kind === 'examen' ? '★ ' : '';
+  const mark = markOf(entry);
   return (
     <button
-      className={`week-item ${done ? 'done' : ''}`}
+      className={`week-item ${shapeOf(entry)} ${done ? 'done' : ''}`}
       style={{ '--k': entryColor(entry, state), '--p': programColor(entry, state) ?? 'transparent' }}
       onClick={() => openForm(FORM_FOR_COL[entry.col], entry.item)}
     >
@@ -214,17 +217,17 @@ function AgendaList({ state, today, from }) {
   );
 }
 
-/** Leyenda de colores: tipos (clase, examen...) y, si hay, estudios (la barra del borde en el mes). */
+/** Leyenda: cómo se distingue cada tipo por su forma. */
 function Legend({ state }) {
-  const kindColors = { ...DEFAULT_KIND_COLORS, ...state.settings?.kindColors };
   const byProgram = state.settings?.colorBy === 'estudios';
   return (
     <div className="legend" aria-label="Leyenda">
-      {byProgram
-        ? state.programs.map((p) => <span key={p.id}><i style={{ background: p.color }} />{p.name}</span>)
-        : Object.keys(KINDS).map((k) => <span key={k}><i style={{ background: kindColors[k] }} />{KINDS[k].label}</span>)}
-      {byProgram && <span className="muted">· el tipo se distingue por la etiqueta</span>}
-      {!byProgram && state.programs.length > 0 && <span className="muted">· la franja de color a la derecha de cada título marca el estudio</span>}
+      <span className="mini k-examen" style={{ '--k': '#9333ea' }}>★ Examen</span>
+      <span className="mini k-entrega" style={{ '--k': '#0d9488' }}>☐ Tarea / entrega</span>
+      <span className="mini k-otro" style={{ '--k': '#2563eb' }}>Clases y eventos</span>
+      {state.programs.length > 0 && (
+        <span className="muted">· {byProgram ? 'el color es el de cada estudio' : 'la franja de color a la derecha marca el estudio'}</span>
+      )}
     </div>
   );
 }

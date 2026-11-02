@@ -261,12 +261,16 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 .mini {
   display: block; font-size: 0.58rem; font-weight: 700; line-height: 1.4; letter-spacing: -0.2px; padding: 1px 2px; border-radius: 3px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  background: var(--k); color: #fff;
   box-shadow: inset -2px 0 0 var(--p, transparent); /* franja derecha = color del estudio */
 }
+/* Forma según el tipo (se nota aunque los colores sean los del estudio) */
+.mini.k-examen { background: var(--k); color: #fff; font-weight: 800; }
+.mini.k-entrega { background: var(--surface); color: var(--text); outline: 1.5px solid var(--k); outline-offset: -1.5px; }
+.mini.k-otro { background: color-mix(in srgb, var(--k) 18%, var(--surface)); color: var(--text); border-left: 3px solid var(--k); }
 .mini.done { opacity: 0.45; text-decoration: line-through; }
 .more { display: block; font-size: 0.62rem; font-weight: 700; color: var(--muted); padding-left: 3px; }
-.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.78rem; font-weight: 600; margin: -4px 0 12px; }
+.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 0.78rem; font-weight: 600; margin: -4px 0 12px; }
+.legend .mini { display: inline-block; font-size: 0.74rem; padding: 2px 8px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
 @media (min-width: 700px) {
@@ -290,6 +294,9 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
   background: color-mix(in srgb, var(--k) 16%, var(--surface));
   box-shadow: inset -3px 0 0 var(--p, transparent);
 }
+.week-item.k-examen { background: var(--k); border-left-color: var(--k); }
+.week-item.k-examen .wi-title, .week-item.k-examen .wi-time, .week-item.k-examen .wi-place { color: #fff; }
+.week-item.k-entrega { background: var(--surface); border: 1.5px solid var(--k); border-left-width: 1.5px; }
 .week-item.done { opacity: 0.5; }
 .week-item.done .wi-title { text-decoration: line-through; }
 .wi-time { font-size: 0.7rem; font-weight: 700; color: var(--muted); }
