@@ -8,6 +8,7 @@ import { buildDemoState } from '../data/demo.js';
 import { useTheme } from '../lib/theme.js';
 import { ColorSwatches, ReminderPicker, Segmented } from '../components/forms/fields.jsx';
 import { AccountCard, NotificationsCard } from '../components/AccountCard.jsx';
+import AiCard from '../components/AiCard.jsx';
 
 export default function Settings() {
   const state = useAppState();
@@ -75,6 +76,7 @@ export default function Settings() {
         </section>
 
         <AccountCard />
+        <AiCard />
         <NotificationsCard />
 
         <section className="card stack">

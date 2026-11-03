@@ -6,7 +6,7 @@
 // (Firestore ya trae modo offline y sincronización) y bastará con cambiarla en
 // `src/data/repo.js`, sin tocar ninguna pantalla.
 
-export const COLLECTIONS = ['programs', 'subjects', 'classes', 'events', 'exams', 'tasks', 'todos', 'grades', 'notes'];
+export const COLLECTIONS = ['programs', 'subjects', 'classes', 'events', 'exams', 'tasks', 'todos', 'grades', 'notes', 'folders'];
 
 export const DEFAULT_SETTINGS = {
   // Avisos por defecto de cada examen/entrega: días antes (0 = el mismo día). Se usan en la fase 2.

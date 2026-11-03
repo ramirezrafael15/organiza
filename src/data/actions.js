@@ -26,6 +26,10 @@ export const actions = {
     if (col === 'subjects') {
       state.grades.filter((g) => g.subjectId === id).forEach((g) => repo.remove('grades', g.id));
     }
+    if (col === 'folders') {
+      // Los apuntes de la carpeta se quedan, sin carpeta.
+      state.notes.filter((n) => n.folderId === id).forEach((n) => repo.upsert('notes', { id: n.id, folderId: null }));
+    }
     if (col === 'exams' || col === 'tasks') {
       const type = col === 'exams' ? 'exam' : 'task';
       // Las notas enlazadas se quedan, pero sin enlace.

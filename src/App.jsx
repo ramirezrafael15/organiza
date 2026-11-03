@@ -89,7 +89,7 @@ export default function App() {
           <div className="brand"><img src={`${import.meta.env.BASE_URL}icons/icon.svg`} alt="" /> Organiza</div>
           {ROUTES.map((r) => (
             <button key={r.id} className={`side-btn ${routeId === r.id ? 'active' : ''}`} onClick={() => navigate(r.id)}>
-              <Icon name={r.icon} /> {r.id === 'notas' ? 'Bloc de notas' : r.id === 'calificaciones' ? 'Calificaciones' : r.label}
+              <Icon name={r.icon} /> {r.id === 'notas' ? 'Apuntes' : r.id === 'calificaciones' ? 'Calificaciones' : r.label}
             </button>
           ))}
         </nav>
