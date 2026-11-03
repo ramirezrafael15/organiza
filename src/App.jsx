@@ -125,7 +125,15 @@ export default function App() {
           </div>
         </Modal>
       )}
-      {quick && <QuickAdd defaults={quick.defaults} onPick={(kind, defaults) => ui.openForm(kind, null, defaults)} onClose={() => setQuick(null)} />}
+      {quick && <QuickAdd defaults={quick.defaults} onPick={(kind, defaults) => {
+        if (kind === 'note') {
+          // Los apuntes se abren directamente en el editor.
+          setQuick(null);
+          try { sessionStorage.setItem('organiza:newnote', '1'); } catch { /* sin almacenamiento */ }
+          navigate('notas');
+          window.dispatchEvent(new Event('organiza:newnote'));
+        } else ui.openForm(kind, null, defaults);
+      }} onClose={() => setQuick(null)} />}
       {form && <FormHost form={form} onClose={() => setForm(null)} />}
     </UIContext.Provider>
   );

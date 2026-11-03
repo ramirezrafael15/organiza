@@ -27,7 +27,7 @@ const QUICK = [
   { form: 'todo', label: 'Pendiente del día', icon: 'check', color: 'var(--k-pendiente)' },
   { form: 'class', label: 'Horario semanal', icon: 'clock', color: 'var(--k-clase)' },
   { form: 'event', label: 'Evento', icon: 'calendar', color: 'var(--k-personal)' },
-  { form: 'note', label: 'Nota rápida', icon: 'note', color: 'var(--k-laboral)' },
+  { form: 'note', label: 'Apunte', icon: 'note', color: 'var(--k-laboral)' },
 ];
 
 // El calendario pasa { date }; cada formulario lo usa con su propio nombre de campo.

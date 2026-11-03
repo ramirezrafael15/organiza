@@ -1,5 +1,5 @@
 // Apuntes: documentos tipo Docs organizados en carpetas, con búsqueda por texto.
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Empty, SubjectChip } from '../components/bits.jsx';
 import Icon from '../components/Icon.jsx';
 import { actions } from '../data/index.js';
@@ -17,6 +17,16 @@ export default function Notes() {
   const [folder, setFolder] = useState('todas'); // 'todas' | 'sin' | id de carpeta
   const [sort, setSort] = useState('recientes');
   const [editing, setEditing] = useState(null); // nota abierta en el editor ({} = nueva)
+
+  // Desde el "+" del menú Añadir se abre un apunte nuevo directamente.
+  useEffect(() => {
+    const go = () => { try { sessionStorage.removeItem('organiza:newnote'); } catch { /* sin almacenamiento */ } setEditing({}); };
+    let flagged = false;
+    try { flagged = sessionStorage.getItem('organiza:newnote') === '1'; } catch { /* sin almacenamiento */ }
+    if (flagged) go();
+    window.addEventListener('organiza:newnote', go);
+    return () => window.removeEventListener('organiza:newnote', go);
+  }, []);
 
   const inFolder = (n) => folder === 'todas' || (folder === 'sin' ? !n.folderId : n.folderId === folder);
   const list = state.notes
@@ -48,7 +58,7 @@ export default function Notes() {
     <>
       <div className="page-head">
         <h1>Apuntes</h1>
-        <button className="btn primary" onClick={() => open()}><Icon name="plus" /> Nota</button>
+        <button className="btn primary" onClick={() => open()}><Icon name="plus" /> Apunte</button>
       </div>
 
       <div className="notes-layout">
@@ -102,7 +112,7 @@ export default function Notes() {
             </div>
           ) : (
             <div className="card">
-              <Empty>{query || subjectId ? 'No hay apuntes que coincidan.' : 'Aún no hay apuntes aquí. Pulsa “Nota” para crear el primero.'}</Empty>
+              <Empty>{query || subjectId ? 'No hay apuntes que coincidan.' : 'Aún no hay apuntes aquí. Pulsa “Apunte” para crear el primero.'}</Empty>
             </div>
           )}
         </div>
