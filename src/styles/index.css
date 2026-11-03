@@ -473,3 +473,10 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
   .ne-toolbar { flex-wrap: wrap; overflow-x: visible; }
   .ne-table-bar { top: auto; }
 }
+
+/* ---- Símbolos ---- */
+.sym-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
+.sym-head { display: flex; gap: 8px; justify-content: space-between; align-items: flex-start; }
+.sym-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 4px; max-height: 190px; overflow-y: auto; }
+.sym-grid button { height: 42px; border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 8px; font-size: 1.2rem; cursor: pointer; }
+.sym-grid button:active { background: var(--primary-soft); }

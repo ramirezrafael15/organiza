@@ -6,6 +6,7 @@ import { actions, useAppState } from '../data/index.js';
 import { editorExtensions } from '../lib/tiptapExt.js';
 import { SubjectSelect } from './forms/fields.jsx';
 import AiPanel from './AiPanel.jsx';
+import SymbolPanel from './SymbolPanel.jsx';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 // Las notas antiguas eran texto plano: se convierten a párrafos la primera vez que se abren.
@@ -39,6 +40,7 @@ export default function NoteEditor({ note, onClose }) {
   const [folderId, setFolderId] = useState(note.folderId ?? null);
   const [status, setStatus] = useState('');
   const [ai, setAi] = useState(false);
+  const [sym, setSym] = useState(false);
   const [outline, setOutline] = useState([]);
   const [, bump] = useState(0);
   const dirty = useRef(false);
@@ -214,10 +216,12 @@ export default function NoteEditor({ note, onClose }) {
               <B label="Cita" active={editor.isActive('blockquote')} on={() => c().toggleBlockquote().run()}>❝</B>
               <B label="Código" active={editor.isActive('codeBlock')} on={() => c().toggleCodeBlock().run()}>{'</>'}</B>
               <B label="Línea" on={() => c().setHorizontalRule().run()}>―</B>
+              <B label="Símbolos y flechas" active={sym} on={() => setSym((v) => !v)}>→Ω</B>
               <B label="Subíndice" active={editor.isActive('subscript')} on={() => c().toggleSubscript().run()}>x₂</B>
               <B label="Superíndice" active={editor.isActive('superscript')} on={() => c().toggleSuperscript().run()}>x²</B>
               <input ref={imgRef} type="file" accept="image/*" hidden onChange={addImage} />
             </div>
+            {sym && <SymbolPanel onPick={(s) => c().insertContent(s).run()} onClose={() => setSym(false)} />}
             {inTable && (
               <div className="ne-toolbar ne-table-bar" role="toolbar" aria-label="Tabla">
                 <span className="small muted">Tabla:</span>

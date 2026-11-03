@@ -12,6 +12,7 @@ import Color from '@tiptap/extension-color';
 import FontFamily from '@tiptap/extension-font-family';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
+import Typography from '@tiptap/extension-typography';
 import Image from '@tiptap/extension-image';
 import Table from '@tiptap/extension-table';
 import TableRow from '@tiptap/extension-table-row';
@@ -44,7 +45,7 @@ export const FontSize = Extension.create({
 
 export const editorExtensions = () => [
   StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
-  Underline, Subscript, Superscript, TextStyle, Color, FontFamily, FontSize,
+  Typography, Underline, Subscript, Superscript, TextStyle, Color, FontFamily, FontSize,
   Highlight.configure({ multicolor: true }),
   TextAlign.configure({ types: ['heading', 'paragraph'] }),
   TaskList, TaskItem.configure({ nested: true }),
