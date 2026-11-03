@@ -1,5 +1,5 @@
 // Bloc de notas: notas rápidas asociables a asignatura, examen o entrega, con búsqueda por texto.
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Empty, SubjectChip } from '../components/bits.jsx';
 import Icon from '../components/Icon.jsx';
 import { useUI } from '../components/ui.js';
@@ -7,11 +7,14 @@ import { useViewState } from '../data/viewFilter.js';
 import { fmt, toISO } from '../lib/dates.js';
 import { linkedLabel, matchNote } from '../lib/search.js';
 
+const NoteEditor = lazy(() => import('../components/NoteEditor.jsx'));
+
 export default function Notes() {
   const state = useViewState();
   const { openForm } = useUI();
   const [query, setQuery] = useState('');
   const [subjectId, setSubjectId] = useState(null);
+  const [editing, setEditing] = useState(null); // nota abierta en el editor ({} = nueva)
 
   const list = state.notes
     .filter((n) => (!subjectId || n.subjectId === subjectId) && matchNote(n, query, state))
@@ -20,8 +23,8 @@ export default function Notes() {
   return (
     <>
       <div className="page-head">
-        <h1>Bloc de notas</h1>
-        <button className="btn primary" onClick={() => openForm('note')}><Icon name="plus" /> Nota</button>
+        <h1>Apuntes</h1>
+        <button className="btn primary" onClick={() => setEditing({})}><Icon name="plus" /> Nota</button>
       </div>
 
       <div className="stack" style={{ marginBottom: 14 }}>
@@ -44,7 +47,7 @@ export default function Notes() {
           {list.map((n) => {
             const link = linkedLabel(n, state);
             return (
-              <button key={n.id} className="card note-card" onClick={() => openForm('note', n)}>
+              <button key={n.id} className="card note-card" onClick={() => setEditing(n)}>
                 <div className="item-title">{n.title}</div>
                 <div className="note-body">{n.body}</div>
                 <div className="entry-meta">
@@ -58,8 +61,13 @@ export default function Notes() {
         </div>
       ) : (
         <div className="card">
-          <Empty>{query || subjectId ? 'No hay notas que coincidan.' : 'Aún no tienes notas. Pulsa “Nota” para crear la primera.'}</Empty>
+          <Empty>{query || subjectId ? 'No hay notas que coincidan.' : 'Aún no tienes apuntes. Pulsa “Nota” para crear el primero.'}</Empty>
         </div>
+      )}
+      {editing && (
+        <Suspense fallback={null}>
+          <NoteEditor key={editing.id ?? 'new'} note={editing} onClose={() => setEditing(null)} />
+        </Suspense>
       )}
     </>
   );

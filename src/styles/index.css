@@ -387,3 +387,35 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 .todo-title { font-weight: 650; overflow-wrap: anywhere; }
 .todo-row.done .todo-title { text-decoration: line-through; color: var(--muted); }
 .todo-meta { display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.78rem; color: var(--muted); }
+
+/* ---- Editor de apuntes (tipo Docs) ---- */
+.note-editor { position: fixed; inset: 0; z-index: 60; background: var(--bg); display: flex; flex-direction: column; }
+.ne-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: calc(env(safe-area-inset-top) + 8px) 12px 8px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.ne-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.ne-page { max-width: 820px; margin: 0 auto; padding: 14px 16px calc(env(safe-area-inset-bottom) + 60px); }
+.ne-title { width: 100%; border: 0; background: transparent; font-size: 1.7rem; font-weight: 800; padding: 6px 0; outline: none; color: var(--text); }
+.ne-toolbar { position: sticky; top: 0; z-index: 2; display: flex; gap: 4px; align-items: center; overflow-x: auto; padding: 8px 4px; margin: 6px -4px 10px; background: var(--bg); border-bottom: 1px solid var(--border); scrollbar-width: none; }
+.ne-toolbar::-webkit-scrollbar { display: none; }
+.ne-toolbar .tb { flex: none; min-width: 36px; height: 36px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font-size: .9rem; cursor: pointer; }
+.ne-toolbar .tb.on { background: var(--primary-soft); color: var(--primary); }
+.ne-toolbar .tb:disabled { opacity: .35; }
+.ne-toolbar .sep { flex: none; width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+.ne-content .ProseMirror { min-height: 50vh; outline: none; font-size: 1.02rem; line-height: 1.65; }
+.ne-content .ProseMirror p { margin: .4em 0; }
+.ne-content .ProseMirror h1 { font-size: 1.6rem; margin: 1em 0 .3em; }
+.ne-content .ProseMirror h2 { font-size: 1.3rem; margin: .9em 0 .3em; }
+.ne-content .ProseMirror h3 { font-size: 1.1rem; margin: .8em 0 .3em; }
+.ne-content .ProseMirror ul, .ne-content .ProseMirror ol { padding-left: 1.4em; }
+.ne-content .ProseMirror blockquote { margin: .6em 0; padding: 2px 14px; border-left: 4px solid var(--primary); color: var(--muted); }
+.ne-content .ProseMirror pre { background: #0f172a; color: #e2e8f0; padding: 12px; border-radius: 10px; overflow-x: auto; }
+.ne-content .ProseMirror code { background: rgba(100,116,139,.18); padding: 1px 5px; border-radius: 5px; }
+.ne-content .ProseMirror pre code { background: none; padding: 0; }
+.ne-content .ProseMirror mark { background: #fde68a; color: inherit; border-radius: 3px; padding: 0 2px; }
+.ne-content .ProseMirror hr { border: 0; border-top: 2px solid var(--border); margin: 1em 0; }
+.ne-content ul[data-type="taskList"] { list-style: none; padding-left: 2px; }
+.ne-content ul[data-type="taskList"] li { display: flex; gap: 8px; align-items: flex-start; }
+.ne-content ul[data-type="taskList"] li > label { margin-top: .35em; }
+.ne-content ul[data-type="taskList"] li > label input { width: 18px; height: 18px; }
+.ne-content ul[data-type="taskList"] li[data-checked="true"] > div { text-decoration: line-through; color: var(--muted); }
+.ne-content .ProseMirror p.is-editor-empty:first-child::before { content: attr(data-placeholder); color: var(--muted); float: left; height: 0; pointer-events: none; }
+.ne-count { text-align: right; margin-top: 18px; }
