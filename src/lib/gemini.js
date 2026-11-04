@@ -79,7 +79,12 @@ export async function askGemini({ key, system, prompt, image }) {
       } catch (e) {
         e.model = model;
         lastErr = e;
-        if (e.status === 404 && !refreshed) { refreshed = true; models = await resolveModels(key, true); round = -1; break; }
+        if (e.status === 404) { // modelo retirado para tu cuenta: se quita de la lista y se sigue con los demás
+          models = models.filter((m) => m !== model);
+          try { localStorage.setItem(MODEL_KEY, JSON.stringify(models)); } catch { /* sin almacenamiento */ }
+          if (!models.length && !refreshed) { refreshed = true; models = await resolveModels(key, true); }
+          round = -1; break;
+        }
         if (!(e.status >= 500 || e.status === 429 || e.status === 404)) { e.message += ` [${model} · ${e.status}${e.detail ? ` · ${String(e.detail).slice(0, 140)}` : ''}]`; throw e; } // clave mala, etc.: no tiene sentido seguir
       }
     }
