@@ -17,7 +17,7 @@ const friendly = (status, msg = '') => {
   if (status === 400 && /api key/i.test(msg)) return 'La clave de Gemini no es válida. Revísala en Ajustes.';
   if (status === 401 || status === 403) return 'Gemini ha rechazado la clave. Comprueba que está bien copiada y activa.';
   if (status === 429) return 'Has llegado al límite gratuito de Gemini por ahora. Espera un rato (o hasta mañana) y vuelve a probar.';
-  if (status >= 500) return 'Gemini no responde ahora mismo. Prueba en un minuto.';
+  if (status >= 500) return 'Gemini está saturado ahora mismo (le pasa a ratos en el plan gratis). Lo he reintentado varias veces: prueba otra vez en uno o dos minutos.';
   return `Error de Gemini (${status}). ${msg}`.trim();
 };
 
@@ -62,8 +62,15 @@ export async function askGemini({ key, system, prompt, image }) {
     const model = await resolveModel(key, force);
     return call(`${API}/models/${model}:generateContent`, key, { method: 'POST', body: JSON.stringify(body) });
   };
+  // Gemini gratis se satura a ratos (503): se reintenta un par de veces antes de rendirse.
   let data;
-  try { data = await run(false); } catch (e) { if (e.status === 404) data = await run(true); else throw e; }
+  for (let i = 0; ; i++) {
+    try { data = await run(false); break; } catch (e) {
+      if (e.status === 404 && i === 0) { data = await run(true); break; }
+      if (!(e.status >= 500) || i >= 2) throw e;
+      await new Promise((r) => setTimeout(r, 2500 * (i + 1)));
+    }
+  }
   const text = (data.candidates?.[0]?.content?.parts ?? []).map((p) => p.text ?? '').join('').trim();
   if (!text) throw new Error('Gemini no ha devuelto nada. Prueba con otro texto.');
   return text;
