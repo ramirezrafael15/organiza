@@ -18,6 +18,7 @@ import Schedule from './pages/Schedule.jsx';
 import Settings from './pages/Settings.jsx';
 import Tasks from './pages/Tasks.jsx';
 import Todos from './pages/Todos.jsx';
+import Study from './pages/Study.jsx';
 import { useTheme } from './lib/theme.js';
 import { initAccount } from './sync/account.js';
 
@@ -26,6 +27,7 @@ const ROUTES = [
   { id: 'calendario', label: 'Calendario', icon: 'calendar', Page: CalendarPage },
   { id: 'tareas', label: 'Entregas', icon: 'tasks', Page: Tasks },
   { id: 'pendientes', label: 'Pendientes', icon: 'check', Page: Todos },
+  { id: 'estudio', label: 'Estudio', icon: 'exam', Page: Study },
   { id: 'notas', label: 'Bloc', icon: 'note', Page: Notes },
   { id: 'horario', label: 'Horario', icon: 'clock', Page: Schedule },
   { id: 'calificaciones', label: 'Notas', icon: 'grades', Page: Grades },

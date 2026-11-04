@@ -23,7 +23,7 @@ export default function StudyPlan({ exam, onClose }) {
   const examDay = exam.date >= today ? exam.date : null;
   const list = examDay ? [...days, examDay] : [];
 
-  const add = (date, title) => actions.save('todos', { title, date, time: '', subjectId: exam.subjectId ?? null, examId: exam.id, done: false });
+  const add = (date, title) => actions.save('todos', { title, date, time: '', subjectId: exam.subjectId ?? null, examId: exam.id, study: true, done: false });
   const submit = (e, date) => {
     e.preventDefault();
     if (text.trim()) add(date, text.trim());
@@ -58,7 +58,7 @@ export default function StudyPlan({ exam, onClose }) {
           </div>
 
           <section className="card stack">
-            <div className="small muted">{total ? `${done} de ${total} tareas hechas · preparación ${pct} %` : 'Aún no hay tareas en el plan.'}</div>
+            <div className="small muted">{total ? `${done} de ${total} tareas hechas${total >= 3 ? ` · preparación ${pct} %` : ''}` : 'Aún no hay tareas en el plan.'}</div>
             {total > 0 && <Progress value={pct} />}
           </section>
 

@@ -52,8 +52,8 @@ export const actions = {
     const saved = repo.upsert('todos', { ...todo, done: !todo.done, doneAt: todo.done ? null : Date.now() });
     // Si es una tarea del plan de estudio de un examen, la preparación del examen se calcula sola.
     if (todo.examId) {
-      const { pct } = planProgress(repo.getState().todos, todo.examId);
-      if (pct != null) repo.upsert('exams', { id: todo.examId, progress: pct });
+      const { pct, total } = planProgress(repo.getState().todos, todo.examId);
+      if (total >= 3) repo.upsert('exams', { id: todo.examId, progress: pct });
     }
     return saved;
   },
