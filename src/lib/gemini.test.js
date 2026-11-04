@@ -30,9 +30,23 @@ describe('askGemini', () => {
     const ok = (body) => ({ ok: true, status: 200, json: async () => body });
     global.fetch = vi.fn()
       .mockResolvedValueOnce(ok({ models: [{ name: 'models/gemini-2.5-flash', supportedGenerationMethods: ['generateContent'] }] }))
-      .mockResolvedValueOnce(ok({ candidates: [{ content: { parts: [{ text: '<p>hola</p>' }] } }] }))
-      .mockResolvedValueOnce({ ok: false, status: 429, json: async () => ({ error: { message: 'quota' } }) });
+      .mockResolvedValueOnce(ok({ candidates: [{ content: { parts: [{ text: '<p>hola</p>' }] } }] }));
     expect(await askGemini({ key: 'k'.repeat(30), prompt: 'x' })).toBe('<p>hola</p>');
-    await expect(askGemini({ key: 'k'.repeat(30), prompt: 'x' })).rejects.toThrow(/límite gratuito/);
+  });
+  it('si un modelo está saturado prueba con el siguiente', async () => {
+    const ok = (body) => ({ ok: true, status: 200, json: async () => body });
+    const m = (name) => ({ name: `models/${name}`, supportedGenerationMethods: ['generateContent'] });
+    global.fetch = vi.fn()
+      .mockResolvedValueOnce(ok({ models: [m('gemini-3-flash'), m('gemini-2.5-flash'), m('gemini-2.5-flash-lite')] }))
+      .mockResolvedValueOnce({ ok: false, status: 503, json: async () => ({ error: { message: 'overloaded' } }) })
+      .mockResolvedValueOnce(ok({ candidates: [{ content: { parts: [{ text: 'ok2' }] } }] }));
+    expect(await askGemini({ key: 'k'.repeat(30), prompt: 'x' })).toBe('ok2');
+    expect(global.fetch.mock.calls[2][0]).toContain('gemini-2.5-flash:generate');
+  });
+  it('una clave mala no reintenta', async () => {
+    global.fetch = vi.fn()
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ models: [] }) })
+      .mockResolvedValueOnce({ ok: false, status: 400, json: async () => ({ error: { message: 'API key not valid' } }) });
+    await expect(askGemini({ key: 'k'.repeat(30), prompt: 'x' })).rejects.toThrow(/clave/);
   });
 });

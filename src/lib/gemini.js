@@ -2,16 +2,19 @@
 const API = 'https://generativelanguage.googleapis.com/v1beta';
 const MODEL_KEY = 'organiza:gemini-model';
 
-/** Elige el modelo "flash" estable más nuevo de la lista (no lite, no preview). */
-export function pickModel(models) {
-  const ok = (models ?? [])
+/** Modelos válidos, de mejor a peor: flash estables (más nuevo primero) y luego flash-lite. */
+export function pickModels(models) {
+  const names = (models ?? [])
     .filter((m) => (m.supportedGenerationMethods ?? []).includes('generateContent'))
-    .map((m) => String(m.name).replace('models/', ''))
-    .map((n) => ({ n, v: /^gemini-(\d+(?:\.\d+)?)-flash$/.exec(n) }))
+    .map((m) => String(m.name).replace('models/', ''));
+  const rank = (re) => names
+    .map((n) => ({ n, v: re.exec(n) }))
     .filter((x) => x.v)
-    .sort((a, b) => parseFloat(b.v[1]) - parseFloat(a.v[1]));
-  return ok[0]?.n ?? null;
+    .sort((a, b) => parseFloat(b.v[1]) - parseFloat(a.v[1]))
+    .map((x) => x.n);
+  return [...rank(/^gemini-(\d+(?:\.\d+)?)-flash$/), ...rank(/^gemini-(\d+(?:\.\d+)?)-flash-lite$/)];
 }
+export const pickModel = (models) => pickModels(models)[0] ?? null;
 
 const friendly = (status, msg = '') => {
   if (status === 400 && /api key/i.test(msg)) return 'La clave de Gemini no es válida. Revísala en Ajustes.';
@@ -38,42 +41,45 @@ async function call(url, key, init = {}) {
   return res.json();
 }
 
-async function resolveModel(key, force = false) {
-  try { if (!force) { const c = localStorage.getItem(MODEL_KEY); if (c) return c; } } catch { /* sin almacenamiento */ }
-  let name = null;
-  try { name = pickModel((await call(`${API}/models?pageSize=100`, key)).models); } catch (e) { if (e.status) throw e; }
-  name = name ?? 'gemini-2.5-flash';
-  try { localStorage.setItem(MODEL_KEY, name); } catch { /* sin almacenamiento */ }
-  return name;
+async function resolveModels(key, force = false) {
+  try { if (!force) { const c = JSON.parse(localStorage.getItem(MODEL_KEY) || 'null'); if (c?.length) return c; } } catch { /* sin almacenamiento */ }
+  let names = [];
+  try { names = pickModels((await call(`${API}/models?pageSize=100`, key)).models); } catch (e) { if (e.status) throw e; }
+  if (!names.length) names = ['gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+  try { localStorage.setItem(MODEL_KEY, JSON.stringify(names)); } catch { /* sin almacenamiento */ }
+  return names;
 }
 
 /**
- * Pide algo a Gemini. `image` = { mimeType, data(base64) } opcional.
- * Devuelve el texto de la respuesta.
+ * Pide algo a Gemini. `image` = { mimeType, data(base64) } opcional (foto, PDF...).
+ * Si un modelo está saturado o sin cuota, prueba con el siguiente. Devuelve el texto.
  */
 export async function askGemini({ key, system, prompt, image }) {
   if (!key) throw new Error('Falta la clave de Gemini. Ponla en Ajustes.');
-  const body = {
+  const body = JSON.stringify({
     systemInstruction: system ? { parts: [{ text: system }] } : undefined,
     contents: [{ role: 'user', parts: [{ text: prompt }, ...(image ? [{ inlineData: image }] : [])] }],
     generationConfig: { temperature: 0.4 },
-  };
-  const run = async (force) => {
-    const model = await resolveModel(key, force);
-    return call(`${API}/models/${model}:generateContent`, key, { method: 'POST', body: JSON.stringify(body) });
-  };
-  // Gemini gratis se satura a ratos (503): se reintenta un par de veces antes de rendirse.
-  let data;
-  for (let i = 0; ; i++) {
-    try { data = await run(false); break; } catch (e) {
-      if (e.status === 404 && i === 0) { data = await run(true); break; }
-      if (!(e.status >= 500) || i >= 2) throw e;
-      await new Promise((r) => setTimeout(r, 2500 * (i + 1)));
+  });
+  let models = await resolveModels(key);
+  let refreshed = false;
+  let lastErr;
+  for (let round = 0; round < 2; round++) {
+    for (const model of models) {
+      try {
+        const data = await call(`${API}/models/${model}:generateContent`, key, { method: 'POST', body });
+        const text = (data.candidates?.[0]?.content?.parts ?? []).map((p) => p.text ?? '').join('').trim();
+        if (text) return text;
+        lastErr = new Error('Gemini no ha devuelto nada. Prueba con otro texto.');
+      } catch (e) {
+        lastErr = e;
+        if (e.status === 404 && !refreshed) { refreshed = true; models = await resolveModels(key, true); round = -1; break; }
+        if (!(e.status >= 500 || e.status === 429 || e.status === 404)) throw e; // clave mala, etc.: no tiene sentido seguir
+      }
     }
+    if (round >= 0) await new Promise((r) => setTimeout(r, 2500));
   }
-  const text = (data.candidates?.[0]?.content?.parts ?? []).map((p) => p.text ?? '').join('').trim();
-  if (!text) throw new Error('Gemini no ha devuelto nada. Prueba con otro texto.');
-  return text;
+  throw lastErr;
 }
 
 export const SYSTEM = `Eres un asistente de estudio para un estudiante español. Responde siempre en español.
