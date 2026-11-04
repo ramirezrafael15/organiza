@@ -26,13 +26,14 @@ export default function AiPanel({ editor, onClose }) {
   const hasSel = !sel.empty;
   const selText = hasSel ? editor.state.doc.textBetween(sel.from, sel.to, '\n') : '';
   const allText = editor.getText({ blockSeparator: '\n' }).trim();
-  const source = hasSel ? selText : allText;
+  // Si hay un archivo adjunto, la IA trabaja sobre él (y solo usa el texto de la nota si lo seleccionas).
+  const source = hasSel ? selText : image ? '' : allText;
 
   const run = async (instruction) => {
     if (!source && !image) { setError('Escribe algo en la nota o selecciona un texto primero (o adjunta una foto).'); return; }
     setBusy(true); setError(''); setResult('');
     try {
-      const prompt = `${instruction}\n\n${source ? `TEXTO:\n${source}` : 'El contenido está en la imagen adjunta.'}`;
+      const prompt = `${instruction}\n\n${source ? `TEXTO:\n${source}` : 'El contenido está en el archivo adjunto.'}`;
       const out = await askGemini({ key, system: SYSTEM, prompt, image: image && { mimeType: image.mimeType, data: image.data } });
       setResult(cleanAiHtml(out));
     } catch (e) { setError(e.message); }
@@ -43,8 +44,12 @@ export default function AiPanel({ editor, onClose }) {
     const f = e.target.files?.[0];
     e.target.value = '';
     if (!f) return;
-    if (f.size > 8_000_000) { setError('La foto pesa demasiado (máx. 8 MB).'); return; }
-    setImage({ mimeType: f.type || 'image/jpeg', data: await fileToBase64(f), name: f.name });
+    if (f.size > 14_000_000) { setError('El archivo pesa demasiado (máx. 14 MB). Prueba a dividir el PDF.'); return; }
+    setError('');
+    const isText = /^text\//.test(f.type) || /\.(txt|md)$/i.test(f.name);
+    if (isText) { setImage({ mimeType: 'text/plain', data: btoa(unescape(encodeURIComponent(await f.text()))), name: f.name }); return; }
+    const mimeType = f.type || (/\.pdf$/i.test(f.name) ? 'application/pdf' : 'image/jpeg');
+    setImage({ mimeType, data: await fileToBase64(f), name: f.name });
   };
 
   const replaceSel = () => {
@@ -81,20 +86,20 @@ export default function AiPanel({ editor, onClose }) {
     <aside className="ai-panel">
       <div className="ai-head"><b>✨ IA para tus apuntes</b><button className="btn small" onClick={onClose}>Cerrar</button></div>
       <p className="small muted" style={{ margin: 0 }}>
-        Trabaja sobre: <b>{hasSel ? 'el texto seleccionado' : 'toda la nota'}</b>{image && <> + foto «{image.name}» <button className="link-btn" onClick={() => setImage(null)}>quitar</button></>}
+        Trabaja sobre: <b>{hasSel ? 'el texto seleccionado' : 'toda la nota'}</b>{image && <> + archivo «{image.name}» <button className="link-btn" onClick={() => setImage(null)}>quitar</button></>}
       </p>
       <div className="ai-actions">
         {Object.entries(TASKS).map(([id, t]) => (
           <button key={id} className="chip-btn" title={t.hint} disabled={busy} onClick={() => run(t.prompt)}>{t.label}</button>
         ))}
-        <button className="chip-btn" disabled={busy} onClick={() => fileRef.current?.click()}>📷 Foto → apuntes</button>
-        <input ref={fileRef} type="file" accept="image/*" hidden onChange={pickImage} />
+        <button className="chip-btn" disabled={busy} onClick={() => fileRef.current?.click()}>📎 PDF o foto → apuntes</button>
+        <input ref={fileRef} type="file" accept="application/pdf,image/*,.txt,.md,text/plain" hidden onChange={pickImage} />
       </div>
       <form className="ai-free" onSubmit={(e) => { e.preventDefault(); if (free.trim()) run(free.trim()); }}>
         <input type="text" placeholder="O pídele otra cosa…" value={free} onChange={(e) => setFree(e.target.value)} />
         <button className="btn primary" disabled={busy || !free.trim()}>Enviar</button>
       </form>
-      {image && !result && !busy && <p className="small muted" style={{ margin: 0 }}>Con la foto adjunta pulsa «Pasar a limpio» para convertirla en apuntes.</p>}
+      {image && !result && !busy && <p className="small muted" style={{ margin: 0 }}>Con el archivo adjunto pulsa «Pasar a limpio», «Resumir», «Esquema»… y trabaja sobre él.</p>}
       {busy && <p className="muted">Pensando…</p>}
       {error && <p className="ai-error">{error}</p>}
       {result && (
