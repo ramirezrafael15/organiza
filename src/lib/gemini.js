@@ -42,6 +42,10 @@ async function call(url, key, init = {}) {
   return res.json();
 }
 
+function rememberWorking(model, models) {
+  try { localStorage.setItem(MODEL_KEY, JSON.stringify([model, ...models.filter((m) => m !== model)])); } catch { /* sin almacenamiento */ }
+}
+
 async function resolveModels(key, force = false) {
   try { if (!force) { const c = JSON.parse(localStorage.getItem(MODEL_KEY) || 'null'); if (c?.length) return c; } } catch { /* sin almacenamiento */ }
   let names = [];
@@ -70,7 +74,7 @@ export async function askGemini({ key, system, prompt, image }) {
       try {
         const data = await call(`${API}/models/${model}:generateContent`, key, { method: 'POST', body });
         const text = (data.candidates?.[0]?.content?.parts ?? []).map((p) => p.text ?? '').join('').trim();
-        if (text) return text;
+        if (text) { rememberWorking(model, models); return text; }
         lastErr = new Error('Gemini no ha devuelto nada. Prueba con otro texto.');
       } catch (e) {
         e.model = model;
@@ -107,3 +111,26 @@ export const TASKS = {
   ampliar: { label: 'Ampliar', hint: 'Desarrolla más el contenido',
     prompt: 'Amplía este texto desarrollando mejor cada idea con explicaciones y algún ejemplo. Mantén la estructura.' },
 };
+
+
+/** Prueba cada modelo con una petición mínima y cuenta qué responde cada uno. */
+export async function diagnose(key) {
+  if (!key) throw new Error('Falta la clave de Gemini.');
+  const names = await resolveModels(key, true);
+  const out = [];
+  for (const model of names.slice(0, 6)) {
+    try {
+      const data = await call(`${API}/models/${model}:generateContent`, key, {
+        method: 'POST',
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Responde solo con la palabra OK.' }] }] }),
+      });
+      const ok = !!(data.candidates?.[0]?.content?.parts ?? []).length;
+      out.push({ model, ok, status: 200, detail: ok ? '' : 'respuesta vacía' });
+    } catch (e) {
+      out.push({ model, ok: false, status: e.status ?? 0, detail: String(e.detail || e.message).slice(0, 160) });
+    }
+  }
+  const first = out.find((r) => r.ok);
+  if (first) rememberWorking(first.model, names);
+  return { listed: names, results: out };
+}

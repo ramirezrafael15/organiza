@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { askGemini, pickModel } from './gemini.js';
+import { askGemini, diagnose, pickModel } from './gemini.js';
 import { cleanAiHtml } from './sanitize.js';
 
 describe('pickModel', () => {
@@ -48,5 +48,20 @@ describe('askGemini', () => {
       .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ models: [] }) })
       .mockResolvedValueOnce({ ok: false, status: 400, json: async () => ({ error: { message: 'API key not valid' } }) });
     await expect(askGemini({ key: 'k'.repeat(30), prompt: 'x' })).rejects.toThrow(/clave/);
+  });
+});
+
+describe('diagnose y modelo que funciona', () => {
+  beforeEach(() => { localStorage.clear(); });
+  it('cuenta qué responde cada modelo y recuerda el bueno', async () => {
+    const m = (name) => ({ name: `models/${name}`, supportedGenerationMethods: ['generateContent'] });
+    const ok = (body) => ({ ok: true, status: 200, json: async () => body });
+    global.fetch = vi.fn()
+      .mockResolvedValueOnce(ok({ models: [m('gemini-3-flash'), m('gemini-2.5-flash')] }))
+      .mockResolvedValueOnce({ ok: false, status: 429, json: async () => ({ error: { message: 'limit: 0' } }) })
+      .mockResolvedValueOnce(ok({ candidates: [{ content: { parts: [{ text: 'OK' }] } }] }));
+    const d = await diagnose('k'.repeat(30));
+    expect(d.results.map((r) => [r.model, r.ok, r.status])).toEqual([['gemini-3-flash', false, 429], ['gemini-2.5-flash', true, 200]]);
+    expect(JSON.parse(localStorage.getItem('organiza:gemini-model'))[0]).toBe('gemini-2.5-flash');
   });
 });

@@ -1,13 +1,20 @@
 // Ajustes: clave gratuita de Gemini para la IA de los apuntes.
 import { useState } from 'react';
 import { actions, useAppState } from '../data/index.js';
-import { askGemini } from '../lib/gemini.js';
+import { askGemini, diagnose } from '../lib/gemini.js';
 
 export default function AiCard() {
   const { settings } = useAppState();
   const [key, setKey] = useState('');
   const [msg, setMsg] = useState('');
   const has = !!settings.geminiKey;
+  const [diag, setDiag] = useState(null);
+
+  const runDiag = async () => {
+    setMsg('Probando cada modelo (puede tardar unos segundos)…'); setDiag(null);
+    try { const d = await diagnose(settings.geminiKey); setDiag(d); setMsg(d.results.some((r) => r.ok) ? '✔ Hay al menos un modelo que funciona; la app usará ese.' : 'Ningún modelo ha respondido. Mira el detalle de abajo.'); }
+    catch (e) { setMsg(e.message); }
+  };
 
   const test = async () => {
     setMsg('Probando…');
@@ -23,6 +30,7 @@ export default function AiCard() {
           <p className="muted small">Clave guardada (…{settings.geminiKey.slice(-4)}). Se sincroniza con tus otros dispositivos.</p>
           <div className="chips">
             <button className="btn small" onClick={test}>Probar</button>
+            <button className="btn small" onClick={runDiag}>Diagnóstico</button>
             <button className="btn small" onClick={() => { actions.updateSettings({ geminiKey: '' }); setMsg(''); }}>Quitar clave</button>
           </div>
         </>
@@ -38,6 +46,12 @@ export default function AiCard() {
         </>
       )}
       {msg && <p className="small">{msg}</p>}
+      {diag && (
+        <div className="small" style={{ fontFamily: 'monospace', overflowWrap: 'anywhere' }}>
+          <div>Modelos de tu clave: {diag.listed.length ? diag.listed.join(', ') : 'ninguno encontrado'}</div>
+          {diag.results.map((r) => <div key={r.model}>{r.ok ? '✔' : '✘'} {r.model} · {r.status}{r.detail ? ` · ${r.detail}` : ''}</div>)}
+        </div>
+      )}
     </section>
   );
 }
