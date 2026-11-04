@@ -165,7 +165,7 @@ export default function Dashboard() {
             )}
           </Section>
 
-          <Section title="Próximos exámenes" action={<button className="link-btn" onClick={() => navigate('tareas')}>Ver todos</button>}>
+          <Section title="Próximos exámenes" action={<button className="link-btn" onClick={() => navigate('examenes')}>Ver todos</button>}>
             {exams.length ? (
               <div className="stack">
                 {exams.map((x) => {

@@ -19,21 +19,23 @@ import Settings from './pages/Settings.jsx';
 import Tasks from './pages/Tasks.jsx';
 import Todos from './pages/Todos.jsx';
 import Study from './pages/Study.jsx';
+import Exams from './pages/Exams.jsx';
 import { useTheme } from './lib/theme.js';
 import { initAccount } from './sync/account.js';
 
 const ROUTES = [
   { id: 'panel', label: 'Panel', icon: 'home', Page: Dashboard },
   { id: 'calendario', label: 'Calendario', icon: 'calendar', Page: CalendarPage },
+  { id: 'examenes', label: 'Exámenes', icon: 'exam', Page: Exams },
   { id: 'tareas', label: 'Entregas', icon: 'tasks', Page: Tasks },
   { id: 'pendientes', label: 'Pendientes', icon: 'check', Page: Todos },
-  { id: 'estudio', label: 'Estudio', icon: 'exam', Page: Study },
+  { id: 'estudio', label: 'Estudio', icon: 'book', Page: Study },
   { id: 'notas', label: 'Bloc', icon: 'note', Page: Notes },
   { id: 'horario', label: 'Horario', icon: 'clock', Page: Schedule },
   { id: 'calificaciones', label: 'Notas', icon: 'grades', Page: Grades },
   { id: 'ajustes', label: 'Ajustes', icon: 'settings', Page: Settings },
 ];
-const MOBILE_MAIN = ['panel', 'calendario', 'tareas', 'pendientes']; // el resto va en "Más"
+const MOBILE_MAIN = ['panel', 'calendario', 'examenes', 'pendientes']; // el resto va en "Más"
 
 const routeFromHash = () => {
   const id = window.location.hash.replace(/^#\/?/, '');
