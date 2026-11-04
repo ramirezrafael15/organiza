@@ -36,6 +36,7 @@ async function call(url, key, init = {}) {
     try { msg = (await res.json())?.error?.message ?? ''; } catch { /* sin cuerpo */ }
     const e = new Error(friendly(res.status, msg));
     e.status = res.status;
+    e.detail = msg;
     throw e;
   }
   return res.json();
@@ -72,13 +73,16 @@ export async function askGemini({ key, system, prompt, image }) {
         if (text) return text;
         lastErr = new Error('Gemini no ha devuelto nada. Prueba con otro texto.');
       } catch (e) {
+        e.model = model;
         lastErr = e;
         if (e.status === 404 && !refreshed) { refreshed = true; models = await resolveModels(key, true); round = -1; break; }
-        if (!(e.status >= 500 || e.status === 429 || e.status === 404)) throw e; // clave mala, etc.: no tiene sentido seguir
+        if (!(e.status >= 500 || e.status === 429 || e.status === 404)) { e.message += ` [${model} · ${e.status}${e.detail ? ` · ${String(e.detail).slice(0, 140)}` : ''}]`; throw e; } // clave mala, etc.: no tiene sentido seguir
       }
     }
     if (round >= 0) await new Promise((r) => setTimeout(r, 2500));
   }
+  // Detalle técnico al final, para poder saber qué falla de verdad.
+  if (lastErr?.status) lastErr.message += ` [${lastErr.model ?? '?'} · ${lastErr.status}${lastErr.detail ? ` · ${String(lastErr.detail).slice(0, 140)}` : ''}]`;
   throw lastErr;
 }
 
