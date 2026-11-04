@@ -1,5 +1,6 @@
 // Operaciones de alto nivel sobre los datos (con las reglas de negocio).
 import { planScheduleImport } from '../lib/scheduleImport.js';
+import { planProgress } from '../lib/studyPlan.js';
 import { newId } from './repository.js';
 import { repo } from './repo.js';
 
@@ -26,6 +27,7 @@ export const actions = {
     if (col === 'subjects') {
       state.grades.filter((g) => g.subjectId === id).forEach((g) => repo.remove('grades', g.id));
     }
+    if (col === 'exams') state.todos.filter((t) => t.examId === id).forEach((t) => repo.remove('todos', t.id)); // su plan de estudio
     if (col === 'folders') {
       // Los apuntes de la carpeta se quedan, sin carpeta.
       state.notes.filter((n) => n.folderId === id).forEach((n) => repo.upsert('notes', { id: n.id, folderId: null }));
@@ -47,7 +49,13 @@ export const actions = {
 
   /** Marca o desmarca un pendiente del día a día. */
   toggleTodo(todo) {
-    return repo.upsert('todos', { ...todo, done: !todo.done, doneAt: todo.done ? null : Date.now() });
+    const saved = repo.upsert('todos', { ...todo, done: !todo.done, doneAt: todo.done ? null : Date.now() });
+    // Si es una tarea del plan de estudio de un examen, la preparación del examen se calcula sola.
+    if (todo.examId) {
+      const { pct } = planProgress(repo.getState().todos, todo.examId);
+      if (pct != null) repo.upsert('exams', { id: todo.examId, progress: pct });
+    }
+    return saved;
   },
 
   setProgress(col, item, progress) {

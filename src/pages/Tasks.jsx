@@ -1,5 +1,7 @@
 // Exámenes y entregas (trabajos): fechas, estado, progreso y urgencia.
 import { useState } from 'react';
+import StudyPlan from '../components/StudyPlan.jsx';
+import { planProgress } from '../lib/studyPlan.js';
 import { Empty, ProgramPill, Progress, ProgressSlider, SubjectChip, UrgencyBadge } from '../components/bits.jsx';
 import Icon from '../components/Icon.jsx';
 import { useUI } from '../components/ui.js';
@@ -30,10 +32,11 @@ export default function Tasks() {
 }
 
 function Exams() {
-  const { exams, subjects } = useViewState();
+  const { exams, subjects, todos } = useViewState();
   const today = useToday();
   const { openForm } = useUI();
   const [showPast, setShowPast] = useState(false);
+  const [planId, setPlanId] = useState(null);
 
   const list = exams
     .filter((x) => (showPast ? x.date < today : x.date >= today))
@@ -72,6 +75,9 @@ function Exams() {
                   <div>
                     <div className="small muted">Preparación</div>
                     <ProgressSlider value={x.progress ?? 0} label="Preparación" onCommit={(v) => actions.setProgress('exams', x, v)} />
+                    <button className="btn small" style={{ marginTop: 8 }} onClick={() => setPlanId(x.id)}>
+                      📅 Plan de estudio{(() => { const p = planProgress(todos, x.id); return p.total ? ` · ${p.done}/${p.total}` : ''; })()}
+                    </button>
                   </div>
                 )}
               </article>
@@ -81,6 +87,7 @@ function Exams() {
       ) : (
         <div className="card"><Empty>{showPast ? 'Aún no hay exámenes pasados.' : 'No tienes exámenes próximos.'}</Empty></div>
       )}
+      {planId && exams.find((e) => e.id === planId) && <StudyPlan exam={exams.find((e) => e.id === planId)} onClose={() => setPlanId(null)} />}
     </>
   );
 }
