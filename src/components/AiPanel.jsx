@@ -1,7 +1,8 @@
 // Panel de IA del editor: elige una acción, mira el resultado y decide si insertarlo.
 import { useRef, useState } from 'react';
 import { actions, useAppState } from '../data/index.js';
-import { askGemini, SYSTEM, TASKS } from '../lib/gemini.js';
+import { askAI } from '../lib/ai.js';
+import { SYSTEM, TASKS } from '../lib/gemini.js';
 import { cleanAiHtml } from '../lib/sanitize.js';
 
 const fileToBase64 = (file) => new Promise((ok, fail) => {
@@ -14,6 +15,7 @@ const fileToBase64 = (file) => new Promise((ok, fail) => {
 export default function AiPanel({ editor, onClose }) {
   const { settings } = useAppState();
   const key = settings.geminiKey;
+  const groqKey = settings.groqKey;
   const [newKey, setNewKey] = useState('');
   const [free, setFree] = useState('');
   const [busy, setBusy] = useState(false);
@@ -34,7 +36,7 @@ export default function AiPanel({ editor, onClose }) {
     setBusy(true); setError(''); setResult('');
     try {
       const prompt = `${instruction}\n\n${source ? `TEXTO:\n${source}` : 'El contenido está en el archivo adjunto.'}`;
-      const out = await askGemini({ key, system: SYSTEM, prompt, image: image && { mimeType: image.mimeType, data: image.data } });
+      const out = await askAI({ geminiKey: key, groqKey, system: SYSTEM, prompt, image: image && { mimeType: image.mimeType, data: image.data } });
       setResult(cleanAiHtml(out));
     } catch (e) { setError(e.message); }
     setBusy(false);
@@ -63,7 +65,7 @@ export default function AiPanel({ editor, onClose }) {
     setResult('');
   };
 
-  if (!key) {
+  if (!key && !groqKey) {
     return (
       <aside className="ai-panel">
         <div className="ai-head"><b>✨ IA para tus apuntes</b><button className="btn small" onClick={onClose}>Cerrar</button></div>
@@ -92,7 +94,7 @@ export default function AiPanel({ editor, onClose }) {
         {Object.entries(TASKS).map(([id, t]) => (
           <button key={id} className="chip-btn" title={t.hint} disabled={busy} onClick={() => run(t.prompt)}>{t.label}</button>
         ))}
-        <button className="chip-btn" disabled={busy} onClick={() => fileRef.current?.click()}>📎 PDF o foto → apuntes</button>
+        {key && <button className="chip-btn" disabled={busy} onClick={() => fileRef.current?.click()}>📎 PDF o foto → apuntes</button>}
         <input ref={fileRef} type="file" accept="application/pdf,image/*,.txt,.md,text/plain" hidden onChange={pickImage} />
       </div>
       <form className="ai-free" onSubmit={(e) => { e.preventDefault(); if (free.trim()) run(free.trim()); }}>
@@ -101,7 +103,7 @@ export default function AiPanel({ editor, onClose }) {
       </form>
       {image && !result && !busy && <p className="small muted" style={{ margin: 0 }}>Con el archivo adjunto pulsa «Pasar a limpio», «Resumir», «Esquema»… y trabaja sobre él.</p>}
       {busy && <p className="muted">Pensando…</p>}
-      {error && <p className="ai-error">{error}</p>}
+      {error && <p className="ai-error" style={{ whiteSpace: 'pre-wrap' }}>{error}</p>}
       {result && (
         <div className="stack">
           <div className="ai-result ne-content"><div className="ProseMirror" dangerouslySetInnerHTML={{ __html: result }} /></div>

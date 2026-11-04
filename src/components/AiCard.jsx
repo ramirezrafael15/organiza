@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { actions, useAppState } from '../data/index.js';
 import { askGemini, diagnose } from '../lib/gemini.js';
+import { askGroq } from '../lib/groq.js';
 
 export default function AiCard() {
   const { settings } = useAppState();
@@ -9,6 +10,13 @@ export default function AiCard() {
   const [msg, setMsg] = useState('');
   const has = !!settings.geminiKey;
   const [diag, setDiag] = useState(null);
+  const [gkey, setGkey] = useState('');
+  const hasGroq = !!settings.groqKey;
+  const testGroq = async () => {
+    setMsg('Probando Groq…');
+    try { await askGroq({ key: settings.groqKey, prompt: 'Responde solo con la palabra OK.' }); setMsg('✔ Groq funciona.'); }
+    catch (e) { setMsg(e.message); }
+  };
 
   const runDiag = async () => {
     setMsg('Probando cada modelo (puede tardar unos segundos)…'); setDiag(null);
@@ -45,7 +53,24 @@ export default function AiCard() {
             onClick={() => { actions.updateSettings({ geminiKey: key.trim() }); setKey(''); }}>Guardar clave</button>
         </>
       )}
-      {msg && <p className="small">{msg}</p>}
+      <h3 style={{ margin: '8px 0 0' }}>Respaldo: Groq (opcional)</h3>
+      {hasGroq ? (
+        <>
+          <p className="muted small">Clave guardada (…{settings.groqKey.slice(-4)}). Si Gemini falla, la app usa Groq (solo con texto).</p>
+          <div className="chips">
+            <button className="btn small" onClick={testGroq}>Probar Groq</button>
+            <button className="btn small" onClick={() => { actions.updateSettings({ groqKey: '' }); setMsg(''); }}>Quitar clave</button>
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="muted small">Gratis y sin tarjeta: crea una clave en <b>console.groq.com/keys</b> y pégala aquí. No lee PDF ni fotos, pero casi nunca se satura.</p>
+          <input type="password" placeholder="gsk_…" value={gkey} onChange={(e) => setGkey(e.target.value)} />
+          <button className="btn primary" style={{ alignSelf: 'flex-start' }} disabled={gkey.trim().length < 20}
+            onClick={() => { actions.updateSettings({ groqKey: gkey.trim() }); setGkey(''); }}>Guardar clave de Groq</button>
+        </>
+      )}
+      {msg && <p className="small" style={{ whiteSpace: 'pre-wrap' }}>{msg}</p>}
       {diag && (
         <div className="small" style={{ fontFamily: 'monospace', overflowWrap: 'anywhere' }}>
           <div>Modelos de tu clave: {diag.listed.length ? diag.listed.join(', ') : 'ninguno encontrado'}</div>
