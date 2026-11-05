@@ -1,5 +1,6 @@
 // Ajustes: tema, copia de seguridad y datos de ejemplo.
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import { account, useAccount } from '../sync/account.js';
 import { KindLabel } from '../components/bits.jsx';
 import { useUI } from '../components/ui.js';
 import { actions, useAppState } from '../data/index.js';
@@ -19,7 +20,8 @@ export default function Settings() {
   const kindColors = { ...DEFAULT_KIND_COLORS, ...settings.kindColors };
 
   const exportData = () => {
-    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const { geminiKey, groqKey, ...safeSettings } = state.settings || {}; // las claves de IA nunca van en la copia
+    const blob = new Blob([JSON.stringify({ ...state, settings: safeSettings }, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `organiza-copia-${new Date().toISOString().slice(0, 10)}.json`;
@@ -63,6 +65,18 @@ export default function Settings() {
   };
   const clearAll = () => {
     if (window.confirm('¿Borrar TODOS tus datos? Si tienes la sesión iniciada, también se borrarán de tus otros dispositivos. No se puede deshacer.')) actions.replaceAll(null);
+  };
+
+  const acc = useAccount();
+  const [pw, setPw] = useState('');
+  const [askDelete, setAskDelete] = useState(false);
+  const deleteAccount = async () => {
+    if (!window.confirm('Se borrará tu cuenta y todos tus datos de la nube. Esto no se puede deshacer. ¿Seguro?')) return;
+    if (await account.deleteAccount(pw)) {
+      actions.replaceAll(null);
+      window.alert('Cuenta y datos borrados.');
+    }
+    setPw('');
   };
 
   return (
@@ -150,6 +164,31 @@ export default function Settings() {
             <button className="btn" onClick={loadDemo}>Cargar datos de ejemplo</button>
             <button className="btn danger" onClick={clearAll}>Borrar todo</button>
           </div>
+        </section>
+
+        <section className="card stack">
+          <h2>Privacidad</h2>
+          <p className="muted small" style={{ margin: 0 }}>
+            Tus datos están en tu dispositivo y, si tienes cuenta, en tu espacio privado de la nube: solo tu cuenta puede leerlos.
+            Las claves de IA se guardan únicamente en este dispositivo. El texto que envías a la IA (apuntes) llega a Google o Groq.
+          </p>
+          {acc.status === 'in' && (
+            <>
+              {!askDelete ? (
+                <button className="btn danger" style={{ alignSelf: 'flex-start' }} onClick={() => setAskDelete(true)}>Borrar mi cuenta y mis datos</button>
+              ) : (
+                <div className="stack" style={{ gap: 8 }}>
+                  <p className="small" style={{ margin: 0 }}>Escribe tu contraseña para confirmar.</p>
+                  <input type="password" autoComplete="current-password" value={pw} onChange={(e) => setPw(e.target.value)} />
+                  {acc.error && <p className="small" style={{ color: 'var(--danger)', margin: 0 }}>{acc.error}</p>}
+                  <div className="row wrap">
+                    <button className="btn danger" disabled={!pw} onClick={deleteAccount}>Borrar definitivamente</button>
+                    <button className="btn" onClick={() => { setAskDelete(false); setPw(''); }}>Cancelar</button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </section>
 
         <section className="card stack install-tip">

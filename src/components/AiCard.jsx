@@ -1,11 +1,11 @@
 // Ajustes: clave gratuita de Gemini para la IA de los apuntes.
 import { useState } from 'react';
-import { actions, useAppState } from '../data/index.js';
+import { setKey, useKeys } from '../lib/keys.js';
 import { askGemini, diagnose } from '../lib/gemini.js';
 import { askGroq } from '../lib/groq.js';
 
 export default function AiCard() {
-  const { settings } = useAppState();
+  const settings = useKeys();
   const [key, setKey] = useState('');
   const [msg, setMsg] = useState('');
   const has = !!settings.geminiKey;
@@ -35,11 +35,11 @@ export default function AiCard() {
       <h2>IA de los apuntes (Gemini)</h2>
       {has ? (
         <>
-          <p className="muted small">Clave guardada (…{settings.geminiKey.slice(-4)}). Se sincroniza con tus otros dispositivos.</p>
+          <p className="muted small">Clave guardada (…{settings.geminiKey.slice(-4)}). Se guarda solo en este dispositivo (no en la nube): en cada dispositivo tienes que ponerla una vez.</p>
           <div className="chips">
             <button className="btn small" onClick={test}>Probar</button>
             <button className="btn small" onClick={runDiag}>Diagnóstico</button>
-            <button className="btn small" onClick={() => { actions.updateSettings({ geminiKey: '' }); setMsg(''); }}>Quitar clave</button>
+            <button className="btn small" onClick={() => { setKey('geminiKey', ''); setMsg(''); }}>Quitar clave</button>
           </div>
         </>
       ) : (
@@ -50,7 +50,7 @@ export default function AiCard() {
           </p>
           <input type="password" placeholder="AIza…" value={key} onChange={(e) => setKey(e.target.value)} />
           <button className="btn primary" style={{ alignSelf: 'flex-start' }} disabled={key.trim().length < 20}
-            onClick={() => { actions.updateSettings({ geminiKey: key.trim() }); setKey(''); }}>Guardar clave</button>
+            onClick={() => { setKey('geminiKey', key.trim()); setKey(''); }}>Guardar clave</button>
         </>
       )}
       <h3 style={{ margin: '8px 0 0' }}>Respaldo: Groq (opcional)</h3>
@@ -59,7 +59,7 @@ export default function AiCard() {
           <p className="muted small">Clave guardada (…{settings.groqKey.slice(-4)}). Si Gemini falla, la app usa Groq (solo con texto).</p>
           <div className="chips">
             <button className="btn small" onClick={testGroq}>Probar Groq</button>
-            <button className="btn small" onClick={() => { actions.updateSettings({ groqKey: '' }); setMsg(''); }}>Quitar clave</button>
+            <button className="btn small" onClick={() => { setKey('groqKey', ''); setMsg(''); }}>Quitar clave</button>
           </div>
         </>
       ) : (
@@ -67,7 +67,7 @@ export default function AiCard() {
           <p className="muted small">Gratis y sin tarjeta: crea una clave en <b>console.groq.com/keys</b> y pégala aquí. No lee PDF ni fotos, pero casi nunca se satura.</p>
           <input type="password" placeholder="gsk_…" value={gkey} onChange={(e) => setGkey(e.target.value)} />
           <button className="btn primary" style={{ alignSelf: 'flex-start' }} disabled={gkey.trim().length < 20}
-            onClick={() => { actions.updateSettings({ groqKey: gkey.trim() }); setGkey(''); }}>Guardar clave de Groq</button>
+            onClick={() => { setKey('groqKey', gkey.trim()); setGkey(''); }}>Guardar clave de Groq</button>
         </>
       )}
       {msg && <p className="small" style={{ whiteSpace: 'pre-wrap' }}>{msg}</p>}

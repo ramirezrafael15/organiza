@@ -37,7 +37,7 @@ export function AccountCard() {
         <form className="stack" onSubmit={submit(account.signIn)}>
           <p className="muted small">Entra con tu cuenta para tener los mismos datos en el iPhone y en Windows. Todo se guarda también sin conexión.</p>
           <Field label="Correo"><input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
-          <Field label="Contraseña"><input type="password" required minLength={6} autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
+          <Field label="Contraseña"><input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
           {acc.error && <p className="small" style={{ color: 'var(--danger)', margin: 0 }}>{acc.error}</p>}
           <div className="row wrap">
             <button className="btn primary" type="submit" disabled={busy}>Entrar</button>
@@ -56,10 +56,28 @@ export function AccountCard() {
             {acc.sync.pending ? `Pendientes de subir: ${acc.sync.pending}. ` : ''}
             <span>Versión {typeof __BUILD__ === 'undefined' ? 'dev' : __BUILD__} (UTC).</span>
           </p>
+          {!acc.user.emailVerified && <VerifyBanner />}
           <button className="btn small" style={{ alignSelf: 'flex-start' }} onClick={() => account.signOut()}>Cerrar sesión</button>
         </>
       )}
     </section>
+  );
+}
+
+function VerifyBanner() {
+  const acc = useAccount();
+  const [msg, setMsg] = useState('');
+  return (
+    <div className="stack" style={{ gap: 6 }}>
+      <p className="small" style={{ margin: 0 }}>
+        ⚠️ Falta verificar tu correo. Te enviamos un mensaje al crear la cuenta (mira también en spam).
+      </p>
+      <div className="row wrap">
+        <button className="btn small" onClick={async () => { if (await account.resendVerification()) setMsg('Enviado de nuevo.'); }}>Reenviar correo</button>
+        <button className="btn small" onClick={async () => { await account.refreshVerification(); setMsg('Comprobado.'); }}>Ya lo he verificado</button>
+      </div>
+      {(msg || acc.error) && <p className="small muted" style={{ margin: 0 }}>{acc.error || msg}</p>}
+    </div>
   );
 }
 

@@ -1,11 +1,12 @@
 // Conexión con Firebase (cuenta + base de datos). Se carga solo si la app está configurada.
 import { initializeApp } from 'firebase/app';
 import {
-  createUserWithEmailAndPassword, getAuth, onAuthStateChanged, sendPasswordResetEmail,
+  createUserWithEmailAndPassword, deleteUser, EmailAuthProvider, getAuth, onAuthStateChanged,
+  reauthenticateWithCredential, sendEmailVerification, sendPasswordResetEmail,
   signInWithEmailAndPassword, signOut as fbSignOut,
 } from 'firebase/auth';
 import {
-  collection, deleteDoc, doc, initializeFirestore, memoryLocalCache, onSnapshot, setDoc,
+  collection, deleteDoc, doc, getDocs, initializeFirestore, memoryLocalCache, onSnapshot, setDoc, writeBatch,
 } from 'firebase/firestore';
 import { firebaseConfig } from './config.js';
 
@@ -32,6 +33,35 @@ export const signIn = (email, password) => signInWithEmailAndPassword(services()
 export const signUp = (email, password) => createUserWithEmailAndPassword(services().auth, email, password);
 export const signOut = () => fbSignOut(services().auth);
 export const resetPassword = (email) => sendPasswordResetEmail(services().auth, email);
+export const sendVerification = () => sendEmailVerification(services().auth.currentUser);
+
+/** Vuelve a leer la cuenta (¿ya verificó el correo?) y renueva el permiso para que las reglas lo vean. */
+export async function refreshUser() {
+  const u = services().auth.currentUser;
+  await u.reload();
+  await u.getIdToken(true);
+  return { emailVerified: u.emailVerified };
+}
+
+export async function reauth(password) {
+  const u = services().auth.currentUser;
+  await reauthenticateWithCredential(u, EmailAuthProvider.credential(u.email, password));
+}
+
+/** Borra todo lo que hay en la nube de esta cuenta y después la cuenta. */
+export async function wipeCloudAndDelete() {
+  const { auth, db } = services();
+  const user = auth.currentUser;
+  for (const sub of ['items', 'push', 'sent', 'meta']) {
+    const snap = await getDocs(collection(db, 'users', user.uid, sub));
+    for (let i = 0; i < snap.docs.length; i += 400) {
+      const batch = writeBatch(db);
+      snap.docs.slice(i, i + 400).forEach((d) => batch.delete(d.ref));
+      await batch.commit();
+    }
+  }
+  await deleteUser(user);
+}
 
 // Firestore no admite `undefined`: se limpia antes de guardar.
 const clean = (obj) => JSON.parse(JSON.stringify(obj));

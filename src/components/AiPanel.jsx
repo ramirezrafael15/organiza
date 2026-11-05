@@ -1,7 +1,7 @@
 // Panel de IA del editor: elige una acción, mira el resultado y decide si insertarlo.
 import { useRef, useState } from 'react';
-import { actions, useAppState } from '../data/index.js';
 import { askAI } from '../lib/ai.js';
+import { setKey, useKeys } from '../lib/keys.js';
 import { SYSTEM, TASKS } from '../lib/gemini.js';
 import { cleanAiHtml } from '../lib/sanitize.js';
 
@@ -13,9 +13,9 @@ const fileToBase64 = (file) => new Promise((ok, fail) => {
 });
 
 export default function AiPanel({ editor, onClose }) {
-  const { settings } = useAppState();
-  const key = settings.geminiKey;
-  const groqKey = settings.groqKey;
+  const keys = useKeys();
+  const key = keys.geminiKey;
+  const groqKey = keys.groqKey;
   const [newKey, setNewKey] = useState('');
   const [free, setFree] = useState('');
   const [busy, setBusy] = useState(false);
@@ -77,8 +77,8 @@ export default function AiPanel({ editor, onClose }) {
             <li>Pégala aquí abajo.</li>
           </ol>
           <input type="password" placeholder="Pega aquí tu clave (AIza…)" value={newKey} onChange={(e) => setNewKey(e.target.value)} />
-          <button className="btn primary" disabled={newKey.trim().length < 20} onClick={() => actions.updateSettings({ geminiKey: newKey.trim() })}>Guardar clave</button>
-          <p className="muted small">En el plan gratuito Google puede usar lo que envíes para mejorar sus modelos: no mandes datos personales.</p>
+          <button className="btn primary" disabled={newKey.trim().length < 20} onClick={() => setKey('geminiKey', newKey.trim())}>Guardar clave</button>
+          <p className="muted small">La clave se guarda solo en este dispositivo. En el plan gratuito Google puede usar lo que envíes para mejorar sus modelos: no mandes datos personales.</p>
         </div>
       </aside>
     );

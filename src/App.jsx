@@ -8,7 +8,7 @@ import Modal from './components/Modal.jsx';
 import ProgramFilter from './components/ProgramFilter.jsx';
 import SyncBadge from './components/SyncBadge.jsx';
 import { UIContext } from './components/ui.js';
-import { useAppState } from './data/index.js';
+import { actions, useAppState } from './data/index.js';
 import { DEFAULT_KIND_COLORS } from './lib/kinds.js';
 import CalendarPage from './pages/CalendarPage.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -22,6 +22,7 @@ import Study from './pages/Study.jsx';
 import Exams from './pages/Exams.jsx';
 import { useTheme } from './lib/theme.js';
 import { initAccount } from './sync/account.js';
+import { migrateKeysFromSettings } from './lib/keys.js';
 
 const ROUTES = [
   { id: 'panel', label: 'Panel', icon: 'home', Page: Dashboard },
@@ -46,6 +47,7 @@ export default function App() {
   useTheme(); // aplica el tema guardado
   useEffect(() => { initAccount(); }, []); // si la nube está configurada, conecta la cuenta y la sincronización
   const { settings } = useAppState();
+  useEffect(() => { migrateKeysFromSettings(settings, actions.updateSettings); }, [settings.geminiKey, settings.groqKey]);
   const [routeId, setRouteId] = useState(routeFromHash);
   const [form, setForm] = useState(null); // { kind, item, defaults } o null
   const [quick, setQuick] = useState(null); // { defaults } o null
