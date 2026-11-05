@@ -86,7 +86,7 @@ export function NotificationsCard() {
     try {
       const r = await enablePush(acc.user.uid, account.firebase());
       if (r.ok) setSubscribed(true);
-      else setMsg(r.reason === 'denied' ? 'Has bloqueado las notificaciones. Actívalas en los ajustes del móvil o del navegador para Organiza.'
+      else setMsg(r.reason === 'denied' ? 'Has bloqueado las notificaciones. Actívalas en los ajustes del móvil o del navegador para Seiri.'
         : r.reason === 'config' ? 'Falta la clave VAPID en src/sync/config.js (ver README).' : 'No se concedió el permiso.');
     } catch {
       setMsg('No se pudo activar. Inténtalo de nuevo.');
@@ -123,7 +123,7 @@ export function NotificationsCard() {
               </div>
             </>
           )}
-          {permission === 'denied' && <p className="small" style={{ color: 'var(--danger)', margin: 0 }}>Las notificaciones están bloqueadas para Organiza en este dispositivo.</p>}
+          {permission === 'denied' && <p className="small" style={{ color: 'var(--danger)', margin: 0 }}>Las notificaciones están bloqueadas para Seiri en este dispositivo.</p>}
           {msg && <p className="small" style={{ margin: 0 }}>{msg}</p>}
           {!VAPID_PUBLIC_KEY && <p className="small muted" style={{ margin: 0 }}>Falta la clave VAPID pública en src/sync/config.js.</p>}
         </>

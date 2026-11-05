@@ -156,7 +156,7 @@ export default function Settings() {
           <h2>Instalar la app</h2>
           <ul style={{ margin: 0, paddingLeft: 18 }}>
             <li><b>iPhone:</b> ábrela en Safari → botón Compartir → “Añadir a pantalla de inicio”.</li>
-            <li><b>Windows:</b> en Edge o Chrome → icono de instalar en la barra de direcciones (o menú → “Instalar Organiza”).</li>
+            <li><b>Windows:</b> en Edge o Chrome → icono de instalar en la barra de direcciones (o menú → “Instalar Seiri”).</li>
           </ul>
         </section>
       </div>

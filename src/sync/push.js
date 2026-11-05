@@ -49,5 +49,5 @@ export async function disablePush(uid, fb) {
 /** Muestra una notificación local para comprobar que el sistema deja mostrarlas. */
 export async function localTest() {
   const reg = await navigator.serviceWorker.ready;
-  await reg.showNotification('Organiza', { body: 'Así se verán tus avisos ✅', icon: `${import.meta.env.BASE_URL}icons/icon-192.png` });
+  await reg.showNotification('Seiri', { body: 'Así se verán tus avisos ✅', icon: `${import.meta.env.BASE_URL}icons/icon-192.png` });
 }

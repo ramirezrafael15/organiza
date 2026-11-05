@@ -16,8 +16,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/apple-touch-icon-v2.png', 'icons/icon.svg'],
       manifest: {
-        name: 'Organiza',
-        short_name: 'Organiza',
+        name: 'Seiri',
+        short_name: 'Seiri',
         description: 'Tu vida académica y laboral en un solo sitio.',
         lang: 'es',
         start_url: base,

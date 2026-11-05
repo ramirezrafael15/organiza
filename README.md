@@ -1,4 +1,4 @@
-# Organiza
+# Seiri
 
 App de organización personal para estudiantes: calendario, horario semanal, exámenes, entregas, calificaciones, bloc de notas y niveles de urgencia. Es una **PWA** (se instala en iPhone y Windows y funciona sin conexión).
 

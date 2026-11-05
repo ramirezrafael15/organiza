@@ -13,7 +13,7 @@ for (const ref of await db.collection('users').listDocuments()) {
   if (!subs.length) continue;
 
   if (process.env.TEST_PUSH === 'true') {
-    const ok = await sendToAll(subs, { title: 'Organiza', body: 'Prueba: si ves esto, los avisos funcionan ✅', tag: `test-${Date.now()}` });
+    const ok = await sendToAll(subs, { title: 'Seiri', body: 'Prueba: si ves esto, los avisos funcionan ✅', tag: `test-${Date.now()}` });
     console.log(`Prueba a ${ref.id}: ${ok ? 'enviada' : 'no se pudo enviar'}`);
     continue;
   }

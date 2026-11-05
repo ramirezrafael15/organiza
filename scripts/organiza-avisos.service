@@ -4,7 +4,7 @@
 #   journalctl -u organiza-avisos -f      (ver lo que hace)
 # Ajusta User y WorkingDirectory si tu carpeta o usuario son otros.
 [Unit]
-Description=Organiza - avisos puntuales
+Description=Seiri - avisos puntuales
 After=network-online.target
 Wants=network-online.target
 

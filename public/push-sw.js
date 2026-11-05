@@ -9,7 +9,7 @@ self.addEventListener('push', (event) => {
   }
   const icon = new URL('icons/icon-192.png', self.registration.scope).href;
   event.waitUntil(
-    self.registration.showNotification(data.title || 'Organiza', {
+    self.registration.showNotification(data.title || 'Seiri', {
       body: data.body || '',
       icon,
       badge: icon,

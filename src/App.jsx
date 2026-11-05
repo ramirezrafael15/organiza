@@ -90,7 +90,7 @@ export default function App() {
       <SyncBadge />
       <div className="app">
         <nav className="sidebar" aria-label="Principal">
-          <div className="brand"><img src={`${import.meta.env.BASE_URL}icons/icon.svg`} alt="" /> Organiza</div>
+          <div className="brand"><img src={`${import.meta.env.BASE_URL}icons/icon-192-v2.png`} alt="" /> Seiri</div>
           {ROUTES.map((r) => (
             <button key={r.id} className={`side-btn ${routeId === r.id ? 'active' : ''}`} onClick={() => navigate(r.id)}>
               <Icon name={r.icon} /> {r.id === 'notas' ? 'Apuntes' : r.id === 'calificaciones' ? 'Calificaciones' : r.label}
