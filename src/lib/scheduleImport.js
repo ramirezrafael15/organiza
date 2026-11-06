@@ -11,10 +11,10 @@
 // sin mirar mayúsculas ni tildes) se reutilizan; las clases idénticas no se duplican.
 import { PALETTE } from './kinds.js';
 
-const norm = (s = '') => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+export const norm = (s = '') => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
 
 /** Mismo nombre, o uno contenido en el otro ("Marketing" ~ "Grado en Marketing"). */
-const sameName = (a, b) => {
+export const sameName = (a, b) => {
   const x = norm(a), y = norm(b);
   return !!x && !!y && (x === y || x.includes(y) || y.includes(x));
 };

@@ -1,4 +1,5 @@
 // Operaciones de alto nivel sobre los datos (con las reglas de negocio).
+import { parseIcs, planCalendarImport } from '../lib/ics.js';
 import { planScheduleImport } from '../lib/scheduleImport.js';
 import { planProgress } from '../lib/studyPlan.js';
 import { newId } from './repository.js';
@@ -20,6 +21,10 @@ export const actions = {
   /** Borra un registro y limpia lo que dependía de él. */
   remove(col, id) {
     const state = repo.getState();
+    // Una entrega o examen que vino de un calendario y borras a mano no vuelve a aparecer en la siguiente lectura.
+    if ((col === 'tasks' || col === 'exams') && String(id).startsWith('ics_')) {
+      repo.updateSettings({ icsDismissed: [...new Set([...(state.settings.icsDismissed ?? []), id])] });
+    }
     if (col === 'programs') {
       // Las asignaturas se quedan, pero sin estudio.
       state.subjects.filter((s) => s.programId === id).forEach((s) => repo.upsert('subjects', { id: s.id, programId: null }));
@@ -68,6 +73,15 @@ export const actions = {
     plan.programs.forEach((p) => repo.upsert('programs', p));
     plan.subjects.forEach((s) => repo.upsert('subjects', s));
     plan.classes.forEach((c) => repo.upsert('classes', c));
+    return plan;
+  },
+
+  /** Importa un calendario .ics (Moodle de PRADO, Atlántida…): entregas y exámenes, sin duplicar. */
+  importCalendar(text, { programId = null } = {}) {
+    const plan = planCalendarImport(repo.getState(), parseIcs(text), { programId, makeId: newId });
+    plan.subjects.forEach((s) => repo.upsert('subjects', s));
+    plan.tasks.forEach((t) => repo.upsert('tasks', t));
+    plan.exams.forEach((x) => repo.upsert('exams', x));
     return plan;
   },
 

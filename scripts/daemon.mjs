@@ -3,6 +3,8 @@
 // Arranque: npm run avisos   (en producción lo gestiona systemd, ver scripts/organiza-avisos.service)
 //
 // HEALTHCHECK_URL (opcional): URL de healthchecks.io; se pide cada minuto. Si el servidor se apaga, ellos te avisan por correo.
+import { randomUUID } from 'node:crypto';
+import { parseIcs, planCalendarImport } from '../src/lib/ics.js';
 import { dispatchDue } from '../src/lib/dispatch.js';
 import { buildState, init, sendToAll } from './common.mjs';
 
@@ -72,9 +74,42 @@ async function cleanup() {
   }
 }
 
+// Calendarios de clase (Moodle): lee los enlaces .ics de cada usuario y crea/actualiza entregas y exámenes.
+const CAL_EVERY_MS = 3 * 3600 * 1000;
+async function syncCalendars() {
+  for (const u of tracked.values()) {
+    const calendars = u.settings.calendars ?? [];
+    for (const cal of calendars) {
+      try {
+        const res = await fetch(cal.url, { headers: { 'User-Agent': 'Seiri' }, signal: AbortSignal.timeout(30_000) });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const events = parseIcs(await res.text());
+        const state = buildState([...u.items.values()], u.settings, [...u.subs.values()]);
+        const plan = planCalendarImport(state, events, { programId: cal.programId ?? null, makeId: randomUUID });
+        const write = async (col, rec) => {
+          const key = `${col}__${rec.id}`;
+          const now = Date.now();
+          const prev = u.items.get(key)?.data;
+          const data = JSON.parse(JSON.stringify({ ...prev, createdAt: prev?.createdAt ?? now, ...rec, updatedAt: now })); // sin undefined
+          await u.ref.collection('items').doc(key).set({ col, id: rec.id, data, updatedAt: now });
+        };
+        for (const s of plan.subjects) await write('subjects', s);
+        for (const t of plan.tasks) await write('tasks', t);
+        for (const x of plan.exams) await write('exams', x);
+        const n = plan.subjects.length + plan.tasks.length + plan.exams.length;
+        if (n) log(`Calendario "${cal.name}" de ${u.id}: ${plan.tasks.length} entregas, ${plan.exams.length} exámenes, ${plan.subjects.length} asignaturas`);
+      } catch (e) {
+        onError(`calendario ${cal.name}`)(e);
+      }
+    }
+  }
+}
+
 await discoverUsers();
 log('Servidor de avisos en marcha.');
 setInterval(tick, TICK_MS);
+setTimeout(() => syncCalendars().catch(onError('calendarios')), 60_000);
+setInterval(() => syncCalendars().catch(onError('calendarios')), CAL_EVERY_MS);
 setInterval(() => discoverUsers().catch(onError('usuarios')), 10 * 60 * 1000);
 setInterval(() => cleanup().catch(onError('limpieza')), 6 * 3600 * 1000);
 if (process.env.HEALTHCHECK_URL) {
