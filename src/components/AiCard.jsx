@@ -6,7 +6,7 @@ import { askGroq } from '../lib/groq.js';
 
 export default function AiCard() {
   const settings = useKeys();
-  const [key, setKey] = useState('');
+  const [key, setKeyInput] = useState('');
   const [msg, setMsg] = useState('');
   const has = !!settings.geminiKey;
   const [diag, setDiag] = useState(null);
@@ -48,9 +48,9 @@ export default function AiCard() {
             Gratis y sin tarjeta: entra en <b>aistudio.google.com/apikey</b> con tu cuenta de Google, crea una clave y pégala aquí.
             En el plan gratuito Google puede usar lo que envíes para mejorar sus modelos, así que no mandes datos personales.
           </p>
-          <input type="password" placeholder="AIza…" value={key} onChange={(e) => setKey(e.target.value)} />
+          <input type="password" placeholder="AIza…" value={key} onChange={(e) => setKeyInput(e.target.value)} />
           <button className="btn primary" style={{ alignSelf: 'flex-start' }} disabled={key.trim().length < 20}
-            onClick={() => { setKey('geminiKey', key.trim()); setKey(''); }}>Guardar clave</button>
+            onClick={() => { setKey('geminiKey', key.trim()); setKeyInput(''); }}>Guardar clave</button>
         </>
       )}
       <h3 style={{ margin: '8px 0 0' }}>Respaldo: Groq (opcional)</h3>
