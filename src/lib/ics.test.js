@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { classify, icsId, parseIcs, planCalendarImport, subjectName } from './ics.js';
+import { classify, icsId, parseIcs, planCalendarImport, sameSubject, subjectName } from './ics.js';
 
 const ICS = `BEGIN:VCALENDAR
 BEGIN:VEVENT
@@ -81,5 +81,19 @@ describe('ics', () => {
     expect(upd.tasks).toEqual([{ id: t.id, title: 'Tema 4.1.', due: '2026-11-04', time: '14:30' }]);
     const dis = planCalendarImport(state({ settings: { icsDismissed: [icsId('92161@pradogrado2627.ugr.es')] } }), parseIcs(ICS).slice(0, 1), { makeId, now: NOW });
     expect(dis.tasks).toEqual([]);
+  });
+  it('nombres de Atlántida y asignaturas con otro nombre', () => {
+    expect(subjectName('0614. Despliegue de Aplicaciones Web 26-27')).toBe('Despliegue de Aplicaciones Web');
+    expect(subjectName('0618. Itinerario personal para la empleabilidad II (DAW) 26-27')).toBe('Itinerario personal para la empleabilidad II');
+    expect(sameSubject('Desarrollo Web Servidor', 'Desarrollo Web en Entorno Servidor')).toBe(true);
+    expect(sameSubject('Desarrollo Web Cliente', 'Desarrollo web en entorno cliente')).toBe(true);
+    expect(sameSubject('Desarrollo Web Servidor', 'Desarrollo web en entorno cliente')).toBe(false);
+    expect(sameSubject('Inglés', 'Ingles profesional')).toBe(true);
+    expect(sameSubject('IPE II', 'Itinerario personal para la empleabilidad II')).toBe(true);
+    expect(sameSubject('FDAE', 'Fundamentos de dirección y administrac. de empresas')).toBe(true);
+    expect(sameSubject('Profundización en Digitalización', 'Profundizacion en digitalizacion')).toBe(true);
+    expect(sameSubject('Diseño de Interfaces Web', 'Despliegue de Aplicaciones Web')).toBe(false);
+    expect(classify('ENGLISH EXAM FIRST TERM').type).toBe('exam');
+    expect(classify('ENGLISH RETAKE (RECUPERACIÓN DAW)').type).toBe('exam');
   });
 });

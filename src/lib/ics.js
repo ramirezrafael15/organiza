@@ -1,7 +1,7 @@
 // Calendarios de Moodle (PRADO, Atlántida…) en formato .ics → entregas y exámenes de Seiri.
 // Función pura y compartida: la usan la app (importar archivo) y el servidor (leer el enlace cada pocas horas).
 import { PALETTE } from './kinds.js';
-import { norm, sameName } from './scheduleImport.js';
+import { norm } from './scheduleImport.js';
 
 const unescapeText = (s) => s.replace(/\\n/gi, '\n').replace(/\\([,;\\])/g, '$1');
 
@@ -59,10 +59,32 @@ export const icsId = (uid) => `ics_${uid.replace(/[^a-zA-Z0-9]/g, '_')}`;
 
 /** 'INTRODUCCIÓN AL MÁRKETING (2627)-236_11_13_2627_A' → 'Introducción al márketing' */
 export function subjectName(category) {
-  const base = String(category || '').replace(/\s*\(\d{4}\).*$/, '').replace(/\.(?=\S)/g, '. ').replace(/\s+/g, ' ').trim();
+  const base = String(category || '').replace(/\s*\(\d{4}\).*$/, '')
+    .replace(/^\d{4}\.\s*/, '') // código de la asignatura: "0614. "
+    .replace(/\s+\d{2}-\d{2}$/, '') // curso: " 26-27"
+    .replace(/\s*\((?:DAW|ASIR|DAM)\)\s*$/i, '') // ciclo entre paréntesis
+    .replace(/\.(?=\S)/g, '. ').replace(/\s+/g, ' ').trim();
   if (!base) return '';
   const lower = base === base.toUpperCase() ? base.toLowerCase() : base;
   return lower[0].toUpperCase() + lower.slice(1);
+}
+
+// Para reconocer una asignatura que ya tienes aunque Moodle la nombre más largo ("Desarrollo Web en Entorno Servidor" = "Desarrollo Web Servidor").
+const STOP = new Set(['de', 'del', 'la', 'el', 'los', 'las', 'en', 'y', 'e', 'a', 'al', 'para', 'entorno', 'profesional']);
+const words = (s) => norm(s).replace(/[.,]/g, ' ').split(/\s+/).filter(Boolean);
+const keyWords = (s) => words(s).filter((w) => !STOP.has(w));
+const ROMAN = /^(?:i|ii|iii|iv|v)$/;
+/** Siglas: "Fundamentos de Dirección y Administración de Empresas" → "fdae"; "Itinerario personal para la empleabilidad II" → "ipeii". */
+const acronym = (s) => keyWords(s).map((w) => (ROMAN.test(w) ? w : w[0])).join('');
+
+export function sameSubject(a, b) {
+  const x = keyWords(a), y = keyWords(b);
+  if (!x.length || !y.length) return false;
+  const small = x.length <= y.length ? x : y, big = small === x ? y : x;
+  if (small.every((w) => big.includes(w)) && (small.length > 1 || big.length === 1 || small[0].length >= 6)) return true;
+  const compact = (s) => norm(s).replace(/[^a-z0-9]/g, '');
+  return (y.length === 1 && x.length > 2 && acronym(a) === y[0]) || (x.length === 1 && y.length > 2 && acronym(b) === x[0]) ||
+    (compact(a).length <= 6 && acronym(b) === compact(a)) || (compact(b).length <= 6 && acronym(a) === compact(b));
 }
 
 /** ¿Qué es el evento? Entrega (vencimiento/cierre), examen (por palabras clave) o nada (aperturas, etc.). */
@@ -70,7 +92,7 @@ export function classify(summary = '') {
   const m = /^(?:vencimiento|cierre) de\s+(.+)$/i.exec(summary);
   if (m) return { type: 'task', title: m[1].trim() };
   if (/^apertura de/i.test(summary)) return null;
-  if (/\b(examen|parcial|prueba|test|control|cuestionario)\b/i.test(summary)) return { type: 'exam', title: summary.replace(/^(?:vencimiento|cierre) de\s+/i, '').trim() };
+  if (/\b(examen|exam|parcial|prueba|test|control|cuestionario|retake|recuperaci[oó]n)\b/i.test(summary)) return { type: 'exam', title: summary.replace(/^(?:vencimiento|cierre) de\s+/i, '').trim() };
   return null;
 }
 
@@ -90,7 +112,7 @@ export function planCalendarImport(state, events, { programId = null, makeId, no
   const subjectId = (category) => {
     const name = subjectName(category);
     if (!name) return null;
-    let s = allSubjects.find((x) => sameName(x.name, name));
+    let s = allSubjects.find((x) => sameSubject(x.name, name));
     if (!s) {
       s = { id: makeId(), name, color: PALETTE[allSubjects.length % PALETTE.length], programId };
       allSubjects.push(s);
