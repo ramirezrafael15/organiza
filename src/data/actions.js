@@ -47,6 +47,11 @@ export const actions = {
     repo.remove(col, id);
   },
 
+  /** Borra varios de golpe (modo seleccionar). */
+  removeMany(col, ids) {
+    ids.forEach((id) => actions.remove(col, id));
+  },
+
   /** Cambia el estado de una entrega (al entregarla pasa al 100 %). */
   setTaskStatus(task, status) {
     return actions.save('tasks', { ...task, status });

@@ -1,6 +1,7 @@
 // Pendientes del día a día: lo que tienes que hacer hoy y lo que viene, con casilla para marcarlo.
 import { useState } from 'react';
 import { Empty } from '../components/bits.jsx';
+import { pick, SelectBar, SelectButton, useSelect } from '../components/select.jsx';
 import { useUI } from '../components/ui.js';
 import { actions, useToday } from '../data/index.js';
 import { useViewState } from '../data/viewFilter.js';
@@ -9,12 +10,12 @@ import { addDaysISO, fmt, relativeLabel } from '../lib/dates.js';
 const byWhen = (a, b) => (a.date || '9999').localeCompare(b.date || '9999') || (a.time || '').localeCompare(b.time || '') || (a.createdAt ?? 0) - (b.createdAt ?? 0);
 
 /** Una fila: casilla para marcar + texto (al pulsarlo se edita). */
-export function TodoRow({ todo, today, subjects, showDate = false }) {
+export function TodoRow({ todo, today, subjects, showDate = false, sel }) {
   const { openForm } = useUI();
   const subject = subjects.find((s) => s.id === todo.subjectId);
   const late = !todo.done && todo.date && todo.date < today;
   return (
-    <div className={`todo-row ${todo.done ? 'done' : ''}`}>
+    <div className={`todo-row ${todo.done ? 'done' : ''}`} {...(sel ? pick(sel, todo.id) : {})}>
       <button className="todo-check" aria-label={todo.done ? 'Marcar como no hecho' : 'Marcar como hecho'} aria-pressed={!!todo.done} onClick={() => actions.toggleTodo(todo)}>
         {todo.done ? '✓' : ''}
       </button>
@@ -50,6 +51,7 @@ export default function Todos() {
   const [text, setText] = useState('');
   const [when, setWhen] = useState('hoy'); // hoy | manana | sin
   const [showDone, setShowDone] = useState(false);
+  const sel = useSelect();
 
   const add = (e) => {
     e.preventDefault();
@@ -68,7 +70,7 @@ export default function Todos() {
   const done = todos.filter((t) => t.done).sort((a, b) => (b.doneAt ?? 0) - (a.doneAt ?? 0));
   const todayAll = todos.filter((t) => t.date === today);
   const todayDone = todayAll.filter((t) => t.done).length;
-  const rows = (list, showDate) => list.map((t) => <TodoRow key={t.id} todo={t} today={today} subjects={subjects} showDate={showDate} />);
+  const rows = (list, showDate) => list.map((t) => <TodoRow key={t.id} todo={t} today={today} subjects={subjects} showDate={showDate} sel={sel} />);
 
   return (
     <>
@@ -79,6 +81,7 @@ export default function Todos() {
             {todayAll.length ? `Hoy llevas ${todayDone} de ${todayAll.length}` : 'Lo que tienes que hacer en el día a día'} · <span style={{ textTransform: 'capitalize' }}>{fmt(today, "EEEE d 'de' MMMM")}</span>
           </p>
         </div>
+        <SelectButton sel={sel} />
       </div>
 
       <form className="card todo-add" onSubmit={add}>
@@ -108,6 +111,7 @@ export default function Todos() {
           {showDone && <div className="card todo-list" style={{ marginTop: 8 }}>{rows(done.slice(0, 30), true)}</div>}
         </section>
       )}
+      <SelectBar sel={sel} visibleIds={[...late, ...now, ...next, ...noDate, ...(showDone ? done.slice(0, 30) : [])].map((t) => t.id)} noun="pendientes" onDelete={(ids) => actions.removeMany('todos', ids)} />
     </>
   );
 }

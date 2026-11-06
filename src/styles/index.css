@@ -511,3 +511,24 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 .exam-group-head .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--g); flex: none; }
 .exam-group-head .small { flex: 1; min-width: 0; }
 .exam-group-head .chev { margin-left: auto; color: var(--muted); }
+
+/* ===== Seleccionar varios ===== */
+.sel-bar {
+  position: fixed; left: 12px; right: 12px; z-index: 40;
+  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 10px);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 10px 12px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+@media (min-width: 900px) { .sel-bar { left: 272px; right: 32px; bottom: 20px; } }
+.selecting .fab { display: none; }
+[data-selectable] { position: relative; cursor: pointer; }
+[data-selectable] > * { pointer-events: none; }
+[data-selectable]::after {
+  content: ''; position: absolute; top: -8px; left: -8px; width: 24px; height: 24px; border-radius: 50%;
+  border: 2px solid var(--border); background: var(--surface); display: grid; place-items: center;
+  font-size: 14px; font-weight: 800; z-index: 2;
+}
+[data-selected='true'] { outline: 2px solid var(--primary); }
+[data-selected='true']::after { content: '✓'; background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
+.todo-row[data-selectable]::after { top: 50%; left: auto; right: 12px; transform: translateY(-50%); }

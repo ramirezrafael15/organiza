@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Empty, Progress, ProgressSlider, SubjectChip, UrgencyBadge } from '../components/bits.jsx';
 import Icon from '../components/Icon.jsx';
+import { pick, SelectBar, SelectButton, useSelect } from '../components/select.jsx';
 import { useUI } from '../components/ui.js';
 import { actions, useToday } from '../data/index.js';
 import { useViewState } from '../data/viewFilter.js';
@@ -11,20 +12,24 @@ import { getUrgency } from '../lib/urgency.js';
 
 export default function Tasks() {
   const { openForm } = useUI();
+  const sel = useSelect();
   return (
     <>
       <div className="page-head">
         <h1>Entregas</h1>
-        <button className="btn primary" onClick={() => openForm('task')}><Icon name="plus" /> Entrega</button>
+        <div className="row" style={{ gap: 8 }}>
+          <SelectButton sel={sel} />
+          <button className="btn primary" onClick={() => openForm('task')}><Icon name="plus" /> Entrega</button>
+        </div>
       </div>
-      <Deliveries />
+      <Deliveries sel={sel} />
     </>
   );
 }
 
 const FILTERS = [{ value: 'todas', label: 'Todas' }, ...Object.entries(TASK_STATUS).map(([value, label]) => ({ value, label }))];
 
-function Deliveries() {
+function Deliveries({ sel }) {
   const { tasks, subjects } = useViewState();
   const today = useToday();
   const { openForm } = useUI();
@@ -48,7 +53,7 @@ function Deliveries() {
             const subject = subjects.find((s) => s.id === t.subjectId);
             const urgency = getUrgency(t, 'task', today);
             return (
-              <article key={t.id} className="card item-card" style={{ '--c': urgency?.color ?? 'var(--u-0)', opacity: t.status === 'entregado' ? 0.7 : 1 }}>
+              <article key={t.id} className="card item-card" {...pick(sel, t.id)} style={{ '--c': urgency?.color ?? 'var(--u-0)', opacity: t.status === 'entregado' ? 0.7 : 1 }}>
                 <div className="item-top">
                   <button className="grow" style={{ textAlign: 'left' }} onClick={() => openForm('task', t)}>
                     <div className="item-title">{t.title}</div>
@@ -76,6 +81,7 @@ function Deliveries() {
       ) : (
         <div className="card"><Empty>No hay entregas aquí.</Empty></div>
       )}
+      <SelectBar sel={sel} visibleIds={list.map((t) => t.id)} noun="entregas" onDelete={(ids) => actions.removeMany('tasks', ids)} />
     </>
   );
 }

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Empty, ProgramPill, ProgressSlider, UrgencyBadge } from '../components/bits.jsx';
 import Icon from '../components/Icon.jsx';
 import StudyPlan from '../components/StudyPlan.jsx';
+import { pick, SelectBar, SelectButton, useSelect } from '../components/select.jsx';
 import { useUI } from '../components/ui.js';
 import { actions, useToday } from '../data/index.js';
 import { useViewState } from '../data/viewFilter.js';
@@ -17,6 +18,7 @@ export default function Exams() {
   const [showPast, setShowPast] = useState(false);
   const [closed, setClosed] = useState({}); // grupos plegados
   const [planId, setPlanId] = useState(null);
+  const sel = useSelect();
 
   const list = exams.filter((x) => (showPast ? x.date < today : x.date >= today));
   const sortBy = (a, b) => (showPast ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date));
@@ -36,7 +38,10 @@ export default function Exams() {
     <>
       <div className="page-head">
         <h1>Exámenes</h1>
-        <button className="btn primary" onClick={() => openForm('exam')}><Icon name="plus" /> Examen</button>
+        <div className="row" style={{ gap: 8 }}>
+          <SelectButton sel={sel} />
+          <button className="btn primary" onClick={() => openForm('exam')}><Icon name="plus" /> Examen</button>
+        </div>
       </div>
       <div className="chips" style={{ marginBottom: 12 }}>
         <button className={`chip-btn ${!showPast ? 'on' : ''}`} onClick={() => setShowPast(false)}>Próximos</button>
@@ -58,6 +63,14 @@ export default function Exams() {
                   </span>
                   <span className="chev">{open ? '▾' : '▸'}</span>
                 </button>
+                {sel.on && (
+                  <button className="btn small" style={{ margin: '0 0 8px' }} onClick={() => {
+                    const all = g.items.every((x) => sel.has(x.id));
+                    sel.set(all ? [...sel.ids].filter((id) => !g.items.some((x) => x.id === id)) : [...sel.ids, ...g.items.map((x) => x.id)]);
+                  }}>
+                    {g.items.every((x) => sel.has(x.id)) ? 'Quitar' : 'Marcar'} todos de {g.subject?.name ?? 'sin asignatura'}
+                  </button>
+                )}
                 {open && (
                   <div className="cards">
                     {g.items.map((x) => {
@@ -65,7 +78,7 @@ export default function Exams() {
                       const n = daysUntil(x.date, today);
                       const p = planProgress(todos, x.id);
                       return (
-                        <article key={x.id} className="card item-card" style={{ '--c': urgency?.color ?? 'var(--muted)' }}>
+                        <article key={x.id} className="card item-card" {...pick(sel, x.id)} style={{ '--c': urgency?.color ?? 'var(--muted)' }}>
                           <div className="item-top">
                             <div className="countdown">
                               <b>{n >= 0 ? n : '—'}</b>
@@ -100,6 +113,7 @@ export default function Exams() {
       ) : (
         <div className="card"><Empty>{showPast ? 'Aún no hay exámenes pasados.' : 'No tienes exámenes próximos.'}</Empty></div>
       )}
+      <SelectBar sel={sel} visibleIds={list.map((x) => x.id)} noun="exámenes" onDelete={(ids) => actions.removeMany('exams', ids)} />
       {planId && exams.find((e) => e.id === planId) && <StudyPlan exam={exams.find((e) => e.id === planId)} onClose={() => setPlanId(null)} />}
     </>
   );
