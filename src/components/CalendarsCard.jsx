@@ -57,7 +57,7 @@ export default function CalendarsCard() {
         <div className="row wrap">
           <button className="btn primary" type="submit">Añadir calendario</button>
           <button className="btn" type="button" onClick={() => fileRef.current?.click()}>Importar archivo .ics</button>
-          <input ref={fileRef} type="file" accept=".ics,text/calendar" hidden onChange={importFile} />
+          <input ref={fileRef} type="file" hidden onChange={importFile} />
         </div>
       </form>
       {msg && <p className="small" style={{ margin: 0 }}>{msg}</p>}
