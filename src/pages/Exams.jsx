@@ -4,6 +4,7 @@ import { Empty, ProgramPill, ProgressSlider, UrgencyBadge } from '../components/
 import Icon from '../components/Icon.jsx';
 import StudyPlan from '../components/StudyPlan.jsx';
 import { pick, SelectBar, SelectButton, useSelect } from '../components/select.jsx';
+import { Ring } from '../components/motion.jsx';
 import { useUI } from '../components/ui.js';
 import { actions, useToday } from '../data/index.js';
 import { useViewState } from '../data/viewFilter.js';
@@ -80,13 +81,10 @@ export default function Exams() {
                       return (
                         <article key={x.id} className="card item-card" {...pick(sel, x.id)} style={{ '--c': urgency?.color ?? 'var(--muted)' }}>
                           <div className="item-top">
-                            <div className="countdown">
-                              <b>{n >= 0 ? n : '—'}</b>
-                              <span>{n === 1 ? 'día' : n >= 0 ? 'días' : 'pasado'}</span>
-                            </div>
+                            <Ring value={x.progress ?? 0} color={urgency?.color} size={72} label="preparado" />
                             <button className="grow" style={{ textAlign: 'left' }} onClick={() => openForm('exam', x)}>
                               <div className="item-title">{fmt(x.date, 'EEE d MMM')}{x.time ? ` · ${x.time}` : ''} <ProgramPill subject={g.subject} /></div>
-                              <div className="small muted">{countdownLabel(x.date, today)}</div>
+                              <span className="days-pill" style={{ '--c': urgency?.color }}>{countdownLabel(x.date, today)}</span>
                               {x.topics && <div className="small muted" style={{ marginTop: 4, whiteSpace: 'pre-wrap' }}>{x.topics}</div>}
                               {x.expectedGrade != null && <div className="small" style={{ marginTop: 4 }}>Nota esperada: <b>{x.expectedGrade}</b></div>}
                             </button>

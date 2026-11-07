@@ -46,9 +46,14 @@ export function SubjectChip({ subject }) {
 }
 
 export function Progress({ value = 0, color }) {
+  const [w, setW] = useState(0); // la barra se llena al aparecer
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setW(value));
+    return () => cancelAnimationFrame(id);
+  }, [value]);
   return (
     <div className="progress" role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100}>
-      <i style={{ width: `${value}%`, '--c': color }} />
+      <i style={{ width: `${w}%`, '--c': color }} />
     </div>
   );
 }

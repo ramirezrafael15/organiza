@@ -21,6 +21,7 @@ import Todos from './pages/Todos.jsx';
 import Study from './pages/Study.jsx';
 import Exams from './pages/Exams.jsx';
 import { useTheme } from './lib/theme.js';
+import { ToastHost } from './components/toast.jsx';
 import { initAccount } from './sync/account.js';
 import { migrateKeysFromSettings } from './lib/keys.js';
 
@@ -90,6 +91,7 @@ export default function App() {
   return (
     <UIContext.Provider value={ui}>
       <SyncBadge />
+      <ToastHost />
       <div className="app">
         <nav className="sidebar" aria-label="Principal">
           <div className="brand"><img src={`${import.meta.env.BASE_URL}icons/icon-192-v2.png`} alt="" /> Seiri</div>
@@ -103,7 +105,7 @@ export default function App() {
         <main className="main">
           {/* El calendario es común (lo junta todo) y trae sus propios botones; Ajustes no filtra nada. */}
           {routeId !== 'ajustes' && routeId !== 'calendario' && <ProgramFilter />}
-          <Page />
+          <div key={routeId} className="page-in"><Page /></div>
         </main>
 
         <nav className="bottom-nav" aria-label="Principal">

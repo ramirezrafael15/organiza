@@ -6,6 +6,7 @@ import { actions, useAppState, useToday } from '../data/index.js';
 import { useViewState } from '../data/viewFilter.js';
 import { buildDemoState } from '../data/demo.js';
 import { entriesOn, upcomingExams, urgentItems } from '../lib/agenda.js';
+import { Ring } from '../components/motion.jsx';
 import { addDaysISO, countdownLabel, daysUntil, fmt, relativeLabel } from '../lib/dates.js';
 import { entryColor } from '../lib/color.js';
 import { KINDS } from '../lib/kinds.js';
@@ -36,7 +37,7 @@ export default function Dashboard() {
       <>
         <div className="page-head"><h1>Panel</h1></div>
         <div className="card empty">
-          <h2 style={{ color: 'var(--text)' }}>¡Empecemos! 👋</h2>
+          <h2 style={{ color: 'var(--text)' }}>¡Empecemos!</h2>
           <p>Añade tu horario, tus exámenes y entregas, y aquí verás todo de un vistazo.</p>
           <div className="row" style={{ justifyContent: 'center', marginTop: 12 }}>
             <button className="btn primary" onClick={() => openQuickAdd()}>Añadir lo primero</button>
@@ -66,8 +67,8 @@ export default function Dashboard() {
     <>
       <div className="page-head">
         <div>
-          <h1>Hola 👋</h1>
-          <p className="sub" style={{ textTransform: 'capitalize' }}>{fmt(today, "EEEE, d 'de' MMMM")}</p>
+          <h1>Hola</h1>
+          <p className="sub">{fmt(today, "EEEE, d 'de' MMMM")}</p>
         </div>
       </div>
 
@@ -174,13 +175,11 @@ export default function Dashboard() {
                     <button key={x.id} className="card item-card" style={{ '--c': u?.color ?? 'var(--k-examen)', textAlign: 'left' }}
                       onClick={() => openForm('exam', x)}>
                       <div className="item-top">
-                        <div className="countdown">
-                          <b>{daysUntil(x.date, today)}</b>
-                          <span>{daysUntil(x.date, today) === 1 ? 'día' : 'días'}</span>
-                        </div>
+                        <Ring value={x.progress ?? 0} color={u?.color} size={68} label="preparado" />
                         <div className="grow">
                           <div className="item-title">{subjectOf(x.subjectId)?.name ?? 'Examen'} <ProgramPill subject={subjectOf(x.subjectId)} /></div>
                           <div className="small muted">{fmt(x.date, "EEE d MMM")}{x.time ? ` · ${x.time}` : ''}</div>
+                          <span className="days-pill" style={{ '--c': u?.color }}>Queda{daysUntil(x.date, today) === 1 ? '' : 'n'} {daysUntil(x.date, today)} {daysUntil(x.date, today) === 1 ? 'día' : 'días'}</span>
                         </div>
                         <UrgencyBadge urgency={u} />
                       </div>

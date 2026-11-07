@@ -1,6 +1,7 @@
 // Pendientes del día a día: lo que tienes que hacer hoy y lo que viene, con casilla para marcarlo.
 import { useState } from 'react';
 import { Empty } from '../components/bits.jsx';
+import { burst } from '../components/motion.jsx';
 import { pick, SelectBar, SelectButton, useSelect } from '../components/select.jsx';
 import { useUI } from '../components/ui.js';
 import { actions, useToday } from '../data/index.js';
@@ -16,7 +17,7 @@ export function TodoRow({ todo, today, subjects, showDate = false, sel }) {
   const late = !todo.done && todo.date && todo.date < today;
   return (
     <div className={`todo-row ${todo.done ? 'done' : ''}`} {...(sel ? pick(sel, todo.id) : {})}>
-      <button className="todo-check" aria-label={todo.done ? 'Marcar como no hecho' : 'Marcar como hecho'} aria-pressed={!!todo.done} onClick={() => actions.toggleTodo(todo)}>
+      <button className="todo-check" aria-label={todo.done ? 'Marcar como no hecho' : 'Marcar como hecho'} aria-pressed={!!todo.done} onClick={(e) => { if (!todo.done) burst(e.currentTarget); actions.toggleTodo(todo); }}>
         {todo.done ? '✓' : ''}
       </button>
       <button className="todo-main" onClick={() => openForm('todo', todo)}>
