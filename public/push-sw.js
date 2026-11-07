@@ -7,7 +7,7 @@ self.addEventListener('push', (event) => {
   } catch {
     data = { body: event.data && event.data.text() };
   }
-  const icon = new URL('icons/icon-192.png', self.registration.scope).href;
+  const icon = new URL('icons/icon-192-v3.png', self.registration.scope).href;
   event.waitUntil(
     self.registration.showNotification(data.title || 'Seiri', {
       body: data.body || '',

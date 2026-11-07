@@ -14,7 +14,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/apple-touch-icon-v3.png', 'icons/favicon-v3.png'],
+      includeAssets: ['icons/apple-touch-icon-v3.png', 'icons/favicon-v3.png', 'icons/logo.png'],
       manifest: {
         name: 'Seiri',
         short_name: 'Seiri',
@@ -24,8 +24,8 @@ export default defineConfig({
         scope: base,
         display: 'standalone',
         orientation: 'any',
-        background_color: '#09152f',
-        theme_color: '#6366f1',
+        background_color: '#0b0b0c',
+        theme_color: '#0b0b0c',
         icons: [
           { src: 'icons/icon-192-v3.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512-v3.png', sizes: '512x512', type: 'image/png' },
