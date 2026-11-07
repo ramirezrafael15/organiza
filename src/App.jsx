@@ -21,8 +21,10 @@ import Todos from './pages/Todos.jsx';
 import Study from './pages/Study.jsx';
 import Exams from './pages/Exams.jsx';
 import { useTheme } from './lib/theme.js';
+import Splash from './components/Splash.jsx';
 import { ToastHost } from './components/toast.jsx';
-import { initAccount } from './sync/account.js';
+import Welcome from './components/Welcome.jsx';
+import { initAccount, useAccount } from './sync/account.js';
 import { migrateKeysFromSettings } from './lib/keys.js';
 
 const ROUTES = [
@@ -44,9 +46,17 @@ const routeFromHash = () => {
   return ROUTES.some((r) => r.id === id) ? id : 'panel';
 };
 
+/** Primero la cuenta: si hay nube y no hay sesión, lo primero que se ve es entrar o crear cuenta. */
 export default function App() {
   useTheme(); // aplica el tema guardado
   useEffect(() => { initAccount(); }, []); // si la nube está configurada, conecta la cuenta y la sincronización
+  const acc = useAccount();
+  if (acc.status === 'loading') return <><Splash /><div className="welcome" /></>;
+  if (acc.status === 'out') return <><Splash /><Welcome /></>;
+  return <AppShell />;
+}
+
+function AppShell() {
   const { settings } = useAppState();
   useEffect(() => { migrateKeysFromSettings(settings, actions.updateSettings); }, [settings.geminiKey, settings.groqKey]);
   const [routeId, setRouteId] = useState(routeFromHash);
@@ -92,6 +102,7 @@ export default function App() {
     <UIContext.Provider value={ui}>
       <SyncBadge />
       <ToastHost />
+      <Splash />
       <div className="app">
         <nav className="sidebar" aria-label="Principal">
           <div className="brand"><img src={`${import.meta.env.BASE_URL}icons/icon-192-v2.png`} alt="" /> Seiri</div>
