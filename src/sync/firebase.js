@@ -100,7 +100,8 @@ export function createRemote(uid, onStatus = () => {}) {
     },
     set: (col, id, data, updatedAt) => track(setDoc(doc(items, docId(col, id)), { col, id, data: clean(data), updatedAt })),
     remove: (col, id) => track(deleteDoc(doc(items, docId(col, id)))),
-    setSettings: (data, updatedAt) => track(setDoc(settingsDoc, { data: clean(data), updatedAt })),
+    // merge: solo se tocan los campos enviados; así un dispositivo con datos viejos no borra los de otro (calendarios, etc.)
+    setSettings: (data, updatedAt) => track(setDoc(settingsDoc, { data: clean(data), updatedAt }, { merge: true })),
   };
 }
 

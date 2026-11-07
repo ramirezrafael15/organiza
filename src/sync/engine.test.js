@@ -16,6 +16,7 @@ function fakeCloud() {
   return {
     docs,
     clients,
+    getSettings: () => settings,
     remote() {
       const me = {};
       const api = {
@@ -36,7 +37,7 @@ function fakeCloud() {
           send((c) => c.onItems({ upserts: [], removed: [{ col, id }], allKeys: [...docs.keys()], fromCache: false }));
         },
         setSettings(data, updatedAt) {
-          settings = { data, updatedAt };
+          settings = { data: { ...(settings?.data ?? {}), ...data }, updatedAt }; // como Firestore con merge
           send((c) => c.onSettings(settings));
         },
       };
@@ -138,5 +139,20 @@ describe('sincronización', () => {
     const a = device(cloud), b = device(cloud);
     a.updateSettings({ notifyHour: 7 });
     expect(b.getState().settings.notifyHour).toBe(7);
+  });
+});
+
+describe('ajustes: un dispositivo desfasado no pisa los de otro', () => {
+  it('solo sube los campos que cambia', () => {
+    const cloud = fakeCloud();
+    const a = device(cloud);
+    a.updateSettings({ calendars: [{ id: 'c1', name: 'PRADO', url: 'https://x' }] });
+    tick();
+    const b = device(cloud); // dispositivo nuevo
+    tick();
+    b.updateSettings({ notifyHour: 9 });
+    expect(cloud.getSettings().data.calendars).toHaveLength(1);
+    expect(a.getState().settings.notifyHour).toBe(9);
+    expect(b.getState().settings.calendars).toHaveLength(1);
   });
 });

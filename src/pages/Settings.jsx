@@ -11,6 +11,7 @@ import { ColorSwatches, ReminderPicker, Segmented } from '../components/forms/fi
 import { AccountCard, NotificationsCard } from '../components/AccountCard.jsx';
 import AiCard from '../components/AiCard.jsx';
 import WakeCard from '../components/WakeCard.jsx';
+import BackupsCard from '../components/BackupsCard.jsx';
 import CalendarsCard from '../components/CalendarsCard.jsx';
 
 export default function Settings() {
@@ -94,6 +95,7 @@ export default function Settings() {
         <AccountCard />
         <AiCard />
         <WakeCard />
+        <BackupsCard />
         <NotificationsCard />
         <CalendarsCard />
 

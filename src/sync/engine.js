@@ -36,6 +36,7 @@ export class SyncEngine {
     this.reconciled = false; // ya se comparó contra la nube de verdad
     this.applying = false; // true mientras se aplican cambios que vienen de la nube
     this.settingsRemoteAt = 0;
+    this.remoteSettings = {}; // lo último que se sabe que hay en la nube (para subir solo lo que cambia)
     this.prev = this.#index(repo.getState());
     this.stops = [];
   }
@@ -115,6 +116,7 @@ export class SyncEngine {
   #onSettings({ data, updatedAt }) {
     if (!(updatedAt > this.settingsRemoteAt)) return;
     this.settingsRemoteAt = updatedAt;
+    this.remoteSettings = { ...this.remoteSettings, ...data };
     if ((this.repo.getState().settings.updatedAt ?? 0) < updatedAt) {
       this.applying = true;
       try {
@@ -150,7 +152,12 @@ export class SyncEngine {
     const s = state.settings;
     if (s.updatedAt && s.updatedAt > this.settingsRemoteAt) {
       const { updatedAt, ...data } = s;
-      this.remote.setSettings(data, updatedAt);
+      // Solo se suben los campos que han cambiado respecto a la nube: un dispositivo con ajustes
+      // desfasados ya no pisa los que otro dispositivo guardó (calendarios conectados, etc.).
+      const patch = {};
+      for (const k of Object.keys(data)) if (JSON.stringify(data[k]) !== JSON.stringify(this.remoteSettings[k])) patch[k] = data[k];
+      if (Object.keys(patch).length) this.remote.setSettings(patch, updatedAt);
+      this.remoteSettings = { ...this.remoteSettings, ...patch };
       this.settingsRemoteAt = updatedAt;
     }
     this.prev = now;

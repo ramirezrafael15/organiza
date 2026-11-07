@@ -673,3 +673,10 @@ h2 { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transfor
 .voice-card { width: 100%; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; text-align: left; border-top: 1px solid var(--border); padding-top: 16px; animation: rise 0.5s var(--ease) both; }
 .voice-card b { font-size: 1.25rem; letter-spacing: -0.02em; }
 .voice .ai-free { width: 100%; }
+
+/* Avisos de novedades */
+.news { position: fixed; z-index: 80; left: 12px; right: 12px; top: calc(12px + env(safe-area-inset-top)); display: flex; gap: 14px; align-items: center; justify-content: space-between; padding: 14px 16px; border-radius: 16px; background: var(--text); color: var(--bg); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4); animation: newsIn 0.5s var(--ease) both; max-width: 520px; margin: 0 auto; }
+.news p { margin: 4px 0 0; opacity: 0.85; }
+.news.needs { border-left: 4px solid var(--primary-2); }
+.news .btn { flex: none; background: var(--bg); color: var(--text); border-color: transparent; }
+@keyframes newsIn { from { transform: translateY(-20px); opacity: 0; } to { transform: none; opacity: 1; } }

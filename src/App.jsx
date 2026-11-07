@@ -27,7 +27,9 @@ import Splash from './components/Splash.jsx';
 import { ToastHost } from './components/toast.jsx';
 import Welcome from './components/Welcome.jsx';
 import { initAccount, useAccount } from './sync/account.js';
-import { migrateKeysFromSettings } from './lib/keys.js';
+import { getKeys, migrateKeysFromSettings, restoreKeysIfMissing } from './lib/keys.js';
+import { autoBackup, keepStorage } from './lib/safety.js';
+import NewsBanner from './components/NewsBanner.jsx';
 
 const ROUTES = [
   { id: 'panel', label: 'Panel', icon: 'home', Page: Dashboard },
@@ -61,6 +63,9 @@ export default function App() {
 function AppShell() {
   const { settings } = useAppState();
   useEffect(() => { migrateKeysFromSettings(settings, actions.updateSettings); }, [settings.geminiKey, settings.groqKey]);
+  useEffect(() => { keepStorage(); restoreKeysIfMissing(); }, []);
+  const stateNow = useAppState();
+  useEffect(() => { const t = setTimeout(() => autoBackup(stateNow, getKeys()), 8000); return () => clearTimeout(t); }, [stateNow.tasks, stateNow.exams, stateNow.settings.calendars]);
   const [routeId, setRouteId] = useState(routeFromHash);
   const [form, setForm] = useState(null); // { kind, item, defaults } o null
   const [quick, setQuick] = useState(null); // { defaults } o null
@@ -111,6 +116,7 @@ function AppShell() {
     <UIContext.Provider value={ui}>
       <SyncBadge />
       <ToastHost />
+      <NewsBanner />
       <Splash />
       <div className="app">
         <nav className="sidebar" aria-label="Principal">
