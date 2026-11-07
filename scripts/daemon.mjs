@@ -75,8 +75,12 @@ async function cleanup() {
 }
 
 // Calendarios de clase (Moodle): lee los enlaces .ics de cada usuario y crea/actualiza entregas y exámenes.
-const CAL_EVERY_MS = 3 * 3600 * 1000;
+const CAL_EVERY_MS = 60 * 1000; // cada minuto: es lo más cercano a "al instante" que permite Moodle (no avisa, hay que preguntar)
+let syncing = false;
 async function syncCalendars() {
+  if (syncing) return; // si una vuelta aún no ha acabado, no solapar
+  syncing = true;
+  try {
   for (const u of tracked.values()) {
     const calendars = u.settings.calendars ?? [];
     for (const cal of calendars) {
@@ -103,12 +107,13 @@ async function syncCalendars() {
       }
     }
   }
+  } finally { syncing = false; }
 }
 
 await discoverUsers();
 log('Servidor de avisos en marcha.');
 setInterval(tick, TICK_MS);
-setTimeout(() => syncCalendars().catch(onError('calendarios')), 60_000);
+setTimeout(() => syncCalendars().catch(onError('calendarios')), 5_000);
 setInterval(() => syncCalendars().catch(onError('calendarios')), CAL_EVERY_MS);
 setInterval(() => discoverUsers().catch(onError('usuarios')), 10 * 60 * 1000);
 setInterval(() => cleanup().catch(onError('limpieza')), 6 * 3600 * 1000);
