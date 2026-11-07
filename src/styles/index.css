@@ -532,3 +532,6 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 [data-selected='true'] { outline: 2px solid var(--primary); }
 [data-selected='true']::after { content: '✓'; background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
 .todo-row[data-selectable]::after { top: 50%; left: auto; right: 12px; transform: translateY(-50%); }
+
+[data-lp] { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.sel-hint { margin: 0 0 10px; }
