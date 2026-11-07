@@ -2,6 +2,7 @@
 // Las tareas son pendientes (marcados como "estudio"), así que también salen en Pendientes, Panel y Calendario.
 import { useState } from 'react';
 import Icon from '../components/Icon.jsx';
+import Techniques from '../components/Focus.jsx';
 import StudyPlan from '../components/StudyPlan.jsx';
 import { Progress } from '../components/bits.jsx';
 import { useUI } from '../components/ui.js';
@@ -22,6 +23,7 @@ export default function Study() {
   const [text, setText] = useState('');
   const [planId, setPlanId] = useState(null);
   const [over, setOver] = useState(null);
+  const [tab, setTab] = useState('semana');
 
   const days = weekDays(anchor);
   const subj = (id) => subjects.find((s) => s.id === id);
@@ -48,12 +50,17 @@ export default function Study() {
     <>
       <div className="page-head">
         <h1>Estudio</h1>
-        <div className="row-gap">
+        {tab === 'semana' && <div className="row-gap">
           <button className="btn" aria-label="Semana anterior" onClick={() => setAnchor(addDaysISO(anchor, -7))}><Icon name="left" /></button>
           <button className="btn" onClick={() => setAnchor(today)}>Hoy</button>
           <button className="btn" aria-label="Semana siguiente" onClick={() => setAnchor(addDaysISO(anchor, 7))}><Icon name="right" /></button>
-        </div>
+        </div>}
       </div>
+      <div className="seg" style={{ marginBottom: 14 }} role="tablist">
+        <button className={tab === 'semana' ? 'on' : ''} onClick={() => setTab('semana')}>Semana</button>
+        <button className={tab === 'tecnicas' ? 'on' : ''} onClick={() => setTab('tecnicas')}>Técnicas</button>
+      </div>
+      {tab === 'tecnicas' ? <Techniques /> : <>
       <p className="muted" style={{ margin: '-6px 0 12px' }}>{rangeLabel} · pon en cada día lo que vas a estudiar. En el ordenador puedes arrastrar las tareas de un día a otro.</p>
 
       {upcoming.length > 0 && (
@@ -114,6 +121,7 @@ export default function Study() {
           );
         })}
       </div>
+      </>}
       {planId && exams.find((x) => x.id === planId) && <StudyPlan exam={exams.find((x) => x.id === planId)} onClose={() => setPlanId(null)} />}
     </>
   );

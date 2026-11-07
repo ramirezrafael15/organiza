@@ -621,3 +621,21 @@ h2 { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transfor
 
 [data-lp] { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 .sel-hint { margin: 0 0 10px; }
+
+/* Técnicas de estudio */
+.tech-list { display: flex; flex-direction: column; }
+.tech { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 2px; }
+.tech b { font-size: 1.05rem; letter-spacing: -0.02em; }
+.tech-nums { margin-left: 10px; font-size: 0.78rem; color: var(--primary-2); letter-spacing: 0.06em; }
+.tech p { margin: 4px 0 0; max-width: 30ch; }
+.tech-form { padding: 14px 2px; }
+.tech-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tech-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 0.74rem; color: var(--muted); }
+.focus-run { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 18px 0 26px; animation: rise 0.6s var(--ease) both; }
+.focus-ring { position: relative; width: 240px; height: 240px; }
+.focus-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.focus-ring .ring-track, .focus-ring .ring-bar { stroke-width: 2; }
+.focus-ring .ring-bar { filter: none; }
+.focus-time { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.focus-time b { font-size: 3.6rem; font-weight: 250; letter-spacing: -0.05em; font-variant-numeric: tabular-nums; }
+.focus-time span { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--c); }
