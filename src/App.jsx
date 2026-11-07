@@ -21,6 +21,8 @@ import Todos from './pages/Todos.jsx';
 import Study from './pages/Study.jsx';
 import Exams from './pages/Exams.jsx';
 import { useTheme } from './lib/theme.js';
+import { listenForWake, useWake, wakeSupported } from './lib/wake.js';
+import Voice from './components/Voice.jsx';
 import Splash from './components/Splash.jsx';
 import { ToastHost } from './components/toast.jsx';
 import Welcome from './components/Welcome.jsx';
@@ -63,6 +65,13 @@ function AppShell() {
   const [form, setForm] = useState(null); // { kind, item, defaults } o null
   const [quick, setQuick] = useState(null); // { defaults } o null
   const [moreOpen, setMoreOpen] = useState(false);
+  const [voice, setVoice] = useState(false);
+  const [autoStart, setAutoStart] = useState(false);
+  const wake = useWake();
+  useEffect(() => { // "Oye Seiri": mientras el asistente está cerrado y el interruptor activo
+    if (!wake || voice || !wakeSupported()) return undefined;
+    return listenForWake(() => { setAutoStart(true); setVoice(true); });
+  }, [wake, voice]);
 
   useEffect(() => {
     const onHash = () => setRouteId(routeFromHash());
@@ -130,8 +139,11 @@ function AppShell() {
           </button>
         </nav>
 
+        <button className="fab-voice" onClick={() => { setAutoStart(false); setVoice(true); }} aria-label="Asistente de voz"><Icon name="mic" /></button>
         <button className="fab" onClick={() => ui.openQuickAdd()} aria-label="Añadir"><Icon name="plus" /></button>
       </div>
+
+      {voice && <Voice autoStart={autoStart} onClose={() => { setVoice(false); setAutoStart(false); }} />}
 
       {moreOpen && (
         <Modal title="Más" onClose={() => setMoreOpen(false)}>

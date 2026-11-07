@@ -657,3 +657,19 @@ h2 { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transfor
 .welcome p { margin: 0 0 6px; }
 .welcome input { padding: 13px 14px; }
 .welcome .btn { justify-content: center; padding: 12px 18px; }
+
+/* Asistente de voz */
+.fab-voice { position: fixed; z-index: 30; right: 23px; bottom: calc(var(--nav-h) + 86px + env(safe-area-inset-bottom)); width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); transition: transform 0.3s var(--ease); }
+.fab-voice:active { transform: scale(0.9); }
+.fab-voice svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.selecting .fab-voice { display: none; }
+@media (min-width: 900px) { .fab-voice { right: 40px; bottom: 92px; } }
+.voice { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 8px 20px 24px; text-align: center; }
+.orb { width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; background: var(--text); color: var(--bg); transition: transform 0.3s var(--ease); position: relative; }
+.orb svg { width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.orb.live { background: var(--primary-2); animation: orb-pulse 1.3s ease-in-out infinite; }
+.orb.busy { opacity: 0.5; animation: orb-pulse 1.8s ease-in-out infinite; }
+@keyframes orb-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary-2) 55%, transparent); } 70% { box-shadow: 0 0 0 26px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+.voice-card { width: 100%; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; text-align: left; border-top: 1px solid var(--border); padding-top: 16px; animation: rise 0.5s var(--ease) both; }
+.voice-card b { font-size: 1.25rem; letter-spacing: -0.02em; }
+.voice .ai-free { width: 100%; }

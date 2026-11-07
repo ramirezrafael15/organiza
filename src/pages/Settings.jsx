@@ -10,6 +10,7 @@ import { useTheme } from '../lib/theme.js';
 import { ColorSwatches, ReminderPicker, Segmented } from '../components/forms/fields.jsx';
 import { AccountCard, NotificationsCard } from '../components/AccountCard.jsx';
 import AiCard from '../components/AiCard.jsx';
+import WakeCard from '../components/WakeCard.jsx';
 import CalendarsCard from '../components/CalendarsCard.jsx';
 
 export default function Settings() {
@@ -92,6 +93,7 @@ export default function Settings() {
 
         <AccountCard />
         <AiCard />
+        <WakeCard />
         <NotificationsCard />
         <CalendarsCard />
 
