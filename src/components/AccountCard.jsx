@@ -13,6 +13,14 @@ export function AccountCard() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState('');
+  const sendReset = async (to) => {
+    if (!to) { setNote('Escribe primero tu correo.'); return; }
+    setBusy(true);
+    const ok = await account.reset(to);
+    setBusy(false);
+    setNote(ok ? `Te hemos enviado un correo a ${to} para elegir una contraseña nueva (mira también en spam).` : '');
+  };
 
   const submit = (fn) => async (e) => {
     e.preventDefault();
@@ -43,6 +51,8 @@ export function AccountCard() {
             <button className="btn primary" type="submit" disabled={busy}>Entrar</button>
             <button className="btn" type="button" disabled={busy} onClick={submit(account.signUp)}>Crear cuenta</button>
           </div>
+          <button className="link-btn" type="button" style={{ alignSelf: 'flex-start' }} disabled={busy} onClick={() => sendReset(email.trim())}>¿Has olvidado la contraseña?</button>
+          {note && <p className="small muted" style={{ margin: 0 }}>{note}</p>}
         </form>
       )}
 
@@ -57,7 +67,11 @@ export function AccountCard() {
             <span>Versión {typeof __BUILD__ === 'undefined' ? 'dev' : __BUILD__} (UTC).</span>
           </p>
           {!acc.user.emailVerified && <VerifyBanner />}
-          <button className="btn small" style={{ alignSelf: 'flex-start' }} onClick={() => account.signOut()}>Cerrar sesión</button>
+          <div className="row wrap">
+            <button className="btn small" disabled={busy} onClick={() => sendReset(acc.user.email)}>Cambiar contraseña</button>
+            <button className="btn small" onClick={() => account.signOut()}>Cerrar sesión</button>
+          </div>
+          {note && <p className="small muted" style={{ margin: 0 }}>{note}</p>}
         </>
       )}
     </section>
