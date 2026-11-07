@@ -115,3 +115,7 @@ export const savePushSubscription = (uid, subscription, tz) =>
 
 export const removePushSubscription = (uid, endpoint) =>
   deleteDoc(doc(services().db, 'users', uid, 'push', subId(endpoint)));
+
+/** Avisos del temporizador de estudio que el servidor debe mandar aunque la app esté cerrada. [] = ninguno. */
+export const setFocusPlan = (uid, events) =>
+  setDoc(doc(services().db, 'users', uid, 'focus', 'plan'), { events: clean(events), updatedAt: Date.now() });

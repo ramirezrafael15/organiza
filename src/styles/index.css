@@ -680,3 +680,20 @@ h2 { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transfor
 .news.needs { border-left: 4px solid var(--primary-2); }
 .news .btn { flex: none; background: var(--bg); color: var(--text); border-color: transparent; }
 @keyframes newsIn { from { transform: translateY(-20px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Pomodoro a pantalla completa */
+.focus-full { position: fixed; inset: 0; z-index: 400; background: #000; color: #f4efe6; display: grid; place-items: center; animation: ffIn 0.5s var(--ease) both; cursor: none; }
+.focus-full.ui { cursor: default; }
+@keyframes ffIn { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: none; } }
+.ff-ring { position: absolute; width: min(86vmin, 760px); height: min(86vmin, 760px); transform: rotate(-90deg); }
+.ff-ring .ring-track { stroke: rgba(244, 239, 230, 0.09); stroke-width: 0.8; fill: none; }
+.ff-ring .ring-bar { stroke: var(--c); stroke-width: 0.8; fill: none; stroke-linecap: round; filter: drop-shadow(0 0 1.2px var(--c)); }
+.ff-center { position: relative; display: grid; justify-items: center; gap: 0.6rem; text-align: center; }
+.ff-phase { font-size: clamp(0.8rem, 2.2vmin, 1.1rem); letter-spacing: 0.34em; text-transform: uppercase; color: var(--c); }
+.ff-time { font-size: clamp(4.5rem, 24vmin, 15rem); font-weight: 200; letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; }
+.ff-sub { font-size: clamp(0.8rem, 2vmin, 1rem); color: rgba(244, 239, 230, 0.5); letter-spacing: 0.06em; }
+.ff-bar { position: absolute; bottom: max(28px, env(safe-area-inset-bottom)); display: flex; gap: 12px; opacity: 0; transition: opacity 0.4s; pointer-events: none; }
+.focus-full.ui .ff-bar { opacity: 1; pointer-events: auto; }
+@media (prefers-reduced-motion: reduce) { .focus-full { animation: none; } }
+.ff-bar .btn { background: transparent; color: #f4efe6; border: 1px solid rgba(244, 239, 230, 0.3); }
+.ff-bar .btn:hover { background: rgba(244, 239, 230, 0.1); }

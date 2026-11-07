@@ -16,13 +16,14 @@ const log = (...a) => console.log(new Date().toISOString(), ...a);
 const onError = (what) => (e) => console.warn(new Date().toISOString(), `[${what}]`, e.message ?? e);
 
 function track(ref) {
-  const u = { id: ref.id, ref, items: new Map(), settings: {}, subs: new Map(), sent: new Map() };
+  const u = { id: ref.id, ref, items: new Map(), settings: {}, subs: new Map(), sent: new Map(), focus: [] };
   const apply = (map) => (snap) =>
     snap.docChanges().forEach((ch) => (ch.type === 'removed' ? map.delete(ch.doc.id) : map.set(ch.doc.id, ch.doc.ref && { ref: ch.doc.ref, ...ch.doc.data() })));
   ref.collection('items').onSnapshot(apply(u.items), onError('items'));
   ref.collection('push').onSnapshot(apply(u.subs), onError('push'));
   ref.collection('sent').onSnapshot(apply(u.sent), onError('sent'));
   ref.collection('meta').doc('settings').onSnapshot((s) => { u.settings = s.exists ? s.data().data : {}; }, onError('settings'));
+  ref.collection('focus').doc('plan').onSnapshot((s) => { u.focus = s.exists ? (s.data().events ?? []) : []; }, onError('pomodoro'));
   tracked.set(ref.id, u);
   log(`Siguiendo al usuario ${ref.id}`);
 }
@@ -74,6 +75,38 @@ async function cleanup() {
   }
 }
 
+// Pomodoro: la app deja en users/{uid}/focus/plan las horas de los próximos cambios (descanso / a estudiar).
+// Aquí se mandan en el segundo exacto aunque la app esté cerrada, y se quitan del plan al enviarlos.
+const focusDone = new Set();
+let focusBusy = false;
+async function focusTick() {
+  if (focusBusy) return;
+  focusBusy = true;
+  try {
+    const now = Date.now();
+    for (const u of tracked.values()) {
+      const due = u.focus.filter((e) => e.at <= now && !focusDone.has(`${u.id}:${e.id}`));
+      if (!due.length) continue;
+      due.forEach((e) => focusDone.add(`${u.id}:${e.id}`));
+      // Si estuvo parado mucho rato, solo avisa del último cambio (no un aluvión).
+      const fresh = due.filter((e) => now - e.at < 3 * 60 * 1000);
+      const last = fresh[fresh.length - 1];
+      if (last && u.subs.size) {
+        const ok = await sendToAll([...u.subs.values()], { title: last.title, body: last.body, tag: last.tag ?? 'seiri-focus' });
+        if (ok) log(`Pomodoro a ${u.id}: ${last.title}`);
+      }
+      // Transacción: si la app cambió el plan justo ahora (pausa, saltar...), no se pisa; solo se quitan los ya vencidos.
+      const planRef = u.ref.collection('focus').doc('plan');
+      await db.runTransaction(async (tx) => {
+        const cur = await tx.get(planRef);
+        if (!cur.exists) return;
+        tx.set(planRef, { events: (cur.data().events ?? []).filter((e) => e.at > now), updatedAt: now });
+      }).catch(onError('pomodoro'));
+    }
+    if (focusDone.size > 500) focusDone.clear();
+  } finally { focusBusy = false; }
+}
+
 // Calendarios de clase (Moodle): lee los enlaces .ics de cada usuario y crea/actualiza entregas y exámenes.
 const CAL_EVERY_MS = 60 * 1000; // cada minuto: es lo más cercano a "al instante" que permite Moodle (no avisa, hay que preguntar)
 let syncing = false;
@@ -113,6 +146,7 @@ async function syncCalendars() {
 await discoverUsers();
 log('Servidor de avisos en marcha.');
 setInterval(tick, TICK_MS);
+setInterval(() => focusTick().catch(onError('pomodoro')), 3_000);
 setTimeout(() => syncCalendars().catch(onError('calendarios')), 5_000);
 setInterval(() => syncCalendars().catch(onError('calendarios')), CAL_EVERY_MS);
 setInterval(() => discoverUsers().catch(onError('usuarios')), 10 * 60 * 1000);

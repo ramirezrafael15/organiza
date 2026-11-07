@@ -69,6 +69,8 @@ const run = (fn) => async (...args) => {
 };
 
 export const account = {
+  /** Pasa al servidor los próximos avisos del Pomodoro (si no hay sesión, no hace nada). */
+  setFocusPlan: (events) => { if (fb && state.user) fb.setFocusPlan(state.user.uid, events).catch(() => {}); },
   signIn: run((email, pw) => fb.signIn(email, pw)),
   signUp: async (email, pw) => {
     const problem = passwordProblem(pw);
