@@ -978,3 +978,17 @@ input[type='text'], input[type='search'], input[type='number'], input[type='date
 input:focus, select:focus, textarea:focus { border-color: var(--ios-blue); box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.25); }
 [data-theme='dark'] .nav-btn { color: rgba(255, 255, 255, 0.78); }
 [data-theme='dark'] .nav-btn.active { color: #4da3ff; }
+
+/* días de Estudio, celdas del calendario y chips: también de cristal, no opacos */
+.study-day, .day-cell, .daypick button, .exam-chip, .prog-card {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.28)); border: 0.5px solid rgba(255, 255, 255, 0.8); border-radius: 20px;
+  -webkit-backdrop-filter: blur(24px) saturate(2); backdrop-filter: blur(24px) saturate(2);
+  box-shadow: 0 6px 22px rgba(30, 30, 80, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+[data-theme='dark'] .study-day, [data-theme='dark'] .day-cell, [data-theme='dark'] .daypick button, [data-theme='dark'] .exam-chip, [data-theme='dark'] .prog-card {
+  background: linear-gradient(160deg, rgba(60, 60, 70, 0.5), rgba(30, 30, 38, 0.4)); border-color: rgba(255, 255, 255, 0.2); box-shadow: 0 8px 26px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+.study-day.today, .day-cell.sel { border-color: var(--ios-blue); box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.3); }
+.daypick button.on { background: var(--hero); color: #fff; }
+.day-cell.today .num { background: var(--ios-blue); color: #fff; }
+.day-cell, .daypick button { border-radius: 12px; }
