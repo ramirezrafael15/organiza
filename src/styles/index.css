@@ -794,3 +794,60 @@ body { background: transparent; } /* el color lo pone <html>; así el fondo vivo
 .fab { background: var(--hero); color: #fff; box-shadow: 0 12px 32px rgba(214, 90, 80, 0.5), 0 1px 0 rgba(255, 255, 255, 0.45) inset; }
 .nav-btn.active::after { background: #e8705a; box-shadow: 0 0 12px #e8705a; }
 .btn.primary { background: var(--hero); color: #fff; box-shadow: 0 8px 22px rgba(214, 90, 80, 0.4); }
+
+/* ===== v6.2 · que el cristal se NOTE: formas de color definidas detrás + paneles más transparentes con brillo ===== */
+body::before {
+  inset: 0; animation: none;
+  background:
+    radial-gradient(circle at 82% 8%, #ff8a5c 0, #ff8a5c 9%, transparent 9.2%),
+    radial-gradient(circle at 10% 30%, #ffc247 0, #ffc247 11%, transparent 11.2%),
+    radial-gradient(circle at 90% 52%, #c85bd6 0, #c85bd6 12%, transparent 12.2%),
+    radial-gradient(circle at 18% 70%, #ff6b8a 0, #ff6b8a 13%, transparent 13.2%),
+    radial-gradient(circle at 78% 92%, #ffa04d 0, #ffa04d 10%, transparent 10.2%),
+    linear-gradient(160deg, #f6d9c4, #f1c2c0 55%, #e8b6cf);
+}
+[data-theme='dark'] body::before {
+  background:
+    radial-gradient(circle at 82% 8%, #ff6a45 0, #ff6a45 9%, transparent 9.2%),
+    radial-gradient(circle at 10% 30%, #e0a030 0, #e0a030 11%, transparent 11.2%),
+    radial-gradient(circle at 90% 52%, #9a3bd0 0, #9a3bd0 12%, transparent 12.2%),
+    radial-gradient(circle at 18% 70%, #d83a66 0, #d83a66 13%, transparent 13.2%),
+    radial-gradient(circle at 78% 92%, #e0702a 0, #e0702a 10%, transparent 10.2%),
+    linear-gradient(160deg, #1a0d12, #14090f 55%, #0e0814);
+}
+:root { --blur: blur(18px) saturate(1.9); }
+.card, .stat, .entries, .focus-run, .modal {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.14));
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 12px 34px rgba(80, 40, 40, 0.16), 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 -1px 0 rgba(255, 255, 255, 0.25) inset;
+}
+[data-theme='dark'] .card, [data-theme='dark'] .stat, [data-theme='dark'] .entries, [data-theme='dark'] .focus-run, [data-theme='dark'] .modal {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04));
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255, 255, 255, 0.25) inset;
+}
+.stat:first-child { background: var(--hero); }
+.bottom-nav { background: rgba(255, 255, 255, 0.28); border-top-color: rgba(255, 255, 255, 0.6); }
+[data-theme='dark'] .bottom-nav { background: rgba(20, 10, 14, 0.4); }
+.seg, .btn, input[type='text'], input[type='search'], input[type='number'], input[type='date'], input[type='time'], select, textarea { background: rgba(255, 255, 255, 0.3); }
+[data-theme='dark'] .seg, [data-theme='dark'] .btn, [data-theme='dark'] input, [data-theme='dark'] select, [data-theme='dark'] textarea { background: rgba(255, 255, 255, 0.08); }
+
+/* v6.2b · formas más pequeñas y con borde suave: se nota el cristal sin tapar el texto */
+body::before {
+  background:
+    radial-gradient(circle at 84% 7%, #ff8a5c 0, #ff8a5c 5.5%, transparent 8%),
+    radial-gradient(circle at 8% 32%, #ffc247 0, #ffc247 6.5%, transparent 9%),
+    radial-gradient(circle at 92% 54%, #c85bd6 0, #c85bd6 7%, transparent 10%),
+    radial-gradient(circle at 14% 72%, #ff6b8a 0, #ff6b8a 8%, transparent 11%),
+    radial-gradient(circle at 80% 90%, #ffa04d 0, #ffa04d 6%, transparent 9%),
+    linear-gradient(160deg, #f6d9c4, #f1c2c0 55%, #e8b6cf);
+}
+[data-theme='dark'] body::before {
+  background:
+    radial-gradient(circle at 84% 7%, #c4472c 0, #c4472c 5.5%, transparent 8%),
+    radial-gradient(circle at 8% 32%, #a8741f 0, #a8741f 6.5%, transparent 9%),
+    radial-gradient(circle at 92% 54%, #7a2aa8 0, #7a2aa8 7%, transparent 10%),
+    radial-gradient(circle at 14% 72%, #a82c52 0, #a82c52 8%, transparent 11%),
+    radial-gradient(circle at 80% 90%, #b3541f 0, #b3541f 6%, transparent 9%),
+    linear-gradient(160deg, #1a0d12, #14090f 55%, #0e0814);
+}
