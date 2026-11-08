@@ -775,3 +775,22 @@ body { background: transparent; } /* el color lo pone <html>; así el fondo vivo
 .entries { background: var(--glass); border: 1px solid var(--glass-line); border-radius: 20px; box-shadow: var(--glass-shadow); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); padding: 2px 16px; overflow: hidden; }
 [data-theme='dark'] { --orb-1: rgba(212, 168, 92, 0.42); --orb-2: rgba(80, 100, 220, 0.38); --orb-3: rgba(180, 80, 150, 0.26); }
 .bottom-nav { background: color-mix(in srgb, var(--bg) 62%, transparent); -webkit-backdrop-filter: blur(34px) saturate(1.8); backdrop-filter: blur(34px) saturate(1.8); }
+
+/* ===== v6.1 · glass cálido y vivo (referencia: dashboards con fondo de color y cristal claro) ===== */
+:root {
+  --bg: #efdfd2;
+  --orb-1: rgba(232, 120, 90, 0.62); --orb-2: rgba(240, 180, 110, 0.55); --orb-3: rgba(190, 110, 170, 0.4);
+  --glass: rgba(255, 255, 255, 0.46); --glass-strong: rgba(255, 255, 255, 0.7); --glass-line: rgba(255, 255, 255, 0.78);
+  --hero: linear-gradient(145deg, rgba(232, 112, 84, 0.92), rgba(214, 90, 96, 0.88));
+}
+[data-theme='dark'] {
+  --bg: #120a0c;
+  --orb-1: rgba(226, 100, 76, 0.5); --orb-2: rgba(212, 160, 90, 0.34); --orb-3: rgba(150, 80, 170, 0.32);
+  --glass: rgba(255, 255, 255, 0.07); --glass-strong: rgba(255, 255, 255, 0.12); --glass-line: rgba(255, 255, 255, 0.15);
+}
+.card, .stat, .entries, .focus-run { border-radius: 24px; }
+.stat:first-child { background: var(--hero); border-color: rgba(255, 255, 255, 0.35); color: #fff; box-shadow: 0 14px 36px rgba(214, 90, 80, 0.35), 0 1px 0 rgba(255, 255, 255, 0.4) inset; }
+.stat:first-child span { color: rgba(255, 255, 255, 0.82); }
+.fab { background: var(--hero); color: #fff; box-shadow: 0 12px 32px rgba(214, 90, 80, 0.5), 0 1px 0 rgba(255, 255, 255, 0.45) inset; }
+.nav-btn.active::after { background: #e8705a; box-shadow: 0 0 12px #e8705a; }
+.btn.primary { background: var(--hero); color: #fff; box-shadow: 0 8px 22px rgba(214, 90, 80, 0.4); }
