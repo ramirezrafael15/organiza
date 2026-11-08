@@ -697,3 +697,81 @@ h2 { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transfor
 @media (prefers-reduced-motion: reduce) { .focus-full { animation: none; } }
 .ff-bar .btn { background: transparent; color: #f4efe6; border: 1px solid rgba(244, 239, 230, 0.3); }
 .ff-bar .btn:hover { background: rgba(244, 239, 230, 0.1); }
+
+/* ===== v6 · glass: cristal esmerilado sobre un fondo vivo y sutil ===== */
+:root {
+  --glass: rgba(255, 255, 255, 0.52);
+  --glass-strong: rgba(255, 255, 255, 0.72);
+  --glass-line: rgba(255, 255, 255, 0.75);
+  --glass-edge: rgba(18, 18, 17, 0.06);
+  --glass-shadow: 0 10px 34px rgba(60, 50, 30, 0.1), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+  --blur: blur(26px) saturate(1.7);
+  --orb-1: rgba(212, 168, 92, 0.55); --orb-2: rgba(120, 140, 220, 0.38); --orb-3: rgba(200, 120, 170, 0.28);
+  --bg: #ece9e2;
+}
+[data-theme='dark'] {
+  --glass: rgba(255, 255, 255, 0.055);
+  --glass-strong: rgba(255, 255, 255, 0.1);
+  --glass-line: rgba(255, 255, 255, 0.14);
+  --glass-edge: rgba(0, 0, 0, 0.35);
+  --glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.12) inset;
+  --orb-1: rgba(212, 168, 92, 0.34); --orb-2: rgba(80, 100, 210, 0.3); --orb-3: rgba(170, 80, 140, 0.2);
+  --bg: #070709;
+}
+/* fondo: tres luces desenfocadas que se mueven muy despacio (lo que el cristal "deja ver") */
+body::before {
+  content: ''; position: fixed; inset: -20%; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(38% 34% at 18% 14%, var(--orb-1), transparent 70%),
+    radial-gradient(40% 36% at 88% 30%, var(--orb-2), transparent 70%),
+    radial-gradient(42% 38% at 30% 92%, var(--orb-3), transparent 70%);
+  animation: orbs 38s ease-in-out infinite alternate;
+}
+@keyframes orbs { to { transform: translate3d(3%, -4%, 0) scale(1.08) rotate(3deg); } }
+
+.card, .modal, .bottom-nav, .sidebar, .seg, .toast, .news, .fab-voice, .stat, .focus-run {
+  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+}
+.card, .stat {
+  background: var(--glass); border: 1px solid var(--glass-line); border-radius: 20px; box-shadow: var(--glass-shadow);
+}
+.card { padding: 16px 18px; border-top: 1px solid var(--glass-line); }
+.cards, .tech-list, .stack { gap: 12px; }
+.item-card { padding: 16px 18px; overflow: hidden; }
+.item-card::before { left: 18px; width: 28px; top: 0; height: 2px; border-radius: 0 0 2px 2px; }
+.stats { gap: 10px; border-top: 0; }
+.stat, .stat + .stat { padding: 16px 16px; border: 1px solid var(--glass-line); }
+.hello { background: var(--glass); border: 1px solid var(--glass-line); padding-left: 18px; }
+.focus-run { background: var(--glass); border: 1px solid var(--glass-line); border-radius: 28px; box-shadow: var(--glass-shadow); padding: 26px 0; }
+
+.bottom-nav { background: var(--glass); border-top: 1px solid var(--glass-line); box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.12); }
+.sidebar { background: var(--glass); border-right: 1px solid var(--glass-line); }
+.seg { background: var(--glass); border: 1px solid var(--glass-line); border-radius: 14px; }
+.seg button.on { background: var(--glass-strong); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 4px 14px rgba(0, 0, 0, 0.12); border-radius: 11px; }
+.btn { background: var(--glass); border: 1px solid var(--glass-line); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset; }
+.btn:hover { background: var(--glass-strong); }
+.btn.primary { background: var(--text); color: var(--bg); border-color: transparent; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25); }
+input[type='text'], input[type='search'], input[type='number'], input[type='date'], input[type='time'], select, textarea {
+  background: var(--glass); border: 1px solid var(--glass-line); border-radius: 14px; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-2); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-2) 25%, transparent); }
+.modal { background: var(--glass-strong); border: 1px solid var(--glass-line); border-bottom: 0; box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.35); }
+.modal-foot { border-top: 1px solid var(--glass-line); }
+.fab { background: linear-gradient(145deg, color-mix(in srgb, var(--primary-2) 90%, #fff), var(--primary-2)); color: #1a1408; box-shadow: 0 10px 30px color-mix(in srgb, var(--primary-2) 55%, transparent), 0 1px 0 rgba(255, 255, 255, 0.5) inset; }
+.fab-voice { background: var(--glass); border: 1px solid var(--glass-line); }
+.toast, .news { background: var(--glass-strong); color: var(--text); border: 1px solid var(--glass-line); }
+.news .btn { background: var(--text); color: var(--bg); }
+.todo-row, .swipe .todo-row { background: transparent; }
+.progress { background: var(--glass-line); border-radius: 4px; }
+.ring-track { stroke: var(--glass-line); }
+.nav-btn.active::after { box-shadow: 0 0 12px var(--primary-2); }
+
+@media (prefers-reduced-motion: reduce) { body::before { animation: none; } }
+/* si el móvil no soporta el desenfoque, el cristal se vuelve algo más opaco para seguir legible */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root { --glass: rgba(255, 255, 255, 0.85); } [data-theme='dark'] { --glass: rgba(30, 30, 34, 0.92); }
+}
+body { background: transparent; } /* el color lo pone <html>; así el fondo vivo se ve detrás de todo */
+.entries { background: var(--glass); border: 1px solid var(--glass-line); border-radius: 20px; box-shadow: var(--glass-shadow); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); padding: 2px 16px; overflow: hidden; }
+[data-theme='dark'] { --orb-1: rgba(212, 168, 92, 0.42); --orb-2: rgba(80, 100, 220, 0.38); --orb-3: rgba(180, 80, 150, 0.26); }
+.bottom-nav { background: color-mix(in srgb, var(--bg) 62%, transparent); -webkit-backdrop-filter: blur(34px) saturate(1.8); backdrop-filter: blur(34px) saturate(1.8); }
