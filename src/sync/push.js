@@ -26,6 +26,29 @@ export async function currentSubscription() {
   return reg.pushManager.getSubscription();
 }
 
+const OFF = 'seiri:push-off'; // solo existe si TÚ las desactivas a propósito; si no, la app las mantiene siempre activas
+const tz = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+/**
+ * Mantiene las notificaciones SIEMPRE activas: si el permiso está dado y no las has apagado tú,
+ * recrea la suscripción si el sistema la perdió y vuelve a registrarla en la cuenta (por si el servidor la borró).
+ * No pide permiso ni molesta: se llama sola al abrir la app.
+ */
+export async function ensurePush(uid, fb) {
+  try {
+    if (!VAPID_PUBLIC_KEY || pushSupport() !== 'ok') return 'skip';
+    if (Notification.permission !== 'granted') return 'no-permission';
+    if (localStorage.getItem(OFF)) return 'off';
+    const reg = await navigator.serviceWorker.ready;
+    const sub = (await reg.pushManager.getSubscription())
+      ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: toKey(VAPID_PUBLIC_KEY) }));
+    await fb.savePushSubscription(uid, sub.toJSON(), tz());
+    return 'ok';
+  } catch {
+    return 'error';
+  }
+}
+
 /** Pide permiso (hay que llamarlo desde un toque del usuario) y guarda la suscripción en la cuenta. */
 export async function enablePush(uid, fb) {
   if (!VAPID_PUBLIC_KEY) return { ok: false, reason: 'config' };
@@ -35,11 +58,13 @@ export async function enablePush(uid, fb) {
   const sub =
     (await reg.pushManager.getSubscription()) ??
     (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: toKey(VAPID_PUBLIC_KEY) }));
-  await fb.savePushSubscription(uid, sub.toJSON(), Intl.DateTimeFormat().resolvedOptions().timeZone);
+  try { localStorage.removeItem(OFF); } catch { /* sin almacenamiento */ }
+  await fb.savePushSubscription(uid, sub.toJSON(), tz());
   return { ok: true };
 }
 
 export async function disablePush(uid, fb) {
+  try { localStorage.setItem(OFF, '1'); } catch { /* sin almacenamiento */ }
   const sub = await currentSubscription();
   if (!sub) return;
   await fb.removePushSubscription(uid, sub.endpoint).catch(() => {});

@@ -4,6 +4,7 @@ import { useSyncExternalStore } from 'react';
 import { repo } from '../data/repo.js';
 import { passwordProblem } from '../lib/password.js';
 import { isConfigured } from './config.js';
+import { ensurePush } from './push.js';
 import { SyncEngine } from './engine.js';
 
 let state = { status: isConfigured() ? 'loading' : 'off', user: null, error: '', sync: {} }; // off | loading | out | in
@@ -40,6 +41,7 @@ export function initAccount() {
         stopEngine = null;
         if (user) {
           startEngine(user);
+          keepPushAlive(user.uid);
           set({ status: 'in', user: { uid: user.uid, email: user.email, emailVerified: user.emailVerified }, error: '' });
         } else {
           set({ status: 'out', user: null });
@@ -47,6 +49,18 @@ export function initAccount() {
       });
     })
     .catch(() => set({ status: 'out', error: 'No se pudo cargar la sincronización.' }));
+}
+
+// Notificaciones siempre activas: se comprueban al entrar, al volver a la app y cuando el sistema renueva la suscripción.
+let lastPush = 0;
+function keepPushAlive(uid, force = false) {
+  if (!fb || (!force && Date.now() - lastPush < 30 * 60 * 1000)) return;
+  lastPush = Date.now();
+  ensurePush(uid, fb);
+}
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && state.user) keepPushAlive(state.user.uid); });
+  navigator.serviceWorker?.addEventListener('message', (e) => { if (e.data?.type === 'push-changed' && state.user) keepPushAlive(state.user.uid, true); });
 }
 
 function startEngine(user) {

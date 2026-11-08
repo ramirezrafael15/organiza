@@ -29,3 +29,16 @@ self.addEventListener('notificationclick', (event) => {
     }),
   );
 });
+
+// Si el sistema renueva o pierde la suscripción, se recrea al momento y se avisa a la app para que la registre en la cuenta.
+self.addEventListener('pushsubscriptionchange', (event) => {
+  event.waitUntil((async () => {
+    const old = event.oldSubscription;
+    const key = old && old.options && old.options.applicationServerKey;
+    if (key) {
+      try { await self.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }); } catch (e) { /* la app lo reintenta al abrirse */ }
+    }
+    const clients = await self.clients.matchAll({ includeUncontrolled: true });
+    clients.forEach((c) => c.postMessage({ type: 'push-changed' }));
+  })());
+});
