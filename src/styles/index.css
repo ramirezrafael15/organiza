@@ -880,3 +880,33 @@ body::before {
     linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02));
 }
 .stat:first-child { background: var(--hero); }
+
+/* ===== v7 · glass con flash: cintas de color enormes detrás, cristal muy desenfocado y borde de luz ===== */
+:root { --bg: #f6d3e6; --hero: linear-gradient(145deg, #ff7a52, #ff3d7a); }
+[data-theme='dark'] { --bg: #0a0612; }
+body::before { inset: 0; animation: none; background: url('../assets/glass-light.svg') center / cover no-repeat; }
+[data-theme='dark'] body::before { background: url('../assets/glass-dark.svg') center / cover no-repeat; }
+.card, .stat, .entries, .focus-run, .modal {
+  -webkit-backdrop-filter: blur(26px) saturate(2.1); backdrop-filter: blur(26px) saturate(2.1);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.12)); border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 26px;
+  box-shadow: 0 18px 44px rgba(90, 20, 70, 0.28), inset 1.5px 1.5px 0 rgba(255, 255, 255, 0.85), inset -1px -1px 0 rgba(255, 255, 255, 0.25), inset 0 0 28px rgba(255, 255, 255, 0.14);
+}
+[data-theme='dark'] .card, [data-theme='dark'] .stat, [data-theme='dark'] .entries, [data-theme='dark'] .focus-run, [data-theme='dark'] .modal {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.04)); border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55), inset 1.5px 1.5px 0 rgba(255, 255, 255, 0.45), inset -1px -1px 0 rgba(255, 255, 255, 0.08), inset 0 0 30px rgba(255, 255, 255, 0.06);
+}
+.stat:first-child { background: var(--hero); color: #fff; border-color: rgba(255, 255, 255, 0.5); box-shadow: 0 16px 40px rgba(255, 60, 110, 0.45), inset 1.5px 1.5px 0 rgba(255, 255, 255, 0.6); }
+.stat:first-child span { color: rgba(255, 255, 255, 0.88); }
+.fab, .btn.primary { background: var(--hero); color: #fff; box-shadow: 0 12px 30px rgba(255, 60, 110, 0.5), inset 1px 1px 0 rgba(255, 255, 255, 0.5); }
+.nav-btn.active::after { background: #ff5a7a; box-shadow: 0 0 14px #ff5a7a; }
+.bottom-nav { background: rgba(255, 255, 255, 0.26); -webkit-backdrop-filter: blur(30px) saturate(2); backdrop-filter: blur(30px) saturate(2); border-top: 1px solid rgba(255, 255, 255, 0.6); }
+[data-theme='dark'] .bottom-nav { background: rgba(20, 8, 26, 0.35); border-top-color: rgba(255, 255, 255, 0.22); }
+.seg, .btn, input[type='text'], input[type='search'], input[type='number'], input[type='date'], input[type='time'], select, textarea { background: rgba(255, 255, 255, 0.32); border-color: rgba(255, 255, 255, 0.6); }
+[data-theme='dark'] .seg, [data-theme='dark'] .btn, [data-theme='dark'] input, [data-theme='dark'] select, [data-theme='dark'] textarea { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.22); }
+.card, .entries, .stat { color: var(--text); }
+[data-theme='dark'] .muted, [data-theme='dark'] .small.muted { color: rgba(244, 241, 234, 0.7); }
+/* legibilidad en oscuro: el fondo se atenúa y los textos sueltos se refuerzan */
+[data-theme='dark'] body::before { background: linear-gradient(rgba(10, 6, 18, 0.42), rgba(10, 6, 18, 0.42)), url('../assets/glass-dark.svg') center / cover no-repeat; }
+[data-theme='dark'] h2, [data-theme='dark'] .page-head .sub, [data-theme='dark'] .section-head .small, [data-theme='dark'] .chip-btn { color: rgba(255, 255, 255, 0.85); text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5); }
+[data-theme='dark'] .chip-btn.on { color: var(--bg); text-shadow: none; }
+[data-theme='dark'] .card .muted, [data-theme='dark'] .card .small, [data-theme='dark'] .entries .muted { color: rgba(255, 255, 255, 0.78); }
