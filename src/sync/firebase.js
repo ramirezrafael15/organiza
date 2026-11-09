@@ -119,3 +119,6 @@ export const removePushSubscription = (uid, endpoint) =>
 /** Avisos del temporizador de estudio que el servidor debe mandar aunque la app esté cerrada. [] = ninguno. */
 export const setFocusPlan = (uid, events) =>
   setDoc(doc(services().db, 'users', uid, 'focus', 'plan'), { events: clean(events), updatedAt: Date.now() });
+
+/** Borra la copia de claves que una versión anterior pudo subir a la cuenta: las claves viven solo en el dispositivo. */
+export const deleteCloudKeys = (uid) => deleteDoc(doc(services().db, 'users', uid, 'private', 'keys'));

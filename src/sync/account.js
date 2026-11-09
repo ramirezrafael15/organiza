@@ -42,6 +42,7 @@ export function initAccount() {
         if (user) {
           startEngine(user);
           keepPushAlive(user.uid);
+          m.deleteCloudKeys(user.uid).catch(() => {});
           set({ status: 'in', user: { uid: user.uid, email: user.email, emailVerified: user.emailVerified }, error: '' });
         } else {
           set({ status: 'out', user: null });
