@@ -880,3 +880,15 @@ body::before {
     linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02));
 }
 .stat:first-child { background: var(--hero); }
+
+/* ---- Editor por bloques: menú "/" y asa de arrastre ---- */
+.slash-menu { position: fixed; z-index: 1000; width: 288px; max-height: 320px; overflow: auto; background: var(--surface, #fff); color: var(--text); border: 1px solid var(--border); border-radius: 12px; padding: 4px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+.slash-item { display: flex; gap: 10px; align-items: center; width: 100%; text-align: left; border: 0; background: transparent; padding: 6px 8px; border-radius: 8px; cursor: pointer; color: inherit; font: inherit; }
+.slash-item.is-selected, .slash-item:hover { background: var(--primary-soft); }
+.slash-item small { display: block; color: var(--muted); font-size: .75rem; }
+.slash-icon { width: 34px; height: 34px; flex: none; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 8px; font-weight: 700; font-size: .8rem; }
+.slash-empty { padding: 10px; color: var(--muted); }
+.drag-handle { cursor: grab; color: var(--muted); padding: 2px 4px; border-radius: 6px; user-select: none; font-size: 14px; letter-spacing: -3px; }
+.drag-handle:hover { background: var(--primary-soft); color: var(--primary); }
+.ne-content .ProseMirror .ProseMirror-dropcursor, .ProseMirror-dropcursor { background: var(--primary) !important; height: 3px !important; }
+@media (pointer: coarse) { .drag-handle { display: none; } }

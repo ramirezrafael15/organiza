@@ -18,6 +18,7 @@ import Table from '@tiptap/extension-table';
 import TableRow from '@tiptap/extension-table-row';
 import TableHeader from '@tiptap/extension-table-header';
 import TableCell from '@tiptap/extension-table-cell';
+import { SlashCommand } from './slash/SlashCommand.js';
 
 // Tamaño de letra como atributo de "textStyle" (no viene de serie en Tiptap).
 export const FontSize = Extension.create({
@@ -43,7 +44,8 @@ export const FontSize = Extension.create({
   },
 });
 
-export const editorExtensions = () => [
+// onPickImage: abre el selector de imágenes del editor (lo usa el bloque "Imagen" del menú "/").
+export const editorExtensions = ({ onPickImage } = {}) => [
   StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
   Typography, Underline, Subscript, Superscript, TextStyle, Color, FontFamily, FontSize,
   Highlight.configure({ multicolor: true }),
@@ -52,5 +54,6 @@ export const editorExtensions = () => [
   Link.configure({ openOnClick: false, autolink: true }),
   Image.configure({ allowBase64: true }),
   Table.configure({ resizable: true }), TableRow, TableHeader, TableCell,
-  Placeholder.configure({ placeholder: 'Empieza a escribir tus apuntes…' }),
+  Placeholder.configure({ placeholder: "Empieza a escribir tus apuntes… (escribe '/' para insertar bloques)" }),
+  SlashCommand.configure({ onPickImage }),
 ];

@@ -2,6 +2,7 @@
 // Se guarda solo (sin botón) y el texto va a la nube como cualquier otro dato.
 import { useEffect, useRef, useState } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
+import DragHandle from '@tiptap/extension-drag-handle-react';
 import { actions, useAppState } from '../data/index.js';
 import { editorExtensions } from '../lib/tiptapExt.js';
 import { SubjectSelect } from './forms/fields.jsx';
@@ -55,7 +56,7 @@ export default function NoteEditor({ note, onClose }) {
   };
 
   const editor = useEditor({
-    extensions: editorExtensions(),
+    extensions: editorExtensions({ onPickImage: () => imgRef.current?.click() }),
     content: initialHtml(note),
     autofocus: !note.id,
     onCreate: ({ editor: ed }) => buildOutline(ed),
@@ -234,7 +235,11 @@ export default function NoteEditor({ note, onClose }) {
                 <B label="Borrar tabla" on={() => c().deleteTable().run()}>🗑 tabla</B>
               </div>
             )}
-            <EditorContent editor={editor} className="ne-content" />
+            <div className="ne-content-wrap">
+              {/* Asa ⋮⋮ para arrastrar y reordenar bloques (solo con ratón; en móvil se oculta) */}
+              <DragHandle editor={editor}><div className="drag-handle" title="Arrastra para mover">⋮⋮</div></DragHandle>
+              <EditorContent editor={editor} className="ne-content" />
+            </div>
             <p className="small muted ne-count">{words} palabras</p>
           </div>
         </div>
