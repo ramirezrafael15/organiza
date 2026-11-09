@@ -59,7 +59,9 @@ export const editorExtensions = ({ onPickImage } = {}) => [
   Link.configure({ openOnClick: false, autolink: true }),
   Image.configure({ allowBase64: true }),
   Table.configure({ resizable: true }), TableRow, TableHeader, TableCell,
-  Placeholder.configure({ placeholder: "Empieza a escribir tus apuntes… (escribe '/' para insertar bloques)" }),
+  Placeholder.configure({
+    placeholder: ({ node }) => (node.type.name === 'detailsSummary' ? 'Título del desplegable…' : "Empieza a escribir tus apuntes… (escribe '/' para insertar bloques)"),
+  }),
   Details.configure({ persist: true }), DetailsSummary, DetailsContent, Callout, Columns, Column,
   SlashCommand.configure({ onPickImage }),
 ];

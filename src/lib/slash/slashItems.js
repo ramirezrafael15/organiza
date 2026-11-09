@@ -1,6 +1,25 @@
+import { TextSelection } from '@tiptap/pm/state';
+
 // Catálogo de bloques del menú "/". Para añadir uno nuevo basta con añadir un objeto aquí.
 // Cada comando primero borra el "/texto" que escribió el usuario y luego transforma el bloque.
 const base = (editor, range) => editor.chain().focus().deleteRange(range);
+
+/** Deja el desplegable abierto y el cursor en su título, para escribirlo directamente. */
+export function openDetailsAtCursor(editor) {
+  return editor.commands.command(({ state, tr, dispatch }) => {
+    const { $from } = state.selection;
+    for (let d = $from.depth; d > 0; d--) {
+      if ($from.node(d).type.name === 'details') {
+        const pos = $from.before(d);
+        tr.setNodeMarkup(pos, undefined, { ...$from.node(d).attrs, open: true });
+        tr.setSelection(TextSelection.create(tr.doc, pos + 2)); // dentro del título (summary)
+        dispatch?.(tr);
+        return true;
+      }
+    }
+    return false;
+  });
+}
 
 export const slashItems = ({ onPickImage } = {}) => [
   { title: 'Texto', turn: true, description: 'Párrafo normal', icon: 'T', keywords: ['p', 'parrafo', 'texto'],
@@ -20,7 +39,7 @@ export const slashItems = ({ onPickImage } = {}) => [
   { title: 'Tabla', description: '3 × 3 con cabecera', icon: '▦', keywords: ['table', 'tabla'],
     command: ({ editor, range }) => base(editor, range).insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run() },
   { title: 'Desplegable', turn: true, description: 'Contenido que se abre y se cierra', icon: '▸', keywords: ['toggle', 'desplegable', 'acordeon'],
-    command: ({ editor, range }) => base(editor, range).setDetails().run() },
+    command: ({ editor, range }) => { base(editor, range).setDetails().run(); openDetailsAtCursor(editor); } },
   { title: 'Callout', turn: true, description: 'Caja destacada con icono', icon: '💡', keywords: ['callout', 'aviso', 'nota', 'destacado'],
     command: ({ editor, range }) => base(editor, range).setCallout().run() },
   { title: '2 columnas', description: 'Contenido en paralelo', icon: '▥', keywords: ['columnas', 'columns', '2'],

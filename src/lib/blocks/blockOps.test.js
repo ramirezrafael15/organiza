@@ -52,6 +52,12 @@ describe('bloques tipo Notion', () => {
     const again = make(out);
     expect(again.getHTML()).toBe(out); // ida y vuelta sin pérdidas
   });
+  it('el desplegable sale abierto y con el cursor en el título', () => {
+    const ed = make('<p>hola</p>');
+    turnInto(ed, first(ed), TURN_INTO.find((i) => i.title === 'Desplegable'));
+    expect(ed.getHTML()).toContain('<details open="">');
+    expect(ed.state.selection.$from.parent.type.name).toBe('detailsSummary');
+  });
   it('las notas antiguas (HTML normal) se siguen leyendo igual', () => {
     const old = '<h1>Tema</h1><p>texto <strong>negrita</strong></p><ul><li><p>a</p></li></ul>';
     expect(make(old).getHTML()).toBe(old);
