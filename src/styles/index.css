@@ -926,3 +926,115 @@ body::before {
 .now-rest { margin-top: 10px; }
 .now-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .now-row-main { flex: 1 1 160px; text-align: left; background: none; border: 0; padding: 0; color: inherit; display: grid; gap: 2px; }
+
+/* ===== v7 · glass con flash: cintas de color enormes detrás, cristal muy desenfocado y borde de luz ===== */
+:root { --bg: #f6d3e6; --hero: linear-gradient(145deg, #ff7a52, #ff3d7a); }
+[data-theme='dark'] { --bg: #0a0612; }
+body::before { inset: 0; animation: none; background: url('../assets/glass-light.svg') center / cover no-repeat; }
+[data-theme='dark'] body::before { background: url('../assets/glass-dark.svg') center / cover no-repeat; }
+.card, .stat, .entries, .focus-run, .modal {
+  -webkit-backdrop-filter: blur(26px) saturate(2.1); backdrop-filter: blur(26px) saturate(2.1);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.12)); border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 26px;
+  box-shadow: 0 18px 44px rgba(90, 20, 70, 0.28), inset 1.5px 1.5px 0 rgba(255, 255, 255, 0.85), inset -1px -1px 0 rgba(255, 255, 255, 0.25), inset 0 0 28px rgba(255, 255, 255, 0.14);
+}
+[data-theme='dark'] .card, [data-theme='dark'] .stat, [data-theme='dark'] .entries, [data-theme='dark'] .focus-run, [data-theme='dark'] .modal {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.04)); border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55), inset 1.5px 1.5px 0 rgba(255, 255, 255, 0.45), inset -1px -1px 0 rgba(255, 255, 255, 0.08), inset 0 0 30px rgba(255, 255, 255, 0.06);
+}
+.stat:first-child { background: var(--hero); color: #fff; border-color: rgba(255, 255, 255, 0.5); box-shadow: 0 16px 40px rgba(255, 60, 110, 0.45), inset 1.5px 1.5px 0 rgba(255, 255, 255, 0.6); }
+.stat:first-child span { color: rgba(255, 255, 255, 0.88); }
+.fab, .btn.primary { background: var(--hero); color: #fff; box-shadow: 0 12px 30px rgba(255, 60, 110, 0.5), inset 1px 1px 0 rgba(255, 255, 255, 0.5); }
+.nav-btn.active::after { background: #ff5a7a; box-shadow: 0 0 14px #ff5a7a; }
+.bottom-nav { background: rgba(255, 255, 255, 0.26); -webkit-backdrop-filter: blur(30px) saturate(2); backdrop-filter: blur(30px) saturate(2); border-top: 1px solid rgba(255, 255, 255, 0.6); }
+[data-theme='dark'] .bottom-nav { background: rgba(20, 8, 26, 0.35); border-top-color: rgba(255, 255, 255, 0.22); }
+.seg, .btn, input[type='text'], input[type='search'], input[type='number'], input[type='date'], input[type='time'], select, textarea { background: rgba(255, 255, 255, 0.32); border-color: rgba(255, 255, 255, 0.6); }
+[data-theme='dark'] .seg, [data-theme='dark'] .btn, [data-theme='dark'] input, [data-theme='dark'] select, [data-theme='dark'] textarea { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.22); }
+.card, .entries, .stat { color: var(--text); }
+[data-theme='dark'] .muted, [data-theme='dark'] .small.muted { color: rgba(244, 241, 234, 0.7); }
+/* legibilidad en oscuro: el fondo se atenúa y los textos sueltos se refuerzan */
+[data-theme='dark'] body::before { background: linear-gradient(rgba(10, 6, 18, 0.42), rgba(10, 6, 18, 0.42)), url('../assets/glass-dark.svg') center / cover no-repeat; }
+[data-theme='dark'] h2, [data-theme='dark'] .page-head .sub, [data-theme='dark'] .section-head .small, [data-theme='dark'] .chip-btn { color: rgba(255, 255, 255, 0.85); text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5); }
+[data-theme='dark'] .chip-btn.on { color: var(--bg); text-shadow: none; }
+[data-theme='dark'] .card .muted, [data-theme='dark'] .card .small, [data-theme='dark'] .entries .muted { color: rgba(255, 255, 255, 0.78); }
+
+/* ===== v8 · estilo iPhone (Liquid Glass): barra flotante en cápsula, títulos grandes, azul del sistema ===== */
+:root {
+  --ios-blue: #0a84ff; --primary-2: #0a84ff; --nav-h: 76px;
+  --hero: linear-gradient(160deg, #3d9bff, #0a6cff);
+  --sys-font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter Variable', system-ui, sans-serif;
+}
+html, body, button, input, select, textarea { font-family: var(--sys-font); }
+body { letter-spacing: -0.01em; }
+h1, .page-head h1 { font-size: 2.15rem; font-weight: 700; letter-spacing: -0.03em; }
+h2 { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; }
+
+/* fondo: fondo de pantalla suave de iPhone (las cintas, más claras y menos saturadas) */
+body::before { background: linear-gradient(rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0.38)), url('../assets/glass-light.svg') center / cover no-repeat; }
+[data-theme='dark'] body::before { background: linear-gradient(rgba(6, 6, 14, 0.5), rgba(6, 6, 14, 0.5)), url('../assets/glass-dark.svg') center / cover no-repeat; }
+
+/* materiales: cristal claro con luz en el borde */
+.card, .stat, .entries, .focus-run { border-radius: 24px; }
+.card, .stat, .entries, .focus-run, .modal {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.3));
+  border: 0.5px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 30px rgba(30, 30, 80, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 0 0 0.5px rgba(255, 255, 255, 0.4);
+}
+[data-theme='dark'] .card, [data-theme='dark'] .stat, [data-theme='dark'] .entries, [data-theme='dark'] .focus-run, [data-theme='dark'] .modal {
+  background: linear-gradient(160deg, rgba(60, 60, 70, 0.55), rgba(30, 30, 38, 0.45));
+  border: 0.5px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+.stat:first-child { background: var(--hero); border-color: rgba(255, 255, 255, 0.45); box-shadow: 0 12px 32px rgba(10, 108, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.55); }
+
+/* barra inferior: cápsula flotante */
+.bottom-nav {
+  left: 14px; right: 14px; bottom: calc(10px + env(safe-area-inset-bottom)); padding: 6px; border-radius: 36px; border: 0.5px solid rgba(255, 255, 255, 0.85);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.3));
+  -webkit-backdrop-filter: blur(30px) saturate(2.2); backdrop-filter: blur(30px) saturate(2.2);
+  box-shadow: 0 14px 40px rgba(20, 20, 70, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+[data-theme='dark'] .bottom-nav { background: linear-gradient(160deg, rgba(70, 70, 80, 0.55), rgba(30, 30, 38, 0.5)); border-color: rgba(255, 255, 255, 0.25); box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.3); }
+.nav-btn { height: 56px; border-radius: 28px; font-size: 0.62rem; letter-spacing: 0; text-transform: none; font-weight: 600; transition: background 0.3s var(--ease), color 0.3s; }
+.nav-btn.active { color: var(--ios-blue); background: rgba(255, 255, 255, 0.55); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 8px rgba(20, 20, 70, 0.08); }
+[data-theme='dark'] .nav-btn.active { background: rgba(255, 255, 255, 0.16); }
+.nav-btn.active::after { display: none; }
+.main { padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 100px); }
+
+/* botones flotantes de cristal azul */
+.fab { background: var(--hero); color: #fff; bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 22px); box-shadow: 0 12px 30px rgba(10, 108, 255, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.6); }
+.fab-voice { bottom: calc(var(--nav-h) + 90px + env(safe-area-inset-bottom)); background: rgba(255, 255, 255, 0.55); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 0.5px solid rgba(255, 255, 255, 0.85); }
+[data-theme='dark'] .fab-voice { background: rgba(70, 70, 80, 0.5); border-color: rgba(255, 255, 255, 0.25); }
+.btn.primary { background: var(--hero); color: #fff; border-color: transparent; box-shadow: 0 6px 18px rgba(10, 108, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.5); }
+.btn { border-radius: 99px; }
+.link-btn { color: var(--ios-blue); font-weight: 500; }
+[data-theme='dark'] .link-btn { color: #4da3ff; }
+.chip-btn.on { background: var(--ios-blue); color: #fff; }
+[data-theme='dark'] .chip-btn.on { background: var(--ios-blue); color: #fff; }
+
+/* control segmentado de iOS */
+.seg { border-radius: 12px; padding: 3px; background: rgba(120, 120, 128, 0.18); border: 0; }
+.seg button { border-radius: 9px; font-weight: 600; }
+.seg button.on { background: #fff; color: #000; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.2); }
+[data-theme='dark'] .seg button.on { background: rgba(255, 255, 255, 0.22); color: #fff; }
+
+/* hoja inferior con asa */
+.modal { border-radius: 30px 30px 0 0; }
+.modal::before { content: ''; display: block; width: 38px; height: 5px; border-radius: 3px; margin: 8px auto 0; background: rgba(120, 120, 128, 0.4); }
+input[type='text'], input[type='search'], input[type='number'], input[type='date'], input[type='time'], select, textarea { border-radius: 14px; border: 0.5px solid rgba(255, 255, 255, 0.7); }
+input:focus, select:focus, textarea:focus { border-color: var(--ios-blue); box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.25); }
+[data-theme='dark'] .nav-btn { color: rgba(255, 255, 255, 0.78); }
+[data-theme='dark'] .nav-btn.active { color: #4da3ff; }
+
+/* días de Estudio, celdas del calendario y chips: también de cristal, no opacos */
+.study-day, .day-cell, .daypick button, .exam-chip, .prog-card {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.28)); border: 0.5px solid rgba(255, 255, 255, 0.8); border-radius: 20px;
+  -webkit-backdrop-filter: blur(24px) saturate(2); backdrop-filter: blur(24px) saturate(2);
+  box-shadow: 0 6px 22px rgba(30, 30, 80, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+[data-theme='dark'] .study-day, [data-theme='dark'] .day-cell, [data-theme='dark'] .daypick button, [data-theme='dark'] .exam-chip, [data-theme='dark'] .prog-card {
+  background: linear-gradient(160deg, rgba(60, 60, 70, 0.5), rgba(30, 30, 38, 0.4)); border-color: rgba(255, 255, 255, 0.2); box-shadow: 0 8px 26px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+.study-day.today, .day-cell.sel { border-color: var(--ios-blue); box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.3); }
+.daypick button.on { background: var(--hero); color: #fff; }
+.day-cell.today .num { background: var(--ios-blue); color: #fff; }
+.day-cell, .daypick button { border-radius: 12px; }
