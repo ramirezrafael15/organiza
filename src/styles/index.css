@@ -937,3 +937,7 @@ body::before {
 .stats-bar { width: 100%; max-width: 34px; height: 70px; border-radius: 8px; background: var(--primary-soft); display: flex; align-items: flex-end; overflow: hidden; }
 .stats-bar span { display: block; width: 100%; background: var(--primary-2); border-radius: 8px; min-height: 0; }
 .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+
+/* Listas desplegables (select): fondo y texto sólidos para que se lean también con el cristal y en oscuro */
+select option, select optgroup { background-color: #ffffff; color: #121211; }
+[data-theme='dark'] select option, [data-theme='dark'] select optgroup { background-color: #1c1c20; color: #f4f1ea; }
