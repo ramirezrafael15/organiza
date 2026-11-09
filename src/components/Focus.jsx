@@ -3,13 +3,26 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { actions, useAppState } from '../data/index.js';
 import { account } from '../sync/account.js';
-import { advance, catchUp, DEFAULTS, messageFor, phaseMs, schedule } from '../lib/focus.js';
+import { advance, catchUp, DEFAULTS, messageFor, phaseMs, schedule, startRun } from '../lib/focus.js';
 
 const KEY = 'seiri:focus';
 const LOG = 'seiri:focus-log';
 const read = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
 const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* sin almacenamiento */ } };
 const todayKey = () => new Date().toISOString().slice(0, 10);
+/**
+ * Empieza un foco desde otro sitio (el Panel). Si ya hay uno en marcha no lo pisa.
+ * Devuelve true si empezó uno nuevo. Deja marcado que Estudio abra la pestaña "Técnicas".
+ */
+export function startFocusFor({ label, subjectId }, techId = 'pomodoro') {
+  try { sessionStorage.setItem('seiri:study-tab', 'tecnicas'); } catch { /* sin almacenamiento */ }
+  const cur = read(KEY, null);
+  if (cur) return false;
+  const t = DEFAULTS.find((d) => d.id === techId) ?? DEFAULTS[0];
+  write(KEY, startRun(t, Date.now(), { label, subjectId }));
+  return true;
+}
+
 const PHASE_NAME = { focus: 'Foco', rest: 'Descanso', long: 'Descanso largo' };
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
 
@@ -36,7 +49,7 @@ export default function Techniques() {
 
   const save = (r) => { setRun(r); write(KEY, r); };
   const dur = phaseMs;
-  const start = (t) => save({ techId: t.id, phase: 'focus', round: 1, left: dur(t, 'focus'), endAt: Date.now() + dur(t, 'focus'), running: true });
+  const start = (t) => save(startRun(t, Date.now(), { label: '' }));
   const toggle = () => save(run.running ? { ...run, running: false, left: run.endAt - Date.now(), endAt: null } : { ...run, running: true, endAt: Date.now() + run.left });
   const stop = () => save(null);
 
@@ -110,6 +123,7 @@ export default function Techniques() {
             <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" className="ring-track" /><circle cx="50" cy="50" r="46" className="ring-bar" strokeDasharray={C} strokeDashoffset={C * (1 - Math.max(0, left) / total)} style={{ transition: 'none' }} /></svg>
             <div className="focus-time"><b>{mmss(left)}</b><span>{PHASE_NAME[run.phase]}</span></div>
           </div>
+          {run.label && <p style={{ textAlign: 'center', margin: '0 0 4px', fontWeight: 600 }}>{run.label}</p>}
           <p className="small muted" style={{ textAlign: 'center' }}>{tech.name} · ronda {run.round}{tech.cycles > 1 ? ` de ${tech.cycles}` : ''}</p>
           <div className="row-gap" style={{ justifyContent: 'center' }}>
             <button className="btn primary" onClick={toggle}>{run.running ? 'Pausa' : 'Seguir'}</button>

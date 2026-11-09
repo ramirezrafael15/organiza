@@ -23,7 +23,9 @@ export default function Study() {
   const [text, setText] = useState('');
   const [planId, setPlanId] = useState(null);
   const [over, setOver] = useState(null);
-  const [tab, setTab] = useState('semana');
+  const [tab, setTab] = useState(() => {
+    try { const t = sessionStorage.getItem('seiri:study-tab'); sessionStorage.removeItem('seiri:study-tab'); return t === 'tecnicas' ? 'tecnicas' : 'semana'; } catch { return 'semana'; }
+  });
 
   const days = weekDays(anchor);
   const subj = (id) => subjects.find((s) => s.id === id);

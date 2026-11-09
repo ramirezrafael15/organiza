@@ -14,6 +14,7 @@ import { getUrgency } from '../lib/urgency.js';
 import { activeReminders } from '../lib/reminders.js';
 import { FORM_FOR_COL } from '../components/ui.js';
 import { TodoRow } from './Todos.jsx';
+import NowList from '../components/NowList.jsx';
 
 const Section = ({ title, action, children }) => (
   <section className="section">
@@ -77,6 +78,8 @@ export default function Dashboard() {
         <div className="card stat"><b style={{ color: urgent.length ? 'var(--u-3)' : undefined }}>{urgent.length}</b><span>urgentes</span></div>
         <div className="card stat"><b>{pendingTasks}</b><span>entregas pendientes</span></div>
       </div>
+
+      <NowList state={state} full={full} today={today} />
 
       {dueTodos.length > 0 && (
         <Section title="Pendientes de hoy" action={<button className="link-btn" onClick={() => navigate('pendientes')}>Ver todos</button>}>

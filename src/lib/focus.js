@@ -44,3 +44,8 @@ export function schedule(t, run, now, { max = 12, horizonMs = 6 * 3600 * 1000 } 
   }
   return out;
 }
+
+/** Estado de un foco recién empezado. `meta` (opcional) guarda qué estudias: { label, subjectId }. */
+export const startRun = (t, now, meta = {}) => ({
+  techId: t.id, phase: 'focus', round: 1, left: phaseMs(t, 'focus'), endAt: now + phaseMs(t, 'focus'), running: true, ...meta,
+});

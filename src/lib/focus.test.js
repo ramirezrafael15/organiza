@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { advance, catchUp, DEFAULTS, schedule } from './focus.js';
+import { advance, catchUp, DEFAULTS, schedule, startRun } from './focus.js';
 
 const pomo = DEFAULTS[0];
 const start = (at = 0) => ({ techId: 'pomodoro', phase: 'focus', round: 1, left: 25 * 60000, endAt: at + 25 * 60000, running: true });
@@ -22,5 +22,12 @@ describe('focus', () => {
   });
   it('en pausa no hay avisos', () => {
     expect(schedule(pomo, { ...start(), running: false }, 0)).toEqual([]);
+  });
+});
+
+describe('startRun', () => {
+  it('arranca en foco, con la hora de fin y lo que estudias', () => {
+    const r = startRun(pomo, 1000, { label: 'Tema 3', subjectId: 's1' });
+    expect(r).toMatchObject({ techId: 'pomodoro', phase: 'focus', round: 1, running: true, endAt: 1000 + 25 * 60000, label: 'Tema 3', subjectId: 's1' });
   });
 });

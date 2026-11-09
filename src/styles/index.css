@@ -917,3 +917,12 @@ body::before {
 @media (max-width: 640px) { .ne-content .ProseMirror div[data-type="columns"] { grid-auto-flow: row; } }
 .ne-content .ProseMirror .ProseMirror-dropcursor, .ProseMirror-dropcursor { background: var(--primary) !important; height: 3px !important; }
 @media (pointer: coarse) { .block-handle { display: none; } }
+
+/* Qué hago ahora */
+.now-first { display: grid; gap: 10px; border-left: 3px solid var(--k, var(--primary-2)); }
+.now-tag { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.now-title { text-align: left; font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; padding: 0; background: none; border: 0; color: var(--text); }
+.now-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--muted); font-size: 0.88rem; }
+.now-rest { margin-top: 10px; }
+.now-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.now-row-main { flex: 1 1 160px; text-align: left; background: none; border: 0; padding: 0; color: inherit; display: grid; gap: 2px; }
