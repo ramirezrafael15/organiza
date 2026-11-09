@@ -10,25 +10,11 @@ const read = () => { try { return JSON.parse(localStorage.getItem(STORE) || '{}'
 let snap = read();
 
 export const getKeys = () => snap;
-const listeners = new Set();
-/** Avisa cada vez que el usuario cambia una clave (para copiarla a su cuenta). */
-export const onKeyChange = (fn) => (listeners.add(fn), () => listeners.delete(fn));
-/** Mete en este dispositivo las claves que vienen de la cuenta, sin tocar las que ya hay. */
-export function adoptKeys(cloud) {
-  let changed = false;
-  NAMES.forEach((n) => { if (cloud?.[n] && !snap[n]) { snap = { ...snap, [n]: cloud[n] }; changed = true; } });
-  if (!changed) return false;
-  try { localStorage.setItem(STORE, JSON.stringify(snap)); } catch { /* nada */ }
-  mirrorKeys(snap);
-  subs.forEach((fn) => fn());
-  return true;
-}
 export function setKey(name, value) {
   snap = { ...snap, [name]: value || undefined };
   try { localStorage.setItem(STORE, JSON.stringify(snap)); } catch { /* sin almacenamiento */ }
   mirrorKeys(snap); // copia espejo por si el navegador vacía el almacenamiento normal
   subs.forEach((fn) => fn());
-  listeners.forEach((fn) => fn(snap));
 }
 
 /** Si las claves han desaparecido del almacenamiento normal pero hay copia espejo, las recupera. */

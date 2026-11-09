@@ -5,7 +5,6 @@ import { repo } from '../data/repo.js';
 import { passwordProblem } from '../lib/password.js';
 import { isConfigured } from './config.js';
 import { ensurePush } from './push.js';
-import { adoptKeys, getKeys, onKeyChange, restoreKeysIfMissing } from '../lib/keys.js';
 import { SyncEngine } from './engine.js';
 
 let state = { status: isConfigured() ? 'loading' : 'off', user: null, error: '', sync: {} }; // off | loading | out | in
@@ -43,7 +42,6 @@ export function initAccount() {
         if (user) {
           startEngine(user);
           keepPushAlive(user.uid);
-          restoreCloudKeys(user.uid);
           set({ status: 'in', user: { uid: user.uid, email: user.email, emailVerified: user.emailVerified }, error: '' });
         } else {
           set({ status: 'out', user: null });
@@ -52,22 +50,6 @@ export function initAccount() {
     })
     .catch(() => set({ status: 'out', error: 'No se pudo cargar la sincronización.' }));
 }
-
-// Claves de IA: copia en la cuenta del usuario; si el móvil las pierde, se recuperan solas al abrir.
-function restoreCloudKeys(uid) {
-  const ok = () => state.user?.uid === uid;
-  restoreKeysIfMissing()
-    .then(() => fb.loadKeys(uid))
-    .then((cloud) => {
-      if (!ok()) return;
-      adoptKeys(cloud);
-      // Si este móvil tiene claves y la nube no, se las subimos.
-      const local = getKeys();
-      if (Object.keys(local).some((n) => local[n]) && (!cloud || Object.keys(local).some((n) => local[n] && !cloud[n]))) fb.saveKeys(uid, local).catch(() => {});
-    })
-    .catch(() => {});
-}
-onKeyChange((keys) => { if (fb && state.user) fb.saveKeys(state.user.uid, keys).catch(() => {}); });
 
 // Notificaciones siempre activas: se comprueban al entrar, al volver a la app y cuando el sistema renueva la suscripción.
 let lastPush = 0;
