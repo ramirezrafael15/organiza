@@ -6,7 +6,7 @@ import {
   signInWithEmailAndPassword, signOut as fbSignOut,
 } from 'firebase/auth';
 import {
-  collection, deleteDoc, doc, getDocs, initializeFirestore, memoryLocalCache, onSnapshot, setDoc, writeBatch,
+  collection, deleteDoc, doc, getDoc, getDocs, initializeFirestore, memoryLocalCache, onSnapshot, setDoc, writeBatch,
 } from 'firebase/firestore';
 import { firebaseConfig } from './config.js';
 
@@ -119,3 +119,11 @@ export const removePushSubscription = (uid, endpoint) =>
 /** Avisos del temporizador de estudio que el servidor debe mandar aunque la app esté cerrada. [] = ninguno. */
 export const setFocusPlan = (uid, events) =>
   setDoc(doc(services().db, 'users', uid, 'focus', 'plan'), { events: clean(events), updatedAt: Date.now() });
+
+/** Claves de IA en la cuenta del propio usuario (solo él puede leerlas por las reglas), para que no se pierdan si el móvil vacía su almacenamiento. */
+export const saveKeys = (uid, keys) =>
+  setDoc(doc(services().db, 'users', uid, 'private', 'keys'), { ...Object.fromEntries(Object.entries(keys).filter(([, v]) => v)), updatedAt: Date.now() });
+export const loadKeys = async (uid) => {
+  const snap = await getDoc(doc(services().db, 'users', uid, 'private', 'keys'));
+  return snap.exists() ? snap.data() : null;
+};
