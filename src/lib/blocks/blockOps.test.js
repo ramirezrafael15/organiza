@@ -58,6 +58,29 @@ describe('bloques tipo Notion', () => {
     expect(ed.getHTML()).toContain('<details open="">');
     expect(ed.state.selection.$from.parent.type.name).toBe('detailsSummary');
   });
+  const type = (ed, text) => {
+    // escribe como un usuario: pasa por las reglas de entrada (input rules)
+    for (const ch of text) {
+      const { from, to } = ed.state.selection;
+      const handled = ed.view.someProp('handleTextInput', (f) => f(ed.view, from, to, ch));
+      if (!handled) ed.view.dispatch(ed.state.tr.insertText(ch, from, to));
+    }
+  };
+  it('"> " crea un desplegable abierto con el cursor en el título', () => {
+    const ed = make('<p></p>');
+    ed.commands.focus('end');
+    type(ed, '> ');
+    expect(ed.getHTML()).toContain('<details open="">');
+    expect(ed.state.selection.$from.parent.type.name).toBe('detailsSummary');
+    type(ed, 'Mi título');
+    expect(ed.getHTML()).toContain('<summary>Mi título</summary>');
+  });
+  it('\'" \' crea una cita y "> " ya no', () => {
+    const ed = make('<p></p>');
+    ed.commands.focus('end');
+    type(ed, '" ');
+    expect(ed.getHTML()).toContain('<blockquote>');
+  });
   it('las notas antiguas (HTML normal) se siguen leyendo igual', () => {
     const old = '<h1>Tema</h1><p>texto <strong>negrita</strong></p><ul><li><p>a</p></li></ul>';
     expect(make(old).getHTML()).toBe(old);

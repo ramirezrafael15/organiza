@@ -23,6 +23,7 @@ import DetailsSummary from '@tiptap/extension-details-summary';
 import DetailsContent from '@tiptap/extension-details-content';
 import { SlashCommand } from './slash/SlashCommand.js';
 import { Callout } from './blocks/Callout.js';
+import { QuickToggle, QuoteBlock } from './blocks/QuickToggle.js';
 import { Column, Columns } from './blocks/Columns.js';
 
 // Tamaño de letra como atributo de "textStyle" (no viene de serie en Tiptap).
@@ -51,7 +52,8 @@ export const FontSize = Extension.create({
 
 // onPickImage: abre el selector de imágenes del editor (lo usa el bloque "Imagen" del menú "/").
 export const editorExtensions = ({ onPickImage } = {}) => [
-  StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
+  StarterKit.configure({ heading: { levels: [1, 2, 3] }, blockquote: false }),
+  QuoteBlock, QuickToggle,
   Typography, Underline, Subscript, Superscript, TextStyle, Color, FontFamily, FontSize,
   Highlight.configure({ multicolor: true }),
   TextAlign.configure({ types: ['heading', 'paragraph'] }),

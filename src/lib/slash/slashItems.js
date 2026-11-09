@@ -4,22 +4,21 @@ import { TextSelection } from '@tiptap/pm/state';
 // Cada comando primero borra el "/texto" que escribió el usuario y luego transforma el bloque.
 const base = (editor, range) => editor.chain().focus().deleteRange(range);
 
-/** Deja el desplegable abierto y el cursor en su título, para escribirlo directamente. */
-export function openDetailsAtCursor(editor) {
-  return editor.commands.command(({ state, tr, dispatch }) => {
-    const { $from } = state.selection;
-    for (let d = $from.depth; d > 0; d--) {
-      if ($from.node(d).type.name === 'details') {
-        const pos = $from.before(d);
-        tr.setNodeMarkup(pos, undefined, { ...$from.node(d).attrs, open: true });
-        tr.setSelection(TextSelection.create(tr.doc, pos + 2)); // dentro del título (summary)
-        dispatch?.(tr);
-        return true;
-      }
+/** Comando encadenable: deja el desplegable abierto y el cursor en su título, para escribirlo directamente. */
+export const openDetailsCommand = ({ state, tr, dispatch }) => {
+  const { $from } = state.selection;
+  for (let d = $from.depth; d > 0; d--) {
+    if ($from.node(d).type.name === 'details') {
+      const pos = $from.before(d);
+      tr.setNodeMarkup(pos, undefined, { ...$from.node(d).attrs, open: true });
+      tr.setSelection(TextSelection.create(tr.doc, pos + 2)); // dentro del título (summary)
+      if (dispatch) dispatch(tr);
+      return true;
     }
-    return false;
-  });
-}
+  }
+  return false;
+};
+export const openDetailsAtCursor = (editor) => editor.commands.command(openDetailsCommand);
 
 export const slashItems = ({ onPickImage } = {}) => [
   { title: 'Texto', turn: true, description: 'Párrafo normal', icon: 'T', keywords: ['p', 'parrafo', 'texto'],
