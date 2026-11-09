@@ -3,13 +3,16 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { actions, useAppState } from '../data/index.js';
 import { account } from '../sync/account.js';
+import { repo } from '../data/repo.js';
+import { todayISO } from '../lib/dates.js';
+import { recordFocus } from '../lib/stats.js';
 import { advance, catchUp, DEFAULTS, messageFor, phaseMs, schedule, startRun } from '../lib/focus.js';
 
 const KEY = 'seiri:focus';
 const LOG = 'seiri:focus-log';
 const read = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
 const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* sin almacenamiento */ } };
-const todayKey = () => new Date().toISOString().slice(0, 10);
+const todayKey = todayISO; // fecha local (no UTC): cerca de medianoche no se cuenta en el día equivocado
 /**
  * Empieza un foco desde otro sitio (el Panel). Si ya hay uno en marcha no lo pisa.
  * Devuelve true si empezó uno nuevo. Deja marcado que Estudio abra la pestaña "Técnicas".
@@ -53,14 +56,14 @@ export default function Techniques() {
   const toggle = () => save(run.running ? { ...run, running: false, left: run.endAt - Date.now(), endAt: null } : { ...run, running: true, endAt: Date.now() + run.left });
   const stop = () => save(null);
 
-  const addBlocks = (n, min) => {
+  // El registro vive en los ajustes (focusLog), así se sincroniza con la cuenta. `subjectId` = lo que estudiabas.
+  const addBlocks = (n, min, subjectId = null) => {
     if (!n) return;
-    const log = read(LOG, {}); const k = todayKey();
-    log[k] = { rounds: (log[k]?.rounds ?? 0) + n, min: (log[k]?.min ?? 0) + min }; write(LOG, log);
+    actions.updateSettings({ focusLog: recordFocus(repo.getState().settings.focusLog ?? {}, todayKey(), { min, rounds: n, subjectId }) });
   };
   const next = () => {
     const r = advance(tech, run, run.running && run.endAt ? run.endAt : Date.now());
-    if (r.doneFocus) addBlocks(1, tech.focus);
+    if (r.doneFocus) addBlocks(1, tech.focus, run.subjectId);
     save(r.run);
     return r.run;
   };
@@ -79,7 +82,7 @@ export default function Techniques() {
       const t = cur && all.find((x) => x.id === cur.techId);
       if (!cur?.running || !t || Date.now() < cur.endAt) return;
       const { run: r, blocks } = catchUp(t, cur, Date.now());
-      addBlocks(blocks, blocks * t.focus);
+      addBlocks(blocks, blocks * t.focus, cur.subjectId);
       save(r);
     };
     sync();
@@ -103,9 +106,20 @@ export default function Techniques() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [run?.running, run?.endAt, run?.techId, tech]);
 
+  // Una vez: lo que había en el registro antiguo (solo en este móvil) pasa a los ajustes sincronizados.
+  useEffect(() => {
+    const old = read(LOG, null);
+    if (!old) return;
+    const cur = repo.getState().settings.focusLog ?? {};
+    const merged = { ...cur };
+    for (const [d, v] of Object.entries(old)) if (!merged[d]) merged[d] = { rounds: v.rounds ?? 0, min: v.min ?? 0, by: {} };
+    actions.updateSettings({ focusLog: merged });
+    try { localStorage.removeItem(LOG); } catch { /* nada */ }
+  }, []);
+
   const [full, setFull] = useState(false);
 
-  const log = read(LOG, {})[todayKey()];
+  const log = (settings.focusLog ?? {})[todayKey()];
   const left = run ? (run.running ? run.endAt - Date.now() : run.left) : 0;
   const total = run && tech ? dur(tech, run.phase) : 1;
   const C = 2 * Math.PI * 46;

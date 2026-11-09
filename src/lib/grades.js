@@ -47,3 +47,27 @@ export function gradeBand(n) {
   if (n < 9) return { label: 'Notable', tone: 'good' };
   return { label: 'Sobresaliente', tone: 'great' };
 }
+
+/**
+ * ¿Qué nota necesito en lo que falta? Con las notas actuales { value, weight } y el peso de lo que queda
+ * (mismo criterio que los pesos de las notas), calcula la nota mínima para llegar a `target` de media.
+ * Devuelve { needed, status }: 'hecho' (ya llegas aunque saques 0), 'posible' o 'imposible' (necesitarías más de 10).
+ */
+export function neededGrade(grades, remainingWeight, target = 5) {
+  const w = Number(remainingWeight);
+  const t = Number(target);
+  if (!(w > 0) || !Number.isFinite(t)) return null;
+  let sum = 0;
+  let total = 0;
+  for (const g of grades) {
+    const value = Number(g.value);
+    const weight = Number(g.weight) > 0 ? Number(g.weight) : 1;
+    if (!Number.isFinite(value)) continue;
+    sum += value * weight;
+    total += weight;
+  }
+  const raw = (t * (total + w) - sum) / w;
+  if (raw <= 0) return { needed: 0, status: 'hecho' };
+  if (raw > 10) return { needed: raw, status: 'imposible' };
+  return { needed: Math.ceil(raw * 100) / 100, status: 'posible' };
+}

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Icon from '../components/Icon.jsx';
 import Techniques from '../components/Focus.jsx';
+import StatsView from '../components/StatsView.jsx';
 import StudyPlan from '../components/StudyPlan.jsx';
 import { Progress } from '../components/bits.jsx';
 import { useUI } from '../components/ui.js';
@@ -61,8 +62,9 @@ export default function Study() {
       <div className="seg" style={{ marginBottom: 14 }} role="tablist">
         <button className={tab === 'semana' ? 'on' : ''} onClick={() => setTab('semana')}>Semana</button>
         <button className={tab === 'tecnicas' ? 'on' : ''} onClick={() => setTab('tecnicas')}>Técnicas</button>
+        <button className={tab === 'stats' ? 'on' : ''} onClick={() => setTab('stats')}>Estadísticas</button>
       </div>
-      {tab === 'tecnicas' ? <Techniques /> : <>
+      {tab === 'stats' ? <StatsView /> : tab === 'tecnicas' ? <Techniques /> : <>
       <p className="muted" style={{ margin: '-6px 0 12px' }}>{rangeLabel} · pon en cada día lo que vas a estudiar. En el ordenador puedes arrastrar las tareas de un día a otro.</p>
 
       {upcoming.length > 0 && (

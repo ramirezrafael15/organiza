@@ -3,7 +3,37 @@ import { Empty, ProgramPill } from '../components/bits.jsx';
 import Icon from '../components/Icon.jsx';
 import { useUI } from '../components/ui.js';
 import { useViewState } from '../data/viewFilter.js';
-import { formatGrade, gradeBand, overallAverage, subjectAverage } from '../lib/grades.js';
+import { useState } from 'react';
+import { formatGrade, gradeBand, neededGrade, overallAverage, subjectAverage } from '../lib/grades.js';
+
+/** "¿Qué nota necesito?": nota mínima en lo que falta para llegar a un objetivo. */
+function NeedCalc({ list }) {
+  const [open, setOpen] = useState(false);
+  // Si los pesos de las notas suman un porcentaje (p. ej. 50 de 100), propone lo que queda hasta 100; si no, 1.
+  const [weight, setWeight] = useState(() => {
+    const total = list.reduce((a, g) => a + (Number(g.weight) > 0 ? Number(g.weight) : 1), 0);
+    return String(total >= 20 && total < 100 ? Math.round((100 - total) * 100) / 100 : 1);
+  });
+  const [target, setTarget] = useState('5');
+  const r = open ? neededGrade(list, weight, target.replace(',', '.')) : null;
+  if (!open) return <button className="link-btn" style={{ alignSelf: 'flex-start' }} onClick={() => setOpen(true)}>¿Qué nota necesito?</button>;
+  const msg = !r ? 'Pon un peso mayor que 0 y un objetivo.'
+    : r.status === 'hecho' ? `Ya llegas al ${target} aunque saques 0 en lo que falta. 🎉`
+    : r.status === 'imposible' ? `Imposible: necesitarías un ${formatGrade(r.needed)} y el máximo es 10. Prueba con un objetivo más bajo.`
+    : `Necesitas un ${formatGrade(r.needed)} o más en lo que falta.`;
+  const tone = !r || r.status === 'imposible' ? 'var(--danger)' : 'inherit';
+  return (
+    <div className="need-calc">
+      <div className="row-gap" style={{ flexWrap: 'wrap', alignItems: 'end' }}>
+        <label className="small muted">Peso de lo que falta<input type="number" inputMode="decimal" min="0" step="any" value={weight} onChange={(e) => setWeight(e.target.value)} style={{ width: 90 }} /></label>
+        <label className="small muted">Quiero sacar<input type="number" inputMode="decimal" min="0" max="10" step="any" value={target} onChange={(e) => setTarget(e.target.value)} style={{ width: 90 }} /></label>
+        <button className="link-btn" onClick={() => setOpen(false)}>Cerrar</button>
+      </div>
+      <p style={{ margin: '8px 0 0', fontWeight: 600, color: tone }}>{msg}</p>
+      <p className="small muted" style={{ margin: '2px 0 0' }}>El peso va en la misma escala que el de tus notas (si pesan en porcentaje, lo que falta hasta 100; si todas pesan 1, un examen más = 1).</p>
+    </div>
+  );
+}
 
 export default function Grades() {
   const { subjects, grades } = useViewState();
@@ -51,6 +81,7 @@ export default function Grades() {
                 <button className="btn small" style={{ alignSelf: 'flex-start' }} onClick={() => openForm('grade', null, { subjectId: s.id })}>
                   <Icon name="plus" /> Nota
                 </button>
+                <NeedCalc list={list} />
               </section>
             );
           })}

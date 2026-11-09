@@ -11,6 +11,7 @@ import { ColorSwatches, ReminderPicker, Segmented } from '../components/forms/fi
 import { AccountCard, NotificationsCard } from '../components/AccountCard.jsx';
 import AiCard from '../components/AiCard.jsx';
 import WakeCard from '../components/WakeCard.jsx';
+import ScheduleImport from '../components/ScheduleImport.jsx';
 import BackupsCard from '../components/BackupsCard.jsx';
 import CalendarsCard from '../components/CalendarsCard.jsx';
 
@@ -51,6 +52,7 @@ export default function Settings() {
   };
 
   const scheduleRef = useRef(null);
+  const [showSched, setShowSched] = useState(false);
   const importSchedule = async (e) => {
     const file = e.target.files?.[0];
     e.target.value = '';
@@ -84,6 +86,7 @@ export default function Settings() {
 
   return (
     <>
+      {showSched && <ScheduleImport onClose={() => setShowSched(false)} />}
       <div className="page-head"><h1>Ajustes</h1></div>
       <div className="stack">
         <section className="card stack">
@@ -164,6 +167,7 @@ export default function Settings() {
           <div className="row wrap">
             <button className="btn" onClick={() => scheduleRef.current?.click()}>Añadir horario desde archivo</button>
             <input ref={scheduleRef} type="file" accept="application/json,.json" hidden onChange={importSchedule} />
+            <button className="btn" onClick={() => setShowSched(true)}>📷 Horario desde foto o PDF</button>
           </div>
           <p className="muted small" style={{ margin: 0 }}>“Añadir horario” suma las clases del archivo sin borrar nada de lo que ya tienes.</p>
           <div className="row wrap">

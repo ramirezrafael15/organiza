@@ -926,3 +926,14 @@ body::before {
 .now-rest { margin-top: 10px; }
 .now-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .now-row-main { flex: 1 1 160px; text-align: left; background: none; border: 0; padding: 0; color: inherit; display: grid; gap: 2px; }
+
+/* ¿Qué nota necesito? */
+.need-calc { border-top: 1px dashed var(--border); padding-top: 10px; }
+.need-calc label { display: grid; gap: 4px; }
+
+/* Estadísticas */
+.stats-bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; }
+.stats-col { display: grid; gap: 4px; justify-items: center; }
+.stats-bar { width: 100%; max-width: 34px; height: 70px; border-radius: 8px; background: var(--primary-soft); display: flex; align-items: flex-end; overflow: hidden; }
+.stats-bar span { display: block; width: 100%; background: var(--primary-2); border-radius: 8px; min-height: 0; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
