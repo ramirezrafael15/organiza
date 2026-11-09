@@ -43,26 +43,46 @@ export default function Voice({ onClose, autoStart = false }) {
     setErr(''); setHeard(''); setRes(null);
     if (!keys.geminiKey && !keys.groqKey) { setErr('Necesito una clave de IA gratuita. Pon la de Gemini o Groq en Ajustes.'); setPhase('error'); return; }
     // Con clave de Groq grabamos el audio y lo transcribe Whisper (funciona también en iPhone).
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
     if (keys.groqKey && navigator.mediaDevices?.getUserMedia && window.MediaRecorder) {
+      let stream;
+      try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+      catch (e) {
+        const denied = e?.name === 'NotAllowedError' || e?.name === 'SecurityError';
+        setErr(denied
+          ? (isIOS ? 'iPhone ha bloqueado el micrófono. Ve a Ajustes › Apps › Safari › Micrófono (o Ajustes › Seiri) y ponlo en “Preguntar” o “Permitir”.' : 'No tengo permiso para usar el micrófono. Actívalo en los ajustes del navegador.')
+          : `No encuentro el micrófono (${e?.name || 'error'}).`);
+        setPhase('error'); return;
+      }
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const mr = new MediaRecorder(stream); const chunks = [];
-        mr.ondataavailable = (e) => chunks.push(e.data);
+        // iPhone solo graba en mp4/aac; el resto de navegadores en webm/ogg.
+        const mime = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'].find((m) => MediaRecorder.isTypeSupported?.(m));
+        const mr = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+        const chunks = [];
+        mr.ondataavailable = (e) => { if (e.data?.size) chunks.push(e.data); };
+        mr.onerror = () => { stream.getTracks().forEach((t) => t.stop()); setErr('Ha fallado la grabación. Prueba otra vez.'); setPhase('error'); };
         mr.onstop = async () => {
           stream.getTracks().forEach((t) => t.stop());
+          if (!chunks.length) { setErr('No se ha grabado nada. Habla un poco más y pulsa otra vez para parar.'); setPhase('error'); return; }
           setPhase('work');
-          try { await run(await transcribe(new Blob(chunks, { type: mr.mimeType }), keys.groqKey)); }
+          try { await run(await transcribe(new Blob(chunks, { type: mr.mimeType || mime || 'audio/mp4' }), keys.groqKey)); }
           catch (e) { setErr(e.message); setPhase('error'); }
         };
-        rec.current = mr; mr.start(); setPhase('rec');
+        rec.current = mr; mr.start(1000); setPhase('rec');
         return;
-      } catch { setErr('No tengo permiso para usar el micrófono. Actívalo en los ajustes del navegador.'); setPhase('error'); return; }
+      } catch (e) {
+        stream.getTracks().forEach((t) => t.stop());
+        setErr(`No puedo grabar en este dispositivo (${e?.name || 'error'}). Escríbelo abajo.`); setPhase('error'); return;
+      }
+    }
+    if (isIOS && !keys.groqKey) {
+      setErr('En iPhone el micrófono necesita la clave gratuita de Groq (Ajustes › IA). Sin ella escríbelo abajo.'); setPhase('error'); return;
     }
     if (hasSpeechApi()) {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       const r = new SR(); r.lang = 'es-ES'; r.interimResults = false;
       r.onresult = (e) => run(e.results[0][0].transcript);
-      r.onerror = () => { setErr('No he podido oírte. Prueba otra vez o escríbelo abajo.'); setPhase('error'); };
+      r.onerror = (e) => { setErr(e?.error === 'not-allowed' || e?.error === 'service-not-allowed' ? 'El navegador no deja usar el micrófono. Revisa el permiso o escríbelo abajo.' : 'No he podido oírte. Prueba otra vez o escríbelo abajo.'); setPhase('error'); };
       rec.current = r; r.start(); setPhase('rec');
       return;
     }
