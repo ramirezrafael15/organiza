@@ -23,7 +23,7 @@ export function createSlashMenuRenderer() {
       row.addEventListener('mousedown', (e) => { e.preventDefault(); run(item); });
       el.appendChild(row);
     });
-    el.querySelector('.is-selected')?.scrollIntoView({ block: 'nearest' });
+    el.querySelector('.is-selected')?.scrollIntoView?.({ block: 'nearest' });
   };
 
   const place = (props) => {

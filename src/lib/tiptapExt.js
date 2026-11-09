@@ -18,7 +18,12 @@ import Table from '@tiptap/extension-table';
 import TableRow from '@tiptap/extension-table-row';
 import TableHeader from '@tiptap/extension-table-header';
 import TableCell from '@tiptap/extension-table-cell';
+import Details from '@tiptap/extension-details';
+import DetailsSummary from '@tiptap/extension-details-summary';
+import DetailsContent from '@tiptap/extension-details-content';
 import { SlashCommand } from './slash/SlashCommand.js';
+import { Callout } from './blocks/Callout.js';
+import { Column, Columns } from './blocks/Columns.js';
 
 // Tamaño de letra como atributo de "textStyle" (no viene de serie en Tiptap).
 export const FontSize = Extension.create({
@@ -55,5 +60,6 @@ export const editorExtensions = ({ onPickImage } = {}) => [
   Image.configure({ allowBase64: true }),
   Table.configure({ resizable: true }), TableRow, TableHeader, TableCell,
   Placeholder.configure({ placeholder: "Empieza a escribir tus apuntes… (escribe '/' para insertar bloques)" }),
+  Details.configure({ persist: true }), DetailsSummary, DetailsContent, Callout, Columns, Column,
   SlashCommand.configure({ onPickImage }),
 ];

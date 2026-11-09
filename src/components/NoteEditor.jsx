@@ -2,7 +2,8 @@
 // Se guarda solo (sin botón) y el texto va a la nube como cualquier otro dato.
 import { useEffect, useRef, useState } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
-import DragHandle from '@tiptap/extension-drag-handle-react';
+import BlockHandle from './BlockHandle.jsx';
+import { moveBlock, topBlockAtCursor } from '../lib/blocks/blockOps.js';
 import { actions, useAppState } from '../data/index.js';
 import { editorExtensions } from '../lib/tiptapExt.js';
 import { SubjectSelect } from './forms/fields.jsx';
@@ -217,6 +218,8 @@ export default function NoteEditor({ note, onClose }) {
               <B label="Cita" active={editor.isActive('blockquote')} on={() => c().toggleBlockquote().run()}>❝</B>
               <B label="Código" active={editor.isActive('codeBlock')} on={() => c().toggleCodeBlock().run()}>{'</>'}</B>
               <B label="Línea" on={() => c().setHorizontalRule().run()}>―</B>
+              <B label="Subir bloque" on={() => { const t = topBlockAtCursor(editor); if (t) moveBlock(editor, t, -1); }}>⬆</B>
+              <B label="Bajar bloque" on={() => { const t = topBlockAtCursor(editor); if (t) moveBlock(editor, t, 1); }}>⬇</B>
               <B label="Símbolos y flechas" active={sym} on={() => setSym((v) => !v)}>→Ω</B>
               <B label="Subíndice" active={editor.isActive('subscript')} on={() => c().toggleSubscript().run()}>x₂</B>
               <B label="Superíndice" active={editor.isActive('superscript')} on={() => c().toggleSuperscript().run()}>x²</B>
@@ -236,8 +239,8 @@ export default function NoteEditor({ note, onClose }) {
               </div>
             )}
             <div className="ne-content-wrap">
-              {/* Asa ⋮⋮ para arrastrar y reordenar bloques (solo con ratón; en móvil se oculta) */}
-              <DragHandle editor={editor}><div className="drag-handle" title="Arrastra para mover">⋮⋮</div></DragHandle>
+              {/* Asa de bloque: "+", arrastrar y menú (solo con ratón; en móvil se usan los botones ↑↓ de la barra) */}
+              <BlockHandle editor={editor} />
               <EditorContent editor={editor} className="ne-content" />
             </div>
             <p className="small muted ne-count">{words} palabras</p>
