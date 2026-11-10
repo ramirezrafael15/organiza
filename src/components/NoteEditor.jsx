@@ -1,6 +1,7 @@
 // Editor de apuntes tipo Docs: fuentes, tamaños, colores, tablas, imágenes, índice e IA.
 // Se guarda solo (sin botón) y el texto va a la nube como cualquier otro dato.
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { EditorContent, useEditor } from '@tiptap/react';
 import BlockHandle from './BlockHandle.jsx';
 import { moveBlock, topBlockAtCursor } from '../lib/blocks/blockOps.js';
@@ -146,7 +147,8 @@ export default function NoteEditor({ note, onClose }) {
     editor.view.nodeDOM(pos)?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
   };
 
-  return (
+  // Portal a <body>: la página tiene una animación con transform y, dentro, el 'fixed' no ocupaba toda la pantalla.
+  return createPortal(
     <div className="note-editor">
       <header className="ne-head">
         <button className="btn" onClick={close}>← Notas</button>
@@ -248,6 +250,7 @@ export default function NoteEditor({ note, onClose }) {
         </div>
         {ai && <AiPanel editor={editor} onClose={() => setAi(false)} />}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
