@@ -14,6 +14,7 @@ self.addEventListener('push', (event) => {
       icon,
       badge: icon,
       tag: data.tag, // el mismo aviso no se repite
+      renotify: !!data.tag, // si sustituye a otro con la misma etiqueta (foco), vuelve a sonar
       data: { url: data.url || self.registration.scope },
     }),
   );

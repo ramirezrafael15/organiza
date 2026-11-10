@@ -21,12 +21,16 @@ export function init() {
 export async function sendToAll(subs, payload) {
   let delivered = false;
   for (const { ref, subscription } of subs) {
+    // Qué dispositivo es: apple = iPhone/Mac, fcm = Chrome/Edge (Windows, Android).
+    const host = (() => { try { return new URL(subscription.endpoint).host; } catch { return '?'; } })();
+    const kind = host.includes('push.apple.com') ? 'iPhone/Safari' : host.includes('googleapis') ? 'Chrome/Edge' : host.includes('windows') ? 'Edge' : host;
     try {
       await webpush.sendNotification(subscription, JSON.stringify(payload), { TTL: 6 * 3600, urgency: 'high' });
       delivered = true;
+      console.log(`  → ${kind}: aceptado`);
     } catch (e) {
-      if (e.statusCode === 404 || e.statusCode === 410) await ref.delete(); // dispositivo dado de baja
-      else console.warn(`  envío fallido (${e.statusCode ?? e.message})`);
+      if (e.statusCode === 404 || e.statusCode === 410) { console.warn(`  → ${kind}: dispositivo dado de baja (${e.statusCode}), se elimina`); await ref.delete(); }
+      else console.warn(`  → ${kind}: envío fallido (${e.statusCode ?? e.message})`);
     }
   }
   return delivered;
