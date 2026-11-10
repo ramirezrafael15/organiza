@@ -50,7 +50,7 @@ export default function Exams() {
       </div>
 
       {groups.length ? (
-        <div className="stack">
+        <div className="stack exam-groups">
           {groups.map((g) => {
             const open = !closed[g.key];
             const next = g.items[0];

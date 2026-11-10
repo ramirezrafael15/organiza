@@ -97,12 +97,14 @@ export default function Todos() {
         </div>
       </form>
 
+      <div className="todo-cols">
       {late.length > 0 && <Group title="Atrasados" count={late.length} tone="var(--u-3)">{rows(late, true)}</Group>}
       <Group title="Hoy" count={now.length}>
         {now.length ? rows(now, false) : <Empty>{todayAll.length ? '¡Todo hecho por hoy! 🎉' : 'No tienes nada para hoy.'}</Empty>}
       </Group>
       {next.length > 0 && <Group title="Próximos" count={next.length}>{rows(next, true)}</Group>}
       {noDate.length > 0 && <Group title="Sin fecha" count={noDate.length}>{rows(noDate, false)}</Group>}
+      </div>
 
       {done.length > 0 && (
         <section className="section">
