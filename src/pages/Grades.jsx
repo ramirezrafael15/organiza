@@ -4,6 +4,7 @@ import Icon from '../components/Icon.jsx';
 import { useUI } from '../components/ui.js';
 import { useViewState } from '../data/viewFilter.js';
 import { useState } from 'react';
+import MergeSubjects from '../components/MergeSubjects.jsx';
 import { formatGrade, gradeBand, neededGrade, overallAverage, subjectAverage } from '../lib/grades.js';
 
 /** "¿Qué nota necesito?": nota mínima en lo que falta para llegar a un objetivo. */
@@ -36,6 +37,7 @@ function NeedCalc({ list }) {
 }
 
 export default function Grades() {
+  const [merge, setMerge] = useState(false);
   const { subjects, grades } = useViewState();
   const { openForm } = useUI();
   const overall = overallAverage(subjects, grades);
@@ -43,9 +45,13 @@ export default function Grades() {
 
   return (
     <>
+      {merge && <MergeSubjects onClose={() => setMerge(false)} />}
       <div className="page-head">
         <h1>Calificaciones</h1>
-        <button className="btn" onClick={() => openForm('subject')}><Icon name="plus" /> Asignatura</button>
+        <div className="row-gap">
+          <button className="btn" onClick={() => setMerge(true)}>Ordenar / fusionar</button>
+          <button className="btn" onClick={() => openForm('subject')}><Icon name="plus" /> Asignatura</button>
+        </div>
       </div>
 
       <div className="card row spread" style={{ marginBottom: 16 }}>
