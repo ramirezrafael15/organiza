@@ -106,6 +106,8 @@ function MonthView({ state, today, cursor, selected, onSelect, onOpenDay, onAdd 
   for (const d of days) byDay[d] = [...byDay[d]].sort((a, b) => rank(a) - rank(b));
   const mark = (e) => markOf(e);
   const month = cursor.slice(0, 7);
+  // Cuántas barritas caben por casilla: en pantalla grande hay más sitio.
+  const cap = typeof window !== 'undefined' && window.matchMedia?.('(min-width: 1300px)').matches ? 5 : 3;
 
   return (
     <>
@@ -122,10 +124,10 @@ function MonthView({ state, today, cursor, selected, onSelect, onOpenDay, onAdd 
               <span className="dots">
                 {entries.slice(0, 4).map((e) => <i key={e.key} style={{ '--k': entryColor(e, state) }} />)}
               </span>
-              {entries.slice(0, 3).map((e) => (
+              {entries.slice(0, cap).map((e) => (
                 <span key={e.key} className={`mini ${shapeOf(e)} ${e.status === 'entregado' ? 'done' : ''}`} style={{ '--k': entryColor(e, state), '--p': programColor(e, state) ?? 'transparent' }}>{mark(e)}{e.title}</span>
               ))}
-              {entries.length > 3 && <span className="more">+{entries.length - 3} más</span>}
+              {entries.length > cap && <span className="more">+{entries.length - cap} más</span>}
             </button>
           );
         })}
