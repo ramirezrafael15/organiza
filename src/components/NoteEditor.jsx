@@ -10,6 +10,7 @@ import { editorExtensions } from '../lib/tiptapExt.js';
 import { SubjectSelect } from './forms/fields.jsx';
 import AiPanel from './AiPanel.jsx';
 import { flatTree } from '../lib/folders.js';
+import ColorTool from './ColorTool.jsx';
 import SymbolPanel from './SymbolPanel.jsx';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -196,14 +197,8 @@ export default function NoteEditor({ note, onClose }) {
               <B label="Cursiva" active={editor.isActive('italic')} on={() => c().toggleItalic().run()}><i>C</i></B>
               <B label="Subrayado" active={editor.isActive('underline')} on={() => c().toggleUnderline().run()}><u>S</u></B>
               <B label="Tachado" active={editor.isActive('strike')} on={() => c().toggleStrike().run()}><s>T</s></B>
-              <label className="tb tb-color" title="Color del texto" style={{ '--c': attrs.color ?? 'currentColor' }}>
-                <span>A</span>
-                <input type="color" aria-label="Color del texto" value={attrs.color ?? '#000000'} onChange={(e) => c().setColor(e.target.value).run()} />
-              </label>
-              <label className="tb tb-color tb-hl" title="Resaltado" style={{ '--c': editor.getAttributes('highlight').color ?? '#fde68a' }}>
-                <span>▮</span>
-                <input type="color" aria-label="Color de resaltado" value={editor.getAttributes('highlight').color ?? '#fde68a'} onChange={(e) => c().setHighlight({ color: e.target.value }).run()} />
-              </label>
+              <ColorTool kind="text" title="Color del texto" glyph="A" current={attrs.color} onApply={(col) => c().setColor(col).run()} onClear={() => c().unsetColor().run()} />
+              <ColorTool kind="highlight" title="Resaltado" glyph="▮" current={editor.getAttributes('highlight').color} onApply={(col) => c().setHighlight({ color: col }).run()} onClear={() => c().unsetHighlight().run()} />
               <B label="Quitar formato" on={() => c().unsetAllMarks().clearNodes().run()}>Tₓ</B>
               <Sep />
               <B label="Lista" active={editor.isActive('bulletList')} on={() => c().toggleBulletList().run()}>•≡</B>

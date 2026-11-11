@@ -987,3 +987,15 @@ select option, select optgroup { background-color: #ffffff; color: #121211; }
 .folder-toggle.spacer { cursor: default; }
 @media (min-width: 900px) { .folders .folder-row { width: calc(100% - var(--depth, 0) * 16px); margin-left: calc(var(--depth, 0) * 16px); } }
 .notes-bar { flex-wrap: wrap; row-gap: 6px; }
+
+/* Color con memoria */
+.tb-split { display: inline-flex; flex: none; align-items: center; }
+.ne-toolbar .tb-split .tb-color { min-width: 32px; padding: 0 6px; }
+.ne-toolbar .tb-caret { min-width: 18px; padding: 0 2px; height: 36px; font-size: .7rem; color: var(--muted); }
+.color-backdrop { position: fixed; inset: 0; z-index: 9998; }
+.color-pop { position: fixed; z-index: 9999; width: 220px; padding: 12px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); box-shadow: 0 16px 48px rgba(0,0,0,.45); display: grid; gap: 8px; color: var(--text); }
+.color-pop .swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.color-pop .swatch { width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent; outline: 1px solid rgba(255,255,255,.25); cursor: pointer; padding: 0; }
+.color-pop .swatch.on { border-color: #fff; }
+.color-other { position: relative; font-size: .9rem; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+.color-other input { width: 40px; height: 26px; border: 0; padding: 0; background: none; cursor: pointer; }
