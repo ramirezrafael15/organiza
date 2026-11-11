@@ -47,5 +47,20 @@ export function planNotifications({ state, now = new Date(), sent = new Set(), g
         tag: key,
       };
     })
+    .concat(todoNotifications({ state, today, nowMin, sent }))
     .filter((n) => !sent.has(n.key));
+}
+
+/** Pendientes del día con hora: aviso en el minuto exacto (sin hora no avisan, para no mezclarlos con las 8:00). Si el servidor estuvo parado >2 h, ese aviso ya no se manda. */
+export function todoNotifications({ state, today, nowMin, sent = new Set() }) {
+  const out = [];
+  for (const t of state.todos ?? []) {
+    if (t.done || t.date !== today || !/^\d{1,2}:\d{2}$/.test(t.time ?? '')) continue;
+    const [h, m] = t.time.split(':').map(Number);
+    const at = h * 60 + m;
+    if (nowMin < at || nowMin - at > 120) continue;
+    const key = `todos-${t.id}-${t.date}-${t.time}`;
+    if (!sent.has(key)) out.push({ key, title: `Pendiente · ${t.time}`, body: t.title, tag: key });
+  }
+  return out;
 }
