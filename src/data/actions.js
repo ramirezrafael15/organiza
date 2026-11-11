@@ -34,8 +34,10 @@ export const actions = {
     }
     if (col === 'exams') state.todos.filter((t) => t.examId === id).forEach((t) => repo.remove('todos', t.id)); // su plan de estudio
     if (col === 'folders') {
-      // Los apuntes de la carpeta se quedan, sin carpeta.
-      state.notes.filter((n) => n.folderId === id).forEach((n) => repo.upsert('notes', { id: n.id, folderId: null }));
+      // Los apuntes y subcarpetas suben a la carpeta de arriba (o se quedan sueltos si no hay).
+      const parent = (state.folders ?? []).find((f) => f.id === id)?.parentId ?? null;
+      state.notes.filter((n) => n.folderId === id).forEach((n) => repo.upsert('notes', { id: n.id, folderId: parent }));
+      (state.folders ?? []).filter((f) => f.parentId === id).forEach((f) => repo.upsert('folders', { id: f.id, parentId: parent }));
     }
     if (col === 'exams' || col === 'tasks') {
       const type = col === 'exams' ? 'exam' : 'task';

@@ -9,6 +9,7 @@ import { actions, useAppState } from '../data/index.js';
 import { editorExtensions } from '../lib/tiptapExt.js';
 import { SubjectSelect } from './forms/fields.jsx';
 import AiPanel from './AiPanel.jsx';
+import { flatTree } from '../lib/folders.js';
 import SymbolPanel from './SymbolPanel.jsx';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -173,7 +174,7 @@ export default function NoteEditor({ note, onClose }) {
               <label className="field"><span>Carpeta</span>
                 <select value={folderId || ''} onChange={(e) => setFolderId(e.target.value || null)}>
                   <option value="">Sin carpeta</option>
-                  {folders.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+                  {flatTree(folders).map(({ folder: f, depth }) => <option key={f.id} value={f.id}>{'— '.repeat(depth)}{f.name}</option>)}
                 </select>
               </label>
             </div>

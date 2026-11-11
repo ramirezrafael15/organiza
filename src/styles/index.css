@@ -979,3 +979,8 @@ select option, select optgroup { background-color: #ffffff; color: #121211; }
 }
 @media (min-width: 1100px) { .ne-page { max-width: min(1100px, 92%); } }
 @media (min-width: 1700px) { .ne-page { max-width: 1300px; } .ne-content .ProseMirror { font-size: 1.12rem; } }
+
+/* Subcarpetas */
+.folder-btn[data-depth] { margin-left: calc(var(--depth, 0) * 14px); }
+@media (min-width: 900px) { .folder-btn[data-depth] { width: calc(100% - var(--depth, 0) * 14px); } }
+.notes-bar { flex-wrap: wrap; row-gap: 6px; }

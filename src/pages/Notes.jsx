@@ -6,6 +6,7 @@ import { actions } from '../data/index.js';
 import { useViewState } from '../data/viewFilter.js';
 import { fmt, toISO } from '../lib/dates.js';
 import { linkedLabel, matchNote } from '../lib/search.js';
+import { flatTree, folderPath, validParents, withDescendants } from '../lib/folders.js';
 
 const NoteEditor = lazy(() => import('../components/NoteEditor.jsx'));
 
@@ -28,29 +29,36 @@ export default function Notes() {
     return () => window.removeEventListener('organiza:newnote', go);
   }, []);
 
-  const inFolder = (n) => folder === 'todas' || (folder === 'sin' ? !n.folderId : n.folderId === folder);
+  const tree = flatTree(folders);
+  const scope = folders.some((f) => f.id === folder) ? withDescendants(folders, folder) : null; // la carpeta y sus subcarpetas
+  const inFolder = (n) => folder === 'todas' || (folder === 'sin' ? !n.folderId : scope?.has(n.folderId));
   const list = state.notes
     .filter((n) => inFolder(n) && (!subjectId || n.subjectId === subjectId) && matchNote(n, query, state))
     .sort((a, b) => (sort === 'az' ? String(a.title).localeCompare(String(b.title), 'es') : (b.updatedAt ?? 0) - (a.updatedAt ?? 0)));
-  const count = (id) => state.notes.filter((n) => (id === 'sin' ? !n.folderId : n.folderId === id)).length;
+  const count = (id) => (id === 'sin' ? state.notes.filter((n) => !n.folderId).length : state.notes.filter((n) => withDescendants(folders, id).has(n.folderId)).length);
   const current = folders.find((f) => f.id === folder);
 
   const newFolder = () => {
     const name = window.prompt('Nombre de la carpeta:');
     if (name?.trim()) { const f = actions.save('folders', { name: name.trim() }); setFolder(f.id); }
   };
+  const newSubfolder = () => {
+    const name = window.prompt(`Nombre de la subcarpeta dentro de «${current.name}»:`);
+    if (name?.trim()) { const f = actions.save('folders', { name: name.trim(), parentId: current.id }); setFolder(f.id); }
+  };
+  const moveFolder = (parentId) => actions.save('folders', { ...current, parentId: parentId || null });
   const renameFolder = () => {
     const name = window.prompt('Nuevo nombre:', current.name);
     if (name?.trim()) actions.save('folders', { ...current, name: name.trim() });
   };
   const deleteFolder = () => {
-    if (window.confirm(`¿Borrar la carpeta «${current.name}»? Los apuntes no se borran, se quedan sin carpeta.`)) { actions.remove('folders', current.id); setFolder('todas'); }
+    if (window.confirm(`¿Borrar la carpeta «${current.name}»? Los apuntes y subcarpetas no se borran, suben a la carpeta de arriba.`)) { actions.remove('folders', current.id); setFolder('todas'); }
   };
   const open = (n) => setEditing(n ?? { folderId: current?.id ?? null });
 
-  const FolderBtn = ({ id, label, n }) => (
-    <button className={`folder-btn ${folder === id ? 'on' : ''}`} onClick={() => setFolder(id)}>
-      <span>📁 {label}</span>{n != null && <span className="muted small">{n}</span>}
+  const FolderBtn = ({ id, label, n, depth = 0 }) => (
+    <button className={`folder-btn ${folder === id ? 'on' : ''}`} style={depth ? { '--depth': depth } : undefined} data-depth={depth || undefined} onClick={() => setFolder(id)}>
+      <span>{depth ? '↳ ' : '📁 '}{label}</span>{n != null && <span className="muted small">{n}</span>}
     </button>
   );
 
@@ -64,7 +72,7 @@ export default function Notes() {
       <div className="notes-layout">
         <aside className="folders">
           <FolderBtn id="todas" label="Todas" n={state.notes.length} />
-          {folders.map((f) => <FolderBtn key={f.id} id={f.id} label={f.name} n={count(f.id)} />)}
+          {tree.map(({ folder: f, depth }) => <FolderBtn key={f.id} id={f.id} label={f.name} n={count(f.id)} depth={depth} />)}
           <FolderBtn id="sin" label="Sin carpeta" n={count('sin')} />
           <button className="folder-btn add" onClick={newFolder}>＋ Nueva carpeta</button>
         </aside>
@@ -83,9 +91,15 @@ export default function Notes() {
             </div>
           )}
           <div className="notes-bar">
-            <strong>{current ? current.name : folder === 'sin' ? 'Sin carpeta' : 'Todos los apuntes'}</strong>
+            <strong>{current ? folderPath(folders, current.id) : folder === 'sin' ? 'Sin carpeta' : 'Todos los apuntes'}</strong>
             <span className="grow" />
-            {current && <><button className="link-btn" onClick={renameFolder}>Renombrar</button><button className="link-btn danger" onClick={deleteFolder}>Borrar carpeta</button></>}
+            {current && <>
+              <select value={current.parentId || ''} onChange={(e) => moveFolder(e.target.value)} aria-label="Mover a" style={{ width: 'auto', maxWidth: 170 }}>
+                <option value="">En la raíz</option>
+                {validParents(folders, current.id).map(({ folder: f, depth }) => <option key={f.id} value={f.id}>{'— '.repeat(depth)}{f.name}</option>)}
+              </select>
+              <button className="link-btn" onClick={newSubfolder}>＋ Subcarpeta</button>
+              <button className="link-btn" onClick={renameFolder}>Renombrar</button><button className="link-btn danger" onClick={deleteFolder}>Borrar carpeta</button></>}
             <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Orden" style={{ width: 'auto' }}>
               <option value="recientes">Recientes</option><option value="az">A → Z</option>
             </select>
@@ -102,7 +116,7 @@ export default function Notes() {
                     <div className="note-body">{n.body}</div>
                     <div className="entry-meta">
                       <SubjectChip subject={state.subjects.find((s) => s.id === n.subjectId)} />
-                      {fo && folder === 'todas' && <span>📁 {fo.name}</span>}
+                      {fo && (folder === 'todas' || fo.id !== folder) && <span>📁 {folderPath(folders, fo.id)}</span>}
                       {link && <span>🔗 {link}</span>}
                       {n.updatedAt && <span>{fmt(toISO(new Date(n.updatedAt)), 'd MMM')}</span>}
                     </div>
