@@ -29,7 +29,12 @@ export default function Notes() {
     return () => window.removeEventListener('organiza:newnote', go);
   }, []);
 
-  const tree = flatTree(folders);
+  const [closed, setClosed] = useState(() => { try { return new Set(JSON.parse(localStorage.getItem('seiri:folders-closed') || '[]')); } catch { return new Set(); } });
+  const setClosedSaved = (fn) => setClosed((prev) => { const n = fn(new Set(prev)); try { localStorage.setItem('seiri:folders-closed', JSON.stringify([...n])); } catch { /* sin almacenamiento */ } return n; });
+  const parentOf = new Map(folders.map((f) => [f.id, f.parentId]));
+  const hasKids = new Set(folders.map((f) => f.parentId).filter(Boolean));
+  const hidden = (f) => { let p = parentOf.get(f.id); const seen = new Set(); while (p && !seen.has(p)) { if (closed.has(p)) return true; seen.add(p); p = parentOf.get(p); } return false; };
+  const tree = flatTree(folders).filter(({ folder: f }) => !hidden(f));
   const scope = folders.some((f) => f.id === folder) ? withDescendants(folders, folder) : null; // la carpeta y sus subcarpetas
   const inFolder = (n) => folder === 'todas' || (folder === 'sin' ? !n.folderId : scope?.has(n.folderId));
   const list = state.notes
@@ -56,11 +61,20 @@ export default function Notes() {
   };
   const open = (n) => setEditing(n ?? { folderId: current?.id ?? null });
 
-  const FolderBtn = ({ id, label, n, depth = 0 }) => (
-    <button className={`folder-btn ${folder === id ? 'on' : ''}`} style={depth ? { '--depth': depth } : undefined} data-depth={depth || undefined} onClick={() => setFolder(id)}>
-      <span>{depth ? '↳ ' : '📁 '}{label}</span>{n != null && <span className="muted small">{n}</span>}
-    </button>
-  );
+  const FolderBtn = ({ id, label, n, depth = 0 }) => {
+    const kids = hasKids.has(id); const shut = closed.has(id);
+    const select = () => { setFolder(id); if (kids && shut) setClosedSaved((c) => { c.delete(id); return c; }); };
+    return (
+      <div className="folder-row" style={depth ? { '--depth': depth } : undefined} data-depth={depth || undefined}>
+        {kids
+          ? <button className="folder-toggle" aria-label={shut ? 'Desplegar' : 'Plegar'} aria-expanded={!shut} onClick={() => setClosedSaved((c) => { c.has(id) ? c.delete(id) : c.add(id); return c; })}>{shut ? '▸' : '▾'}</button>
+          : <span className="folder-toggle spacer" />}
+        <button className={`folder-btn ${folder === id ? 'on' : ''}`} onClick={select}>
+          <span>📁 {label}</span>{n != null && <span className="muted small">{n}</span>}
+        </button>
+      </div>
+    );
+  };
 
   return (
     <>
