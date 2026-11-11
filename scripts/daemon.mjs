@@ -22,7 +22,7 @@ function track(ref) {
   ref.collection('items').onSnapshot(apply(u.items), onError('items'));
   ref.collection('push').onSnapshot(apply(u.subs), onError('push'));
   ref.collection('sent').onSnapshot(apply(u.sent), onError('sent'));
-  ref.collection('meta').doc('settings').onSnapshot((s) => { u.settings = s.exists ? s.data().data : {}; }, onError('settings'));
+  ref.collection('meta').doc('settings').onSnapshot((s) => { u.settings = s.exists ? s.data().data : {}; u.testSeen ??= u.settings.pushTest ?? 0; }, onError('settings'));
   ref.collection('focus').doc('plan').onSnapshot((s) => { u.focus = s.exists ? (s.data().events ?? []) : []; }, onError('pomodoro'));
   tracked.set(ref.id, u);
   log(`Siguiendo al usuario ${ref.id}`);
@@ -85,6 +85,15 @@ async function focusTick() {
   try {
     const now = Date.now();
     for (const u of tracked.values()) {
+      // Aviso de prueba pedido desde Ajustes ("Probar desde el servidor"): recorre el mismo camino que los avisos reales.
+      const t = u.settings.pushTest ?? 0;
+      if (u.testSeen !== undefined && t > u.testSeen) {
+        u.testSeen = t;
+        if (now - t < 2 * 60 * 1000 && u.subs.size) {
+          log(`Prueba pedida por ${u.id} (${u.subs.size} dispositivo/s)`);
+          await sendToAll([...u.subs.values()], { title: 'Prueba de Seiri ✅', body: `Mandado por el servidor a las ${new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`, tag: `seiri-test-${t}` });
+        } else log(`Prueba pedida por ${u.id}: sin dispositivos suscritos (${u.subs.size}) o demasiado antigua`);
+      }
       const due = u.focus.filter((e) => e.at <= now && !focusDone.has(`${u.id}:${e.id}`));
       if (!due.length) continue;
       due.forEach((e) => focusDone.add(`${u.id}:${e.id}`));

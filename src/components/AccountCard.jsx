@@ -151,6 +151,7 @@ export function NotificationsCard() {
               <p style={{ margin: 0 }}>✅ Activadas en este dispositivo.</p>
               <div className="row wrap">
                 <button className="btn small" onClick={() => localTest().catch(() => setMsg('El sistema no dejó mostrar la notificación.'))}>Probar aquí</button>
+                <button className="btn small" onClick={() => { actions.updateSettings({ pushTest: Date.now() }); setMsg('Prueba pedida. Bloquea el móvil: en unos segundos te llega desde el servidor.'); }}>Probar desde el servidor</button>
                 <button className="btn small" disabled={busy} onClick={turnOff}>Desactivar</button>
               </div>
             </>
