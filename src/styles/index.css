@@ -999,3 +999,6 @@ select option, select optgroup { background-color: #ffffff; color: #121211; }
 .color-pop .swatch.on { border-color: #fff; }
 .color-other { position: relative; font-size: .9rem; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
 .color-other input { width: 40px; height: 26px; border: 0; padding: 0; background: none; cursor: pointer; }
+.color-pop .swatch-wrap { position: relative; display: inline-flex; }
+.color-pop .swatch-x { position: absolute; top: -7px; right: -7px; width: 16px; height: 16px; border-radius: 50%; border: 0; background: #444; color: #fff; font-size: 11px; line-height: 16px; padding: 0; cursor: pointer; }
+.color-pop .swatch.add { background: transparent; border: 2px dashed var(--muted); color: var(--c); outline: 0; font-size: 1rem; line-height: 1; }

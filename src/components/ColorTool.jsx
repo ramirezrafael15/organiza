@@ -1,6 +1,7 @@
 // Botón de color con memoria: un toque aplica el último color usado; la flecha abre colores rápidos y recientes.
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { actions, useAppState } from '../data/index.js';
 
 const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } };
 const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* sin almacenamiento */ } };
@@ -13,11 +14,19 @@ export const COLOR_PRESETS = {
 /** Nuevo orden de colores recientes: el último usado primero, sin repetir, máx. 6. */
 export const pushRecent = (list, color) => [color, ...list.filter((c) => c.toLowerCase() !== color.toLowerCase())].slice(0, 6);
 
+/** Añade un color a «Mis colores» (sin repetir, máx. 18) o lo quita. */
+export const addSaved = (list, color) => (list.some((c) => c.toLowerCase() === color.toLowerCase()) ? list : [...list, color].slice(-18));
+export const removeSaved = (list, color) => list.filter((c) => c.toLowerCase() !== color.toLowerCase());
+
 export default function ColorTool({ kind, title, glyph, current, onApply, onClear }) {
   const key = `seiri:color:${kind}`;
   const [last, setLast] = useState(() => load(key, COLOR_PRESETS[kind][0]));
   const [recent, setRecent] = useState(() => load(`${key}:recent`, []));
   const [pos, setPos] = useState(null);
+  const { settings } = useAppState();
+  const all = settings.savedColors ?? {};
+  const saved = all[kind] ?? [];
+  const setSaved = (list) => actions.updateSettings({ savedColors: { ...all, [kind]: list } });
   const caret = useRef(null);
   const noBlur = (e) => e.preventDefault();
 
@@ -46,6 +55,20 @@ export default function ColorTool({ kind, title, glyph, current, onApply, onClea
         <>
           <div className="color-backdrop" onClick={() => setPos(null)} />
           <div className="color-pop" style={{ left: pos.left, top: pos.top }} onMouseDown={noBlur}>
+            <div className="small muted">Mis colores</div>
+            <div className="swatches">
+              {saved.map((c) => (
+                <span key={c} className="swatch-wrap">
+                  <button type="button" className={`swatch ${c === last ? 'on' : ''}`} style={{ background: c }} aria-label={c} onClick={() => { use(c); setPos(null); }} />
+                  <button type="button" className="swatch-x" aria-label={`Quitar ${c} de mis colores`} onClick={() => setSaved(removeSaved(saved, c))}>×</button>
+                </span>
+              ))}
+              {!saved.some((c) => c.toLowerCase() === last.toLowerCase())
+                ? <button type="button" className="swatch add" aria-label="Guardar el color actual" title="Guardar el color actual" onClick={() => setSaved(addSaved(saved, last))} style={{ '--c': last }}>＋</button>
+                : null}
+              {!saved.length && <span className="small muted">Elige uno y pulsa ＋ para guardarlo</span>}
+            </div>
+            <div className="small muted">Básicos</div>
             <div className="swatches">
               {COLOR_PRESETS[kind].map((c) => <button key={c} type="button" className={`swatch ${c === last ? 'on' : ''}`} style={{ background: c }} aria-label={c} onClick={() => { use(c); setPos(null); }} />)}
             </div>
