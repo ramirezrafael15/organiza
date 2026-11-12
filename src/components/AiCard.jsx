@@ -3,9 +3,24 @@ import { useState } from 'react';
 import { setKey, useKeys } from '../lib/keys.js';
 import { askGemini, diagnose } from '../lib/gemini.js';
 import { askGroq } from '../lib/groq.js';
+import { actions, useAppState } from '../data/index.js';
+import { decryptKeys, encryptKeys } from '../lib/vault.js';
 
 export default function AiCard() {
   const settings = useKeys();
+  const { settings: cloud } = useAppState();
+  const vault = cloud.keysVault;
+  const [pass, setPass] = useState('');
+  const saveVault = async () => {
+    setMsg('Guardando copia segura…');
+    try { actions.updateSettings({ keysVault: await encryptKeys(settings, pass) }); setPass(''); setMsg('✔ Copia segura guardada en tu cuenta (cifrada). Si pierdes las claves, las recuperas con esa contraseña.'); }
+    catch { setMsg('No se pudo cifrar en este navegador.'); }
+  };
+  const restoreVault = async () => {
+    setMsg('Recuperando…');
+    try { const k = await decryptKeys(vault, pass); Object.entries(k).forEach(([n, v]) => setKey(n, v)); setPass(''); setMsg('✔ Claves recuperadas.'); }
+    catch { setMsg('Contraseña incorrecta.'); }
+  };
   const [key, setKeyInput] = useState('');
   const [msg, setMsg] = useState('');
   const has = !!settings.geminiKey;
@@ -33,6 +48,13 @@ export default function AiCard() {
   return (
     <section className="card stack">
       <h2>IA de los apuntes (Gemini)</h2>
+      {!has && vault && (
+        <div className="stack" style={{ gap: 6 }}>
+          <p className="small" style={{ margin: 0 }}>🔐 Tienes una copia segura de tus claves. Escribe tu contraseña de recuperación y vuelven sin tener que pedirlas otra vez.</p>
+          <input type="password" placeholder="Contraseña de recuperación" value={pass} onChange={(e) => setPass(e.target.value)} />
+          <button className="btn primary" style={{ alignSelf: 'flex-start' }} disabled={pass.length < 6} onClick={restoreVault}>Recuperar mis claves</button>
+        </div>
+      )}
       {has ? (
         <>
           <p className="muted small">Clave guardada (…{settings.geminiKey.slice(-4)}). Se guarda solo en este dispositivo (no en la nube): en cada dispositivo tienes que ponerla una vez.</p>
@@ -68,6 +90,17 @@ export default function AiCard() {
           <input type="password" placeholder="gsk_…" value={gkey} onChange={(e) => setGkey(e.target.value)} />
           <button className="btn primary" style={{ alignSelf: 'flex-start' }} disabled={gkey.trim().length < 20}
             onClick={() => { setKey('groqKey', gkey.trim()); setGkey(''); }}>Guardar clave de Groq</button>
+        </>
+      )}
+      {(has || hasGroq) && (
+        <>
+          <h3 style={{ margin: '8px 0 0' }}>Copia segura (para que no se pierdan)</h3>
+          <p className="muted small">
+            {vault ? `✅ Hay una copia cifrada en tu cuenta (${new Date(vault.at).toLocaleDateString('es-ES')}). ` : ''}
+            Elige una contraseña de recuperación (no es la de tu cuenta). Las claves se cifran en tu móvil y solo se sube el texto cifrado: nadie más puede leerlas, ni yo. Si el móvil las borra, las recuperas con esta contraseña.
+          </p>
+          <input type="password" placeholder="Contraseña de recuperación (mín. 6)" value={pass} onChange={(e) => setPass(e.target.value)} />
+          <button className="btn small" style={{ alignSelf: 'flex-start' }} disabled={pass.length < 6} onClick={saveVault}>{vault ? 'Actualizar copia segura' : 'Guardar copia segura'}</button>
         </>
       )}
       {msg && <p className="small" style={{ whiteSpace: 'pre-wrap' }}>{msg}</p>}
