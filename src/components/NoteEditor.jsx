@@ -12,6 +12,7 @@ import AiPanel from './AiPanel.jsx';
 import { flatTree } from '../lib/folders.js';
 import ColorTool from './ColorTool.jsx';
 import SymbolPanel from './SymbolPanel.jsx';
+import ConnectPanel, { LinkChips } from './ConnectPanel.jsx';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 // Las notas antiguas eran texto plano: se convierten a párrafos la primera vez que se abren.
@@ -19,6 +20,7 @@ const initialHtml = (n) => n.html ?? (n.body ? n.body.split('\n').map((l) => `<p
 
 const FONTS = [['', 'Letra'], ['Georgia, serif', 'Georgia'], ['"Times New Roman", serif', 'Times'], ['Arial, sans-serif', 'Arial'], ['Verdana, sans-serif', 'Verdana'], ['"Courier New", monospace', 'Courier'], ['"Comic Sans MS", cursive', 'Cómic']];
 const SIZES = ['', '12px', '14px', '16px', '18px', '22px', '28px', '36px', '48px'];
+const NO_LINKS = [];
 const MAX_HTML = 850_000; // Firestore admite ~1 MB por documento
 
 // Reduce la foto antes de meterla en el apunte (si no, no cabría en la nube).
@@ -46,6 +48,8 @@ export default function NoteEditor({ note, onClose }) {
   const [status, setStatus] = useState('');
   const [ai, setAi] = useState(false);
   const [sym, setSym] = useState(false);
+  const [connect, setConnect] = useState(false);
+  const [links, setLinks] = useState(note.links ?? NO_LINKS);
   const [outline, setOutline] = useState([]);
   const [, bump] = useState(0);
   const dirty = useRef(false);
@@ -83,12 +87,13 @@ export default function NoteEditor({ note, onClose }) {
       html,
       subjectId: latest.current.subjectId,
       folderId: latest.current.folderId,
+      links: latest.current.links,
     });
     idRef.current = saved.id;
     dirty.current = false;
     setStatus('Guardado');
   };
-  latest.current = { title, subjectId, folderId };
+  latest.current = { title, subjectId, folderId, links };
   const flushRef = useRef(flush);
   flushRef.current = flush;
 
@@ -99,8 +104,10 @@ export default function NoteEditor({ note, onClose }) {
     timer.current = setTimeout(() => flushRef.current(), 700);
   }
   useEffect(() => {
-    if (title !== (note.title ?? '') || subjectId !== (note.subjectId ?? null) || folderId !== (note.folderId ?? null)) schedule();
-  }, [title, subjectId, folderId]); // eslint-disable-line
+    if (title !== (note.title ?? '') || subjectId !== (note.subjectId ?? null) || folderId !== (note.folderId ?? null) || links !== (note.links ?? NO_LINKS)) schedule();
+  }, [title, subjectId, folderId, links]); // eslint-disable-line
+  // Un apunte nuevo que viene de un archivo importado se guarda aunque no se toque.
+  useEffect(() => { if (!note.id && note.html) schedule(); }, []); // eslint-disable-line
   // Al cerrar o salir de la app se guarda lo pendiente.
   useEffect(() => {
     const onHide = () => flushRef.current();
@@ -155,6 +162,7 @@ export default function NoteEditor({ note, onClose }) {
       <header className="ne-head">
         <button className="btn" onClick={close}>← Notas</button>
         <span className="ne-status small muted">{status}</span>
+        <button className="btn" onClick={() => setConnect((v) => !v)} aria-expanded={connect}>⇄ Docs · Drive · Notion</button>
         <button className="btn" onClick={() => setAi((v) => !v)}>✨ IA</button>
         <button className="btn danger" onClick={remove}>Borrar</button>
       </header>
@@ -179,6 +187,8 @@ export default function NoteEditor({ note, onClose }) {
                 </select>
               </label>
             </div>
+            {connect && <ConnectPanel editor={editor} title={title} setTitle={setTitle} links={links} setLinks={setLinks} onClose={() => setConnect(false)} />}
+            {!connect && links.length > 0 && <LinkChips links={links} />}
             <div className="ne-toolbar" role="toolbar">
               <B label="Deshacer" on={() => c().undo().run()} disabled={!editor.can().undo()}>↶</B>
               <B label="Rehacer" on={() => c().redo().run()} disabled={!editor.can().redo()}>↷</B>

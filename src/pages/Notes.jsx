@@ -1,11 +1,12 @@
 // Apuntes: documentos tipo Docs organizados en carpetas, con búsqueda por texto.
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Empty, SubjectChip } from '../components/bits.jsx';
 import Icon from '../components/Icon.jsx';
 import { actions } from '../data/index.js';
 import { useViewState } from '../data/viewFilter.js';
 import { fmt, toISO } from '../lib/dates.js';
 import { linkedLabel, matchNote } from '../lib/search.js';
+import { fileToNote, KIND_ICON } from '../lib/noteIO.js';
 import { flatTree, folderPath, validParents, withDescendants } from '../lib/folders.js';
 
 const NoteEditor = lazy(() => import('../components/NoteEditor.jsx'));
@@ -18,6 +19,14 @@ export default function Notes() {
   const [folder, setFolder] = useState('todas'); // 'todas' | 'sin' | id de carpeta
   const [sort, setSort] = useState('recientes');
   const [editing, setEditing] = useState(null); // nota abierta en el editor ({} = nueva)
+  const fileRef = useRef(null);
+  const importNote = async (e) => {
+    const f = e.target.files?.[0];
+    e.target.value = '';
+    if (!f) return;
+    try { const n = await fileToNote(f); setEditing({ title: n.title, html: n.html, folderId: current?.id ?? null }); }
+    catch (err) { window.alert(err.message || 'No he podido leer ese archivo.'); }
+  };
 
   // Desde el "+" del menú Añadir se abre un apunte nuevo directamente.
   useEffect(() => {
@@ -80,6 +89,9 @@ export default function Notes() {
     <>
       <div className="page-head">
         <h1>Apuntes</h1>
+        <span className="grow" />
+        <button className="btn" onClick={() => fileRef.current?.click()}>📥 Importar</button>
+        <input ref={fileRef} type="file" hidden accept=".docx,.md,.markdown,.html,.htm,.txt,text/*" onChange={importNote} />
         <button className="btn primary" onClick={() => open()}><Icon name="plus" /> Apunte</button>
       </div>
 
@@ -132,6 +144,7 @@ export default function Notes() {
                       <SubjectChip subject={state.subjects.find((s) => s.id === n.subjectId)} />
                       {fo && (folder === 'todas' || fo.id !== folder) && <span>📁 {folderPath(folders, fo.id)}</span>}
                       {link && <span>🔗 {link}</span>}
+                      {n.links?.length > 0 && <span>{[...new Set(n.links.map((l) => KIND_ICON[l.kind]))].join(' ')} {n.links.length}</span>}
                       {n.updatedAt && <span>{fmt(toISO(new Date(n.updatedAt)), 'd MMM')}</span>}
                     </div>
                   </button>

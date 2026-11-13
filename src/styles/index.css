@@ -1027,3 +1027,10 @@ select option, select optgroup { background-color: #ffffff; color: #121211; }
 .ai-chat-form input { flex: 1; min-width: 0; }
 .ai-chat-form .btn svg { width: 18px; height: 18px; }
 .linkish { text-decoration: underline; color: inherit; font: inherit; padding: 0; }
+
+/* Conectar apuntes con Docs/Drive/Notion */
+.ne-connect { margin: 8px 0; }
+.ne-connect .row { display: flex; align-items: center; gap: 8px; }
+.ne-links { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.ne-links a.chip-btn { text-decoration: none; }
+.ne-head { flex-wrap: wrap; }
