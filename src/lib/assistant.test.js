@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildPrompt, clip, MAX_CHARS, MAX_TURNS, rateCheck } from './assistant.js';
+import { buildPrompt, clip, MAX_CHARS, MAX_TURNS, rateCheck, wantsContext } from './assistant.js';
 
 describe('asistente: prompt y límites', () => {
   it('recorta los mensajes largos', () => { expect(clip('a'.repeat(900)).length).toBe(MAX_CHARS); });
@@ -20,5 +20,13 @@ describe('asistente: prompt y límites', () => {
     expect(rateCheck(full, now).ok).toBe(false);
     expect(rateCheck(full.slice(0, 5), now).ok).toBe(true);
     expect(rateCheck([now - 11 * 60 * 1000], now).recent).toEqual([]);
+  });
+  it('mete la agenda en el prompt y entiende cuándo pide otra sección', () => {
+    const p = buildPrompt({ history: [], section: 'Panel', text: 'hola', overview: { hoy: '2026-11-13' }, context: { entregas: [1] }, extra: { notas: { total: 2 } } });
+    expect(p).toContain('"hoy":"2026-11-13"'); expect(p).toContain('seccion_actual: {"entregas":[1]}'); expect(p).toContain('mas_secciones: {"notas"');
+    const ok = ['examenes', 'notas'];
+    expect(wantsContext('PEDIR_CONTEXTO: examenes', ok)).toBe('examenes');
+    expect(wantsContext('PEDIR_CONTEXTO: loquesea', ok)).toBeNull();
+    expect(wantsContext('Claro, tienes examen', ok)).toBeNull();
   });
 });

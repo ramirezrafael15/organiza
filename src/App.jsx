@@ -146,7 +146,7 @@ function AppShell() {
           </button>
         </nav>
 
-        <Assistant section={ROUTES.find((r) => r.id === routeId).label} onVoice={() => { setAutoStart(false); setVoice(true); }} />
+        <Assistant routeId={routeId} section={ROUTES.find((r) => r.id === routeId).label} onVoice={() => { setAutoStart(false); setVoice(true); }} />
         <button className="fab" onClick={() => ui.openQuickAdd()} aria-label="Añadir"><Icon name="plus" /></button>
       </div>
 

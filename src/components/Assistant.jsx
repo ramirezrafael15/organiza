@@ -4,11 +4,15 @@ import { useEffect, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
 import { useUI } from './ui.js';
 import { askAI } from '../lib/ai.js';
-import { clip, buildPrompt, MAX_CHARS, rateCheck, SYSTEM } from '../lib/assistant.js';
+import { clip, buildPrompt, MAX_CHARS, rateCheck, SYSTEM, wantsContext } from '../lib/assistant.js';
+import { getOverview, getPageContext, SECTIONS } from '../lib/pageContext.js';
+import { useAppState, useToday } from '../data/index.js';
 import { useKeys } from '../lib/keys.js';
 
-export default function Assistant({ section, onVoice }) {
+export default function Assistant({ routeId, section, onVoice }) {
   const keys = useKeys();
+  const state = useAppState();
+  const today = useToday();
   const ui = useUI();
   const [open, setOpen] = useState(false);
   const [msgs, setMsgs] = useState([]); // { role: 'user'|'ai', text, error? }
@@ -28,7 +32,14 @@ export default function Assistant({ section, onVoice }) {
     times.current.push(Date.now());
     setBusy(true);
     try {
-      const out = await askAI({ geminiKey: keys.geminiKey, groqKey: keys.groqKey, system: SYSTEM, prompt: buildPrompt({ history, section, text }) });
+      // Cada mensaje lleva la agenda actual (resumen + sección en la que está). Si la IA pide otra sección, se le da una vez.
+      const overview = getOverview(state, today);
+      const context = getPageContext(routeId, state, today);
+      const go = (extra) => askAI({ geminiKey: keys.geminiKey, groqKey: keys.groqKey, system: SYSTEM, prompt: buildPrompt({ history, section, text, overview, context, extra }) });
+      let out = await go();
+      const more = wantsContext(out, SECTIONS);
+      if (more) out = await go({ [more]: getPageContext(more, state, today) });
+      if (wantsContext(out, SECTIONS)) out = 'No he conseguido leer esa parte de tu agenda. ¿Me lo pones con otras palabras?';
       setMsgs((m) => [...m, { role: 'ai', text: out }]);
     } catch (e) {
       setMsgs((m) => [...m, { role: 'ai', error: true, retry: text, text: e.message || 'No he podido responder.' }]);
