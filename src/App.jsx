@@ -23,6 +23,7 @@ import Exams from './pages/Exams.jsx';
 import { useTheme } from './lib/theme.js';
 import { listenForWake, useWake, wakeSupported } from './lib/wake.js';
 import Voice from './components/Voice.jsx';
+import Assistant from './components/Assistant.jsx';
 import Splash from './components/Splash.jsx';
 import { ToastHost } from './components/toast.jsx';
 import Welcome from './components/Welcome.jsx';
@@ -145,7 +146,7 @@ function AppShell() {
           </button>
         </nav>
 
-        <button className="fab-voice" onClick={() => { setAutoStart(false); setVoice(true); }} aria-label="Asistente de voz"><Icon name="mic" /></button>
+        <Assistant section={ROUTES.find((r) => r.id === routeId).label} onVoice={() => { setAutoStart(false); setVoice(true); }} />
         <button className="fab" onClick={() => ui.openQuickAdd()} aria-label="Añadir"><Icon name="plus" /></button>
       </div>
 
