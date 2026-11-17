@@ -27,9 +27,9 @@ afterEach(cleanup);
 const go = (hash) => act(() => { window.location.hash = `/${hash}`; window.dispatchEvent(new HashChangeEvent('hashchange')); });
 
 describe('app', () => {
-  it('panel: muestra hoy, urgente y próximos exámenes', () => {
+  it('panel: muestra qué hacer ahora, hoy y próximos exámenes', () => {
     render(<App />);
-    expect(screen.getByRole('heading', { name: 'Urgente' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Qué hago ahora' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Próximos exámenes' })).toBeTruthy();
     expect(screen.getAllByText(/Bases de Datos/).length).toBeGreaterThan(0);
   });

@@ -1,19 +1,16 @@
-// Panel de inicio: lo de hoy, lo de esta semana, lo urgente y los próximos exámenes.
+// Panel de inicio: qué hacer ahora, avisos, lo de hoy, la semana y los próximos exámenes.
 import EntryRow from '../components/EntryRow.jsx';
-import { Empty, ProgramPill, Progress, UrgencyBadge } from '../components/bits.jsx';
+import { Empty, ProgramPill, Progress } from '../components/bits.jsx';
 import { useUI } from '../components/ui.js';
 import { actions, useAppState, useToday } from '../data/index.js';
 import { useViewState } from '../data/viewFilter.js';
 import { buildDemoState } from '../data/demo.js';
 import { entriesOn, upcomingExams, urgentItems } from '../lib/agenda.js';
-import { Ring } from '../components/motion.jsx';
 import { addDaysISO, countdownLabel, daysUntil, fmt, relativeLabel } from '../lib/dates.js';
 import { entryColor } from '../lib/color.js';
-import { KINDS } from '../lib/kinds.js';
 import { getUrgency } from '../lib/urgency.js';
 import { activeReminders } from '../lib/reminders.js';
 import { FORM_FOR_COL } from '../components/ui.js';
-import { TodoRow } from './Todos.jsx';
 import NowList from '../components/NowList.jsx';
 
 const Section = ({ title, action, children }) => (
@@ -61,8 +58,6 @@ export default function Dashboard() {
   const subjectOf = (id) => state.subjects.find((s) => s.id === id);
 
   const pendingTasks = state.tasks.filter((t) => t.status !== 'entregado').length;
-  // Pendientes del día a día que tocan hoy o se quedaron atrás.
-  const dueTodos = (state.todos ?? []).filter((t) => !t.done && t.date && t.date <= today).sort((a, b) => a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || ''));
 
   return (
     <>
@@ -81,19 +76,10 @@ export default function Dashboard() {
 
       <NowList state={state} full={full} today={today} />
 
-      {dueTodos.length > 0 && (
-        <Section title="Pendientes de hoy" action={<button className="link-btn" onClick={() => navigate('pendientes')}>Ver todos</button>}>
-          <div className="card todo-list">
-            {dueTodos.slice(0, 6).map((t) => <TodoRow key={t.id} todo={t} today={today} subjects={state.subjects} showDate={t.date < today} />)}
-            {dueTodos.length > 6 && <p className="small muted" style={{ margin: 0, padding: '8px 14px' }}>+{dueTodos.length - 6} más</p>}
-          </div>
-        </Section>
-      )}
-
       {reminders.length > 0 && (
         <Section title="Avisos" action={<span className="small muted">{reminders.filter((r) => r.isNew).length ? 'Hay avisos nuevos hoy' : 'En curso'}</span>}>
           <div className="entries">
-            {reminders.slice(0, 6).map((r) => (
+            {reminders.slice(0, 3).map((r) => (
               <button key={r.key} className="entry" style={{ '--k': entryColor({ kind: r.kind === 'evento' ? 'personal' : r.kind, subjectId: r.subjectId }, full) }}
                 onClick={() => openForm(FORM_FOR_COL[r.col], r.item)}>
                 <span className="entry-time">{countdownLabel(r.date, today)}</span>
@@ -108,7 +94,7 @@ export default function Dashboard() {
               </button>
             ))}
           </div>
-          {reminders.length > 6 && <p className="small muted" style={{ margin: '6px 0 0' }}>y {reminders.length - 6} más en camino</p>}
+          {reminders.length > 3 && <p className="small muted" style={{ margin: '6px 0 0' }}>y {reminders.length - 3} más en camino</p>}
         </Section>
       )}
 
@@ -141,50 +127,21 @@ export default function Dashboard() {
         </div>
 
         <div>
-          <Section title="Urgente">
-            {urgent.length ? (
-              <div className="entries">
-                {urgent.map(({ kind, col, item, date, urgency }) => {
-                  const subject = subjectOf(item.subjectId);
-                  const title = kind === 'examen' ? `Examen de ${subject?.name ?? ''}`.trim() : item.title;
-                  return (
-                    <button key={item.id} className="entry" style={{ '--k': entryColor({ kind, subjectId: item.subjectId }, full) }}
-                      onClick={() => openForm(col === 'exams' ? 'exam' : 'task', item)}>
-                      <span className="entry-time">{urgency.overdue ? 'Vencido' : countdownLabel(date, today)}</span>
-                      <span className="entry-main">
-                        <span className="entry-title">{title}</span>
-                        <span className="entry-meta">
-                          <span>{KINDS[kind].label} · {fmt(date, 'd MMM')}</span>
-                          <ProgramPill subject={subject} />
-                          <span>{item.progress ?? 0}%</span>
-                        </span>
-                      </span>
-                      <UrgencyBadge urgency={urgency} />
-                    </button>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="card"><Empty>Todo bajo control ✅</Empty></div>
-            )}
-          </Section>
-
           <Section title="Próximos exámenes" action={<button className="link-btn" onClick={() => navigate('examenes')}>Ver todos</button>}>
             {exams.length ? (
               <div className="stack">
                 {exams.map((x) => {
                   const u = getUrgency(x, 'exam', today);
+                  const d = daysUntil(x.date, today);
                   return (
                     <button key={x.id} className="card item-card" style={{ '--c': u?.color ?? 'var(--k-examen)', textAlign: 'left' }}
                       onClick={() => openForm('exam', x)}>
                       <div className="item-top">
-                        <Ring value={x.progress ?? 0} color={u?.color} size={68} label="preparado" />
                         <div className="grow">
                           <div className="item-title">{subjectOf(x.subjectId)?.name ?? 'Examen'} <ProgramPill subject={subjectOf(x.subjectId)} /></div>
-                          <div className="small muted">{fmt(x.date, "EEE d MMM")}{x.time ? ` · ${x.time}` : ''}</div>
-                          <span className="days-pill" style={{ '--c': u?.color }}>Queda{daysUntil(x.date, today) === 1 ? '' : 'n'} {daysUntil(x.date, today)} {daysUntil(x.date, today) === 1 ? 'día' : 'días'}</span>
+                          <div className="small muted">{fmt(x.date, 'EEE d MMM')}{x.time ? ` · ${x.time}` : ''}</div>
                         </div>
-                        <UrgencyBadge urgency={u} />
+                        <span className="days-pill" style={{ '--c': u?.color }}>{d === 0 ? 'Hoy' : d === 1 ? 'Mañana' : `${d} días`}</span>
                       </div>
                       <div className="prog-row">
                         <div className="grow"><Progress value={x.progress ?? 0} color={u?.color} /></div>
