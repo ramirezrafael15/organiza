@@ -1,6 +1,6 @@
 // Calendario con vista mensual, semanal y diaria.
 import { addMonths } from 'date-fns';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import EntryRow from '../components/EntryRow.jsx';
 import Icon from '../components/Icon.jsx';
 import { Empty } from '../components/bits.jsx';
@@ -40,6 +40,16 @@ export default function CalendarPage() {
     if (view === 'mes') setCursor(toISO(addMonths(fromISO(cursor), dir)));
     else setCursor(addDaysISO(cursor, dir * (view === 'semana' ? 7 : view === 'agenda' ? AGENDA_DAYS : 1)));
   };
+  // Si la app se queda abierta y cambia el día, lo que estaba en "hoy" se pasa al nuevo hoy
+  // (si estabas mirando otro día a propósito, no se toca).
+  const prevToday = useRef(today);
+  useEffect(() => {
+    const old = prevToday.current;
+    prevToday.current = today;
+    if (old === today) return;
+    setCursor((c) => (c === old ? today : c));
+    setSelected((c) => (c === old ? today : c));
+  }, [today]);
   const goToday = () => { setCursor(today); setSelected(today); };
   const openDay = (iso) => { setCursor(iso); setSelected(iso); setView('dia'); };
 
