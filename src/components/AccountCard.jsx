@@ -49,8 +49,8 @@ export function AccountCard() {
           {acc.error && <p className="small" style={{ color: 'var(--danger)', margin: 0 }}>{acc.error}</p>}
           <div className="row wrap">
             <button className="btn primary" type="submit" disabled={busy}>Entrar</button>
-            <button className="btn" type="button" disabled={busy} onClick={submit(account.signUp)}>Crear cuenta</button>
           </div>
+          <p className="small muted" style={{ margin: 0 }}>Solo con invitación: la cuenta te la crea Rafa.</p>
           <button className="link-btn" type="button" style={{ alignSelf: 'flex-start' }} disabled={busy} onClick={() => sendReset(email.trim())}>¿Has olvidado la contraseña?</button>
           {note && <p className="small muted" style={{ margin: 0 }}>{note}</p>}
         </form>

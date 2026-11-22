@@ -36,7 +36,7 @@ export default function Welcome() {
           {acc.error && <p className="small" style={{ color: 'var(--danger)', margin: 0 }}>{acc.error}</p>}
           {note && <p className="small muted" style={{ margin: 0 }}>{note}</p>}
           <button className="btn primary" disabled={busy}>Entrar</button>
-          <button className="btn" type="button" disabled={busy} onClick={go(account.signUp)}>Crear cuenta</button>
+          <p className="small muted" style={{ margin: 0 }}>Seiri es solo con invitación: la cuenta te la crea Rafa.</p>
           <button className="link-btn" type="button" disabled={busy} onClick={forgot}>¿Has olvidado la contraseña?</button>
         </form>
       </div>
