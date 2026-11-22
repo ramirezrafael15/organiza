@@ -1034,3 +1034,9 @@ select option, select optgroup { background-color: #ffffff; color: #121211; }
 .ne-links { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
 .ne-links a.chip-btn { text-decoration: none; }
 .ne-head { flex-wrap: wrap; }
+
+/* Menú agrupado y pestañas de "Por hacer" */
+.side-group { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+.side-group.last { margin-top: auto; margin-bottom: 0; }
+.side-title { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 6px 14px 2px; opacity: 0.8; }
+.porhacer-tabs { max-width: 420px; margin-bottom: 14px; }

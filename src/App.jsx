@@ -44,7 +44,34 @@ const ROUTES = [
   { id: 'calificaciones', label: 'Notas', icon: 'grades', Page: Grades },
   { id: 'ajustes', label: 'Ajustes', icon: 'settings', Page: Settings },
 ];
-const MOBILE_MAIN = ['panel', 'calendario', 'examenes', 'pendientes']; // el resto va en "Más"
+// Pendientes, Entregas y Exámenes son tres pestañas de "Por hacer"; cada una sigue teniendo su propia ruta
+// (así los enlaces, el asistente y los avisos siguen funcionando).
+const POR_HACER = ['pendientes', 'tareas', 'examenes'];
+const TAB_KEY = 'organiza:porhacer';
+const lastTab = () => {
+  try { const t = localStorage.getItem(TAB_KEY); return POR_HACER.includes(t) ? t : 'pendientes'; } catch { return 'pendientes'; }
+};
+
+// Menú agrupado. Cada entrada apunta a una ruta (o a la última pestaña de Por hacer).
+const NAV = [
+  { group: 'Hoy', items: [
+    { id: 'panel', label: 'Panel', icon: 'home' },
+    { id: 'calendario', label: 'Calendario', icon: 'calendar' },
+    { id: 'porhacer', label: 'Por hacer', icon: 'check', routes: POR_HACER },
+  ] },
+  { group: 'Estudiar', items: [
+    { id: 'estudio', label: 'Estudio', icon: 'book' },
+    { id: 'notas', label: 'Apuntes', icon: 'note' },
+  ] },
+  { group: 'Mi curso', items: [
+    { id: 'horario', label: 'Horario', icon: 'clock' },
+    { id: 'calificaciones', label: 'Calificaciones', icon: 'grades' },
+  ] },
+  { group: null, items: [{ id: 'ajustes', label: 'Ajustes', icon: 'settings' }] },
+];
+const MOBILE_MAIN = ['panel', 'calendario', 'porhacer', 'estudio']; // el resto va en "Más"
+const ALL_ITEMS = NAV.flatMap((g) => g.items);
+const isActive = (item, routeId) => (item.routes ? item.routes.includes(routeId) : item.id === routeId);
 
 const routeFromHash = () => {
   const id = window.location.hash.replace(/^#\/?/, '');
@@ -95,7 +122,12 @@ function AppShell() {
     }
   }, [settings.kindColors]);
 
+  useEffect(() => { // recuerda la última pestaña de Por hacer
+    if (POR_HACER.includes(routeId)) { try { localStorage.setItem(TAB_KEY, routeId); } catch { /* sin almacenamiento */ } }
+  }, [routeId]);
+
   const navigate = useCallback((id) => {
+    if (id === 'porhacer') id = lastTab();
     window.location.hash = `/${id}`;
     setMoreOpen(false);
     window.scrollTo(0, 0);
@@ -111,7 +143,7 @@ function AppShell() {
   );
 
   const { Page } = ROUTES.find((r) => r.id === routeId);
-  const moreActive = !MOBILE_MAIN.includes(routeId);
+  const moreActive = !ALL_ITEMS.some((i) => MOBILE_MAIN.includes(i.id) && isActive(i, routeId));
 
   return (
     <UIContext.Provider value={ui}>
@@ -122,23 +154,37 @@ function AppShell() {
       <div className="app">
         <nav className="sidebar" aria-label="Principal">
           <div className="brand"><img src={`${import.meta.env.BASE_URL}icons/icon-192-v3.png`} alt="" /> Seiri</div>
-          {ROUTES.map((r) => (
-            <button key={r.id} className={`side-btn ${routeId === r.id ? 'active' : ''}`} onClick={() => navigate(r.id)}>
-              <Icon name={r.icon} /> {r.id === 'notas' ? 'Apuntes' : r.id === 'calificaciones' ? 'Calificaciones' : r.label}
-            </button>
+          {NAV.map((g, i) => (
+            <div key={i} className={g.group ? 'side-group' : 'side-group last'}>
+              {g.group && <div className="side-title">{g.group}</div>}
+              {g.items.map((it) => (
+                <button key={it.id} className={`side-btn ${isActive(it, routeId) ? 'active' : ''}`} onClick={() => navigate(it.id)}>
+                  <Icon name={it.icon} /> {it.label}
+                </button>
+              ))}
+            </div>
           ))}
         </nav>
 
         <main className="main">
           {/* El calendario es común (lo junta todo) y trae sus propios botones; Ajustes no filtra nada. */}
           {routeId !== 'ajustes' && routeId !== 'calendario' && <ProgramFilter />}
+          {POR_HACER.includes(routeId) && (
+            <div className="seg porhacer-tabs" role="tablist" aria-label="Por hacer">
+              {POR_HACER.map((id) => (
+                <button key={id} role="tab" aria-selected={routeId === id} className={routeId === id ? 'on' : ''} onClick={() => navigate(id)}>
+                  {ROUTES.find((r) => r.id === id).label}
+                </button>
+              ))}
+            </div>
+          )}
           <div key={routeId} className="page-in"><Page /></div>
         </main>
 
         <nav className="bottom-nav" aria-label="Principal">
-          {ROUTES.filter((r) => MOBILE_MAIN.includes(r.id)).map((r) => (
-            <button key={r.id} className={`nav-btn ${routeId === r.id ? 'active' : ''}`} onClick={() => navigate(r.id)}>
-              <Icon name={r.icon} /> {r.label}
+          {ALL_ITEMS.filter((it) => MOBILE_MAIN.includes(it.id)).map((it) => (
+            <button key={it.id} className={`nav-btn ${isActive(it, routeId) ? 'active' : ''}`} onClick={() => navigate(it.id)}>
+              <Icon name={it.icon} /> {it.label}
             </button>
           ))}
           <button className={`nav-btn ${moreActive ? 'active' : ''}`} onClick={() => setMoreOpen(true)}>
@@ -155,9 +201,9 @@ function AppShell() {
       {moreOpen && (
         <Modal title="Más" onClose={() => setMoreOpen(false)}>
           <div className="modal-body" style={{ paddingBottom: 22 }}>
-            {ROUTES.filter((r) => !MOBILE_MAIN.includes(r.id)).map((r) => (
-              <button key={r.id} className="side-btn" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 12 }} onClick={() => navigate(r.id)}>
-                <Icon name={r.icon} /> {r.id === 'calificaciones' ? 'Calificaciones' : r.label}
+            {ALL_ITEMS.filter((it) => !MOBILE_MAIN.includes(it.id)).map((it) => (
+              <button key={it.id} className="side-btn" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 12 }} onClick={() => navigate(it.id)}>
+                <Icon name={it.icon} /> {it.label}
               </button>
             ))}
           </div>

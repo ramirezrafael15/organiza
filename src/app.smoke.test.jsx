@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 // Prueba de humo: monta la app entera con datos de ejemplo, recorre todas las pantallas
 // y comprueba que los formularios guardan y que las medias/urgencias salen en pantalla.
-import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // La config real ya está rellena; los tests simulan la app sin nube.
@@ -38,6 +38,25 @@ describe('app', () => {
     render(<App />);
     go(r);
     expect(document.querySelector('main').textContent.length).toBeGreaterThan(10);
+  });
+
+  it('menú: Por hacer agrupa pendientes, entregas y exámenes en pestañas', async () => {
+    localStorage.removeItem('organiza:porhacer');
+    render(<App />);
+    const side = within(document.querySelector('.sidebar'));
+    expect(side.queryByRole('button', { name: /Exámenes/ })).toBeNull();
+    fireEvent.click(side.getByRole('button', { name: /Por hacer/ }));
+    const tabs = within(await screen.findByRole('tablist', { name: 'Por hacer' }));
+    expect(tabs.getByRole('tab', { selected: true }).textContent).toBe('Pendientes');
+    fireEvent.click(tabs.getByRole('tab', { name: 'Exámenes' }));
+    await waitFor(() => expect(tabs.getByRole('tab', { selected: true }).textContent).toBe('Exámenes'));
+    expect(side.getByRole('button', { name: /Por hacer/ }).className).toContain('active');
+    // al volver a Por hacer se abre la última pestaña usada
+    fireEvent.click(side.getByRole('button', { name: /Panel/ }));
+    await waitFor(() => expect(screen.queryByRole('tablist', { name: 'Por hacer' })).toBeNull());
+    fireEvent.click(side.getByRole('button', { name: /Por hacer/ }));
+    const again = within(await screen.findByRole('tablist', { name: 'Por hacer' }));
+    expect(again.getByRole('tab', { selected: true }).textContent).toBe('Exámenes');
   });
 
   it('calendario: cambia entre mes, semana y día', () => {
