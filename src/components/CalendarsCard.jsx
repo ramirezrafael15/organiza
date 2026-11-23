@@ -41,8 +41,9 @@ export default function CalendarsCard() {
     <section className="card stack">
       <h2>Calendarios de clase</h2>
       <p className="muted small" style={{ margin: 0 }}>
-        Trae solos las entregas y exámenes de PRADO o del Moodle de Atlántida. En Moodle: Calendario → Importar o exportar → Exportar
-        calendario → “Todos los eventos”, “Intervalo personalizado” → Obtener URL. El enlace da acceso de lectura a tu calendario: no lo compartas.
+        Trae solas las entregas y exámenes de tu campus virtual (Moodle: la plataforma de tu universidad o instituto). En Moodle:
+        Calendario → Importar o exportar → Exportar calendario → “Todos los eventos”, “Intervalo personalizado” → Obtener URL.
+        El enlace da acceso de lectura a tu calendario: no lo compartas.
       </p>
       {calendars.map((c) => (
         <div key={c.id} className="row" style={{ justifyContent: 'space-between' }}>
@@ -51,7 +52,7 @@ export default function CalendarsCard() {
         </div>
       ))}
       <form className="stack" onSubmit={add}>
-        <Field label="Nombre"><input type="text" placeholder="Ej: PRADO" value={name} onChange={(e) => setName(e.target.value)} /></Field>
+        <Field label="Nombre"><input type="text" placeholder="Ej: Universidad" value={name} onChange={(e) => setName(e.target.value)} /></Field>
         <Field label="Enlace del calendario"><input type="url" required placeholder="https://…/export_execute.php?…" value={url} onChange={(e) => setUrl(e.target.value)} /></Field>
         <ProgramSelect value={programId} onChange={setProgramId} hint="Estudios de las asignaturas nuevas que se creen." />
         <div className="row wrap">
