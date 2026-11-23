@@ -44,14 +44,9 @@ function localParts(date, tz) {
   return { date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${p.minute}` };
 }
 
-const prevDay = (iso) => new Date(Date.parse(`${iso}T12:00:00Z`) - 864e5).toISOString().slice(0, 10);
-
-/** Fecha/hora de la app. Los plazos de Moodle a medianoche (o de madrugada) cuentan como el final del día anterior. */
+/** Fecha/hora de la app: la misma que enseña Moodle (así coincide el día al comparar los dos calendarios). */
 function when(start, tz) {
-  const p = start.utc ? localParts(start.utc, tz) : { date: start.date, time: start.time ?? '' };
-  if (!p.time) return { date: p.date, time: '' };
-  if (p.time < '06:00') return { date: prevDay(p.date), time: '23:59' };
-  return p;
+  return start.utc ? localParts(start.utc, tz) : { date: start.date, time: start.time ?? '' };
 }
 
 /** Id fijo a partir del UID del evento: importar dos veces no duplica. */
@@ -105,7 +100,7 @@ export function planCalendarImport(state, events, { programId = null, makeId, no
   const dismissed = new Set(state.settings?.icsDismissed ?? []);
   const today = localParts(new Date(now), tz).date;
   const oldest = new Date(Date.parse(`${today}T12:00:00Z`) - 30 * 864e5).toISOString().slice(0, 10);
-  const subjects = [], tasks = [], exams = [];
+  const subjects = [], tasks = [], exams = [], evts = [];
   const allSubjects = [...state.subjects];
   let skipped = 0;
 
@@ -122,11 +117,19 @@ export function planCalendarImport(state, events, { programId = null, makeId, no
   };
 
   for (const ev of events) {
-    const kind = classify(ev.summary);
+    const kind = classify(ev.summary) ?? (/^apertura de/i.test(ev.summary || '') ? null : { type: 'event', title: ev.summary });
     const id = icsId(ev.uid);
-    if (!kind || dismissed.has(id)) { skipped++; continue; }
+    if (!kind || !kind.title || dismissed.has(id)) { skipped++; continue; }
     const w = when(ev.start, tz);
     if (w.date < oldest) { skipped++; continue; }
+    if (kind.type === 'event') {
+      const old = (state.events ?? []).find((x) => x.id === id);
+      const fresh = { title: kind.title, date: w.date, start: w.time };
+      if (!old) evts.push({ id, ...fresh, end: '', kind: 'clase', subjectId: subjectId(ev.category), reminderDays: [], source: 'ics' });
+      else if (old.title !== fresh.title || old.date !== fresh.date || (old.start || '') !== fresh.start) evts.push({ id, ...fresh });
+      else skipped++;
+      continue;
+    }
     const existing = (kind.type === 'task' ? state.tasks : state.exams).find((x) => x.id === id);
     if (kind.type === 'task') {
       const fresh = { title: kind.title, due: w.date, time: w.time };
@@ -140,5 +143,5 @@ export function planCalendarImport(state, events, { programId = null, makeId, no
       else skipped++;
     }
   }
-  return { subjects, tasks, exams, skipped };
+  return { subjects, tasks, exams, events: evts, skipped };
 }

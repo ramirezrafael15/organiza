@@ -58,18 +58,24 @@ describe('ics', () => {
     expect(classify('Examen parcial de Marketing').type).toBe('exam');
     expect(classify('Apertura de Tema 5')).toBeNull();
   });
-  it('crea entregas con zona horaria de Madrid y medianoche = final del día anterior', () => {
+  it('crea entregas con zona horaria de Madrid y el mismo día que enseña Moodle', () => {
     const plan = planCalendarImport(state(), parseIcs(ICS), { makeId, now: NOW });
     expect(plan.tasks.map((t) => [t.title, t.due, t.time])).toEqual([
       ['Tema 4.1.', '2026-11-03', '14:30'],
-      ['Ventaja en costes o en diferenciación', '2026-11-09', '23:59'], // 01:00 del 10 → fin del día 9
-      ['Práctica T5 Estrategias de crecimiento', '2026-11-10', '23:59'], // 00:00 del 11 → fin del día 10
+      ['Ventaja en costes o en diferenciación', '2026-11-10', '01:00'],
+      ['Práctica T5 Estrategias de crecimiento', '2026-11-11', '00:00'],
     ]);
     expect(plan.exams).toHaveLength(1);
     expect(plan.subjects.map((s) => s.name)).toEqual(['Introducción al márketing', 'Fundamentos de dirección y administrac. de empresas']);
     expect(plan.exams[0].subjectId).toBe(plan.tasks[0].subjectId); // "Marketing" reutiliza "Introducción al márketing"
     expect(plan.tasks[1].subjectId).toBe(plan.tasks[2].subjectId);
     expect(plan.skipped).toBe(1);
+    expect(plan.events).toEqual([]);
+  });
+  it('otros eventos (asistencia…) entran como eventos', () => {
+    const ev = parseIcs('BEGIN:VEVENT\nUID:9@x\nSUMMARY:Asistencia Subgrupo 2\nDTSTART:20261123T090000Z\nEND:VEVENT');
+    const plan = planCalendarImport(state(), ev, { makeId, now: NOW });
+    expect(plan.events.map((e) => [e.title, e.date, e.start])).toEqual([['Asistencia Subgrupo 2', '2026-11-23', '10:00']]);
   });
   it('no duplica, no pisa tu progreso y respeta lo que borraste', () => {
     const first = planCalendarImport(state(), parseIcs(ICS), { makeId, now: NOW });

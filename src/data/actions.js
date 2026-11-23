@@ -89,6 +89,7 @@ export const actions = {
     plan.subjects.forEach((s) => repo.upsert('subjects', s));
     plan.tasks.forEach((t) => repo.upsert('tasks', t));
     plan.exams.forEach((x) => repo.upsert('exams', x));
+    plan.events.forEach((x) => repo.upsert('events', x));
     return plan;
   },
 

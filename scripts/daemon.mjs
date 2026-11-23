@@ -142,7 +142,8 @@ async function syncCalendars() {
         for (const s of plan.subjects) await write('subjects', s);
         for (const t of plan.tasks) await write('tasks', t);
         for (const x of plan.exams) await write('exams', x);
-        const n = plan.subjects.length + plan.tasks.length + plan.exams.length;
+        for (const x of plan.events) await write('events', x);
+        const n = plan.subjects.length + plan.tasks.length + plan.exams.length + plan.events.length;
         if (n) log(`Calendario "${cal.name}" de ${u.id}: ${plan.tasks.length} entregas, ${plan.exams.length} exámenes, ${plan.subjects.length} asignaturas`);
       } catch (e) {
         onError(`calendario ${cal.name}`)(e);
