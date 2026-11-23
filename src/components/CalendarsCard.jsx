@@ -20,7 +20,7 @@ export default function CalendarsCard() {
     const clean = normalizeUrl(url);
     if (!/^https:\/\/.+/i.test(clean)) { setMsg('El enlace debe empezar por https:// (el que da “Obtener URL del calendario”).'); return; }
     actions.updateSettings({ calendars: [...calendars, { id: newId(), name: name.trim() || 'Calendario', url: clean, programId }] });
-    setName(''); setUrl(''); setMsg('Guardado. Tu servidor lo leerá en unas horas (o importa el archivo para verlo ya).');
+    setName(''); setUrl(''); setMsg('Guardado. Tu servidor lo leerá en un minuto (o importa el archivo para verlo ya).');
   };
   const remove = (id) => actions.updateSettings({ calendars: calendars.filter((c) => c.id !== id) });
 
@@ -46,7 +46,7 @@ export default function CalendarsCard() {
       </p>
       {calendars.map((c) => (
         <div key={c.id} className="row" style={{ justifyContent: 'space-between' }}>
-          <span><b>{c.name}</b> <span className="muted small">· se lee desde tu servidor cada pocas horas</span></span>
+          <span><b>{c.name}</b> <span className="muted small">· se lee desde tu servidor cada minuto</span></span>
           <button className="btn small" onClick={() => remove(c.id)}>Quitar</button>
         </div>
       ))}
