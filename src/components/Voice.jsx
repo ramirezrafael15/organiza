@@ -34,9 +34,12 @@ export default function Voice({ onClose, autoStart = false }) {
       const r = await understand(text, state, keys, today, wd);
       setRes(r);
       if (r.action === 'query' || r.action === 'unknown') { setPhase('answer'); speak(r.answer); }
-      else if (!r.date && r.action !== 'todo') { setErr('No he pillado la fecha. Dímelo otra vez incluyendo el día.'); setPhase('error'); }
-      else setPhase('confirm');
-    } catch (e) { setErr(e.message); setPhase('error'); }
+      else if (!r.date && r.action !== 'todo') { setErr('No he pillado la fecha. Dímelo otra vez incluyendo el día.'); setPhase('error'); speak('No he pillado la fecha. Dímelo otra vez incluyendo el día.'); }
+      else {
+        setPhase('confirm');
+        speak(`${KINDS[r.action]}${r.title ? `: ${r.title}` : ''}${r.date ? `, ${fmt(r.date, "EEEE d 'de' MMMM")}` : ''}${r.time ? ` a las ${r.time}` : ''}. ¿Lo guardo?`);
+      }
+    } catch (e) { setErr(e.message); setPhase('error'); speak(e.message); }
   };
 
   const start = async () => {

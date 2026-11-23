@@ -54,13 +54,25 @@ export async function understand(text, state, keys, today, weekday) {
   return { action: r.action ?? 'unknown', title: r.title ?? '', date: /^\d{4}-\d{2}-\d{2}$/.test(r.date ?? '') ? r.date : null, time: /^\d{2}:\d{2}$/.test(r.time ?? '') ? r.time : '', subjectId: found?.id ?? null, subjectName: found?.name ?? '', answer: r.answer ?? '' };
 }
 
-/** Lee en voz alta (voz del dispositivo, gratis). */
+const VOICE_KEY = 'seiri:voz';
+export const voiceOn = () => { try { return localStorage.getItem(VOICE_KEY) !== '0'; } catch { return true; } };
+export const setVoiceOn = (v) => { try { localStorage.setItem(VOICE_KEY, v ? '1' : '0'); } catch { /* nada */ } };
+
+/** La mejor voz en español que tenga el dispositivo (las "natural"/"Google"/"Mónica"… suenan mejor). */
+function bestVoice() {
+  const all = speechSynthesis.getVoices().filter((v) => /^es/i.test(v.lang));
+  const score = (v) => (/natural|neural|google|premium|enhanced|mejorada/i.test(v.name) ? 4 : 0) + (/es[-_]ES/i.test(v.lang) ? 2 : 0) + (v.localService ? 0 : 1);
+  return all.sort((a, b) => score(b) - score(a))[0];
+}
+
+/** Lee en voz alta (voz del dispositivo, gratis). Se puede apagar en Ajustes. */
 export function speak(text) {
   try {
-    if (!('speechSynthesis' in window) || !text) return;
+    if (!('speechSynthesis' in window) || !text || !voiceOn()) return;
     speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
+    const u = new SpeechSynthesisUtterance(String(text).replace(/[*_#`]/g, ''));
     u.lang = 'es-ES';
+    const v = bestVoice(); if (v) u.voice = v;
     speechSynthesis.speak(u);
   } catch { /* sin voz */ }
 }

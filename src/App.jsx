@@ -101,7 +101,7 @@ function AppShell() {
   const [voice, setVoice] = useState(false);
   const [autoStart, setAutoStart] = useState(false);
   const wake = useWake();
-  useEffect(() => { // "Oye Seiri": mientras el asistente está cerrado y el interruptor activo
+  useEffect(() => { // "Oye <palabra>": mientras el asistente está cerrado y el interruptor activo
     if (!wake || voice || !wakeSupported()) return undefined;
     return listenForWake(() => { setAutoStart(true); setVoice(true); });
   }, [wake, voice]);

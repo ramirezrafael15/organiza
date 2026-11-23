@@ -8,6 +8,7 @@ import { clip, buildPrompt, MAX_CHARS, rateCheck, SYSTEM, wantsContext } from '.
 import { getOverview, getPageContext, SECTIONS } from '../lib/pageContext.js';
 import { useAppState, useToday } from '../data/index.js';
 import { useKeys } from '../lib/keys.js';
+import { speak } from '../lib/voice.js';
 
 export default function Assistant({ routeId, section, onVoice }) {
   const keys = useKeys();
@@ -41,6 +42,7 @@ export default function Assistant({ routeId, section, onVoice }) {
       if (more) out = await go({ [more]: getPageContext(more, state, today) });
       if (wantsContext(out, SECTIONS)) out = 'No he conseguido leer esa parte de tu agenda. ¿Me lo pones con otras palabras?';
       setMsgs((m) => [...m, { role: 'ai', text: out }]);
+      speak(out);
     } catch (e) {
       setMsgs((m) => [...m, { role: 'ai', error: true, retry: text, text: e.message || 'No he podido responder.' }]);
     }
