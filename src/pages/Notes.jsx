@@ -7,6 +7,7 @@ import { useViewState } from '../data/viewFilter.js';
 import { fmt, toISO } from '../lib/dates.js';
 import { linkedLabel, matchNote } from '../lib/search.js';
 import { fileToNote, KIND_ICON } from '../lib/noteIO.js';
+import { pick, SelectBar, SelectButton, useSelect } from '../components/select.jsx';
 import { flatTree, folderPath, validParents, withDescendants } from '../lib/folders.js';
 
 const NoteEditor = lazy(() => import('../components/NoteEditor.jsx'));
@@ -20,6 +21,7 @@ export default function Notes() {
   const [sort, setSort] = useState('recientes');
   const [editing, setEditing] = useState(null); // nota abierta en el editor ({} = nueva)
   const fileRef = useRef(null);
+  const sel = useSelect();
   const importNote = async (e) => {
     const f = e.target.files?.[0];
     e.target.value = '';
@@ -90,6 +92,7 @@ export default function Notes() {
       <div className="page-head">
         <h1>Apuntes</h1>
         <span className="grow" />
+        <SelectButton sel={sel} />
         <button className="btn" onClick={() => fileRef.current?.click()}>📥 Importar</button>
         <input ref={fileRef} type="file" hidden accept=".docx,.md,.markdown,.html,.htm,.txt,text/*" onChange={importNote} />
         <button className="btn primary" onClick={() => open()}><Icon name="plus" /> Apunte</button>
@@ -137,7 +140,7 @@ export default function Notes() {
                 const link = linkedLabel(n, state);
                 const fo = folders.find((f) => f.id === n.folderId);
                 return (
-                  <button key={n.id} className="card note-card" onClick={() => open(n)}>
+                  <button key={n.id} className="card note-card" onClick={() => open(n)} {...pick(sel, n.id)}>
                     <div className="item-title">{n.title}</div>
                     <div className="note-body">{n.body}</div>
                     <div className="entry-meta">
@@ -158,6 +161,8 @@ export default function Notes() {
           )}
         </div>
       </div>
+
+      <SelectBar sel={sel} visibleIds={list.map((n) => n.id)} noun="apuntes" onDelete={(ids) => actions.removeMany('notes', ids)} />
 
       {editing && (
         <Suspense fallback={null}>

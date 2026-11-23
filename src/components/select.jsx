@@ -1,5 +1,6 @@
 // Modo "seleccionar varios": marcas varios elementos y los borras de golpe.
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 export function useSelect() {
   const [on, setOn] = useState(false);
@@ -59,10 +60,10 @@ export const pick = (sel, id) => {
   };
 };
 
-/** Antes era un botón; ahora se entra manteniendo pulsado. Queda una pista discreta. */
+/** Botón visible para entrar en el modo seleccionar (también se entra manteniendo pulsado un elemento). */
 export function SelectButton({ sel }) {
   if (sel.on) return null;
-  return <p className="small muted sel-hint">Mantén pulsado para seleccionar y borrar</p>;
+  return <button className="btn" type="button" onClick={sel.start}>☑ Seleccionar</button>;
 }
 
 /** Barra inferior con el recuento y las acciones. onDelete recibe la lista de ids marcados. */
@@ -75,12 +76,14 @@ export function SelectBar({ sel, visibleIds, noun, onDelete }) {
     onDelete([...sel.ids]);
     sel.stop();
   };
-  return (
+  // En el body: dentro de la página animada (transform) "fixed" se colocaba al final de la página, fuera de la pantalla.
+  return createPortal(
     <div className="sel-bar" role="toolbar" aria-label="Seleccionar varios">
       <b className="grow">{n ? `${n} seleccionad${n === 1 ? 'o' : 'os'}` : 'Toca para marcar más'}</b>
       <button className="btn small" onClick={() => sel.set(all ? [] : visibleIds)}>{all ? 'Ninguno' : 'Todos'}</button>
       <button className="btn small danger" disabled={!n} onClick={del}>Borrar{n ? ` (${n})` : ''}</button>
       <button className="btn small" onClick={sel.stop}>Cancelar</button>
-    </div>
+    </div>,
+    document.body,
   );
 }

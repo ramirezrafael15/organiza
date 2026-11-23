@@ -513,7 +513,8 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
   padding: 10px 12px; background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius-sm); box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
 }
-@media (min-width: 900px) { .sel-bar { left: 272px; right: 32px; bottom: 20px; } }
+.sel-bar > b { flex: 1 1 100%; }
+@media (min-width: 900px) { .sel-bar { left: 272px; right: 32px; bottom: 20px; } .sel-bar > b { flex: 1 1 auto; } }
 .selecting .fab { display: none; }
 [data-selectable] { position: relative; cursor: pointer; }
 [data-selectable] > * { pointer-events: none; }
