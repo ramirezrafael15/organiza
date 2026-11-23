@@ -61,9 +61,16 @@ export default function Techniques() {
     if (!n) return;
     actions.updateSettings({ focusLog: recordFocus(repo.getState().settings.focusLog ?? {}, todayKey(), { min, rounds: n, subjectId }) });
   };
-  const next = () => {
-    const r = advance(tech, run, run.running && run.endAt ? run.endAt : Date.now());
-    if (r.doneFocus) addBlocks(1, tech.focus, run.subjectId);
+  // Al acabar solo, la fase siguiente cuenta desde la hora exacta en que terminó (sin deriva). Al pulsar "Saltar", desde ahora.
+  const next = (skipped = false) => {
+    const now = Date.now();
+    const left = run.running ? run.endAt - now : run.left;
+    const r = advance(tech, run, skipped || !run.running ? now : run.endAt);
+    if (r.doneFocus) {
+      // Un foco saltado solo cuenta por el tiempo que de verdad estudiaste (y como bloque si hiciste casi todo).
+      const done = skipped ? Math.max(0, Math.round((dur(tech, 'focus') - left) / 60000)) : tech.focus;
+      if (!skipped || done >= tech.focus * 0.8) addBlocks(1, done, run.subjectId);
+    }
     save(r.run);
     return r.run;
   };
@@ -141,7 +148,7 @@ export default function Techniques() {
           <p className="small muted" style={{ textAlign: 'center' }}>{tech.name} · ronda {run.round}{tech.cycles > 1 ? ` de ${tech.cycles}` : ''}</p>
           <div className="row-gap" style={{ justifyContent: 'center' }}>
             <button className="btn primary" onClick={toggle}>{run.running ? 'Pausa' : 'Seguir'}</button>
-            <button className="btn" onClick={next}>Saltar</button>
+            <button className="btn" onClick={() => next(true)}>Saltar</button>
             <button className="btn" onClick={stop}>Terminar</button>
           </div>
           <button className="link-btn" onClick={() => setFull(true)}>⛶ Ver en pantalla completa</button>

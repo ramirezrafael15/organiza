@@ -31,3 +31,14 @@ describe('startRun', () => {
     expect(r).toMatchObject({ techId: 'pomodoro', phase: 'focus', round: 1, running: true, endAt: 1000 + 25 * 60000, label: 'Tema 3', subjectId: 's1' });
   });
 });
+
+describe('saltar fase', () => {
+  it('saltar cuenta la fase siguiente desde ahora, no desde la hora en que iba a acabar', () => {
+    const t = DEFAULTS[0];
+    const run = startRun(t, 0); // foco hasta el minuto 25
+    const now = 5 * 60000;      // lo salto en el minuto 5
+    const r = advance(t, run, now).run;
+    expect(r.phase).toBe('rest');
+    expect(r.endAt).toBe(now + 5 * 60000); // descanso de 5 min desde ahora
+  });
+});
