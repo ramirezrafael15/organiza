@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { getWakeWord, setWake, setWakeWord, useWake, wakeSupported } from '../lib/wake.js';
+import { getWakeWord, wakePhrase, setWake, setWakeWord, useWake, wakeSupported } from '../lib/wake.js';
 import { setVoiceOn, speak, voiceOn } from '../lib/voice.js';
 
 export default function WakeCard() {
@@ -12,10 +12,10 @@ export default function WakeCard() {
       <h2>Asistente de voz</h2>
       <label className="row" style={{ gap: 12, alignItems: 'center', opacity: ok ? 1 : 0.5 }}>
         <input type="checkbox" checked={on && ok} disabled={!ok} onChange={(e) => setWake(e.target.checked)} />
-        <span>Escuchar “Oye {word}”</span>
+        <span>Escuchar “{wakePhrase(word)}”</span>
       </label>
       <label className="stack" style={{ gap: 4 }}>
-        <span className="small muted">Palabra para despertarlo (evita “Siri”)</span>
+        <span className="small muted">Palabra para despertarlo (con “Seiri” se dice “Hola Seiri” u “Ok Seiri”)</span>
         <input type="text" value={word} maxLength={20} onChange={(e) => setWord(e.target.value)} onBlur={() => { setWakeWord(word); setWord(getWakeWord()); }} />
       </label>
       <label className="row" style={{ gap: 12, alignItems: 'center' }}>
