@@ -52,8 +52,8 @@ export default function NowList({ state, full, today }) {
   const shown = all ? rest : rest.slice(0, 4);
   const Actions = ({ e, big }) => (
     <div className="row-gap" style={{ flexWrap: 'wrap' }}>
-      {!sel.on && e.canDone && <button className={`btn${big ? ' primary' : ' small'}`} onClick={(ev) => done(e, ev)}>✓ Hecho</button>}
-      {!sel.on && e.canFocus && <button className={`btn${big ? '' : ' small'}`} onClick={() => focus(e)}>▶ Foco</button>}
+      {e.canDone && <button className={`btn${big ? ' primary' : ' small'}`} onClick={(ev) => done(e, ev)}>✓ Hecho</button>}
+      {e.canFocus && <button className={`btn${big ? '' : ' small'}`} onClick={() => focus(e)}>▶ Foco</button>}
     </div>
   );
 

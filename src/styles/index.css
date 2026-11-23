@@ -519,11 +519,12 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 [data-selectable] { position: relative; cursor: pointer; }
 [data-selectable] > * { pointer-events: none; }
 [data-selectable]::after {
-  content: ''; position: absolute; top: -8px; left: -8px; width: 24px; height: 24px; border-radius: 50%;
-  border: 2px solid var(--border); background: var(--surface); display: grid; place-items: center;
-  font-size: 14px; font-weight: 800; z-index: 2;
+  content: ''; position: absolute; top: 16px; right: 12px; left: auto; width: 26px; height: 26px; border-radius: 50%;
+  border: 2px solid var(--border); background: transparent; display: grid; place-items: center;
+  font-size: 14px; font-weight: 800; z-index: 2; transition: background 0.18s, border-color 0.18s;
 }
-[data-selected='true'] { outline: 2px solid var(--primary); }
+.selecting [data-selectable] { padding-right: 50px; border-radius: 16px; transition: background 0.18s; }
+[data-selected='true'] { background: color-mix(in srgb, var(--primary) 14%, transparent); }
 [data-selected='true']::after { content: '✓'; background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
 .todo-row[data-selectable]::after { top: 50%; left: auto; right: 12px; transform: translateY(-50%); }
 
