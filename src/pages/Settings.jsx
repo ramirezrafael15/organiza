@@ -8,7 +8,7 @@ import { DEFAULT_KIND_COLORS, KINDS } from '../lib/kinds.js';
 import { buildDemoState } from '../data/demo.js';
 import { useTheme } from '../lib/theme.js';
 import { ColorSwatches, ReminderPicker, Segmented } from '../components/forms/fields.jsx';
-import { AccountCard, NotificationsCard } from '../components/AccountCard.jsx';
+import { AccessCard, AccountCard, NotificationsCard } from '../components/AccountCard.jsx';
 import AiCard from '../components/AiCard.jsx';
 import WakeCard from '../components/WakeCard.jsx';
 import ScheduleImport from '../components/ScheduleImport.jsx';
@@ -96,6 +96,7 @@ export default function Settings() {
         </section>
 
         <AccountCard />
+        <AccessCard />
         <AiCard />
         <WakeCard />
         <BackupsCard />

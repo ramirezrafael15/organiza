@@ -27,6 +27,7 @@ import Assistant from './components/Assistant.jsx';
 import Splash from './components/Splash.jsx';
 import { ToastHost } from './components/toast.jsx';
 import Welcome from './components/Welcome.jsx';
+import Gate from './components/Gate.jsx';
 import { initAccount, useAccount } from './sync/account.js';
 import { getKeys, migrateKeysFromSettings, restoreKeysIfMissing } from './lib/keys.js';
 import { autoBackup, keepStorage } from './lib/safety.js';
@@ -85,6 +86,7 @@ export default function App() {
   const acc = useAccount();
   if (acc.status === 'loading') return <><Splash /><div className="welcome" /></>;
   if (acc.status === 'out') return <><Splash /><Welcome /></>;
+  if (acc.status === 'in' && acc.access !== 'ok') return <><Splash /><Gate /></>;
   return <AppShell />;
 }
 

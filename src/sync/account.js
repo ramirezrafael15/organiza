@@ -3,11 +3,12 @@
 import { useSyncExternalStore } from 'react';
 import { repo } from '../data/repo.js';
 import { passwordProblem } from '../lib/password.js';
-import { isConfigured } from './config.js';
+import { ADMIN_UID, isConfigured } from './config.js';
 import { ensurePush } from './push.js';
 import { SyncEngine } from './engine.js';
 
-let state = { status: isConfigured() ? 'loading' : 'off', user: null, error: '', sync: {} }; // off | loading | out | in
+// access: unverified | checking | pending | rejected | ok  (ok = Rafa ha aceptado la cuenta)
+let state = { status: isConfigured() ? 'loading' : 'off', user: null, error: '', sync: {}, access: 'checking', isAdmin: false, requests: [], approved: [] }; // off | loading | out | in
 const listeners = new Set();
 const set = (patch) => {
   state = { ...state, ...patch };
@@ -17,6 +18,46 @@ const set = (patch) => {
 let fb = null;
 let started = false;
 let stopEngine = null;
+let stopAccess = null;
+
+// ¿Puede usar la app? Solo con el correo verificado y la cuenta aceptada por Rafa (él entra siempre).
+const accessKey = (uid) => `organiza:access:${uid}`;
+const wasOk = (uid) => { try { return localStorage.getItem(accessKey(uid)) === '1'; } catch { return false; } };
+const rememberOk = (uid, ok) => { try { ok ? localStorage.setItem(accessKey(uid), '1') : localStorage.removeItem(accessKey(uid)); } catch { /* nada */ } };
+
+function grant(user) {
+  if (state.access === 'ok' && stopEngine) return;
+  set({ access: 'ok' });
+  startEngine(user);
+  keepPushAlive(user.uid);
+  fb.deleteCloudKeys(user.uid).catch(() => {});
+}
+
+function beginAccess(user) {
+  stopAccess?.(); stopAccess = null;
+  const off = [];
+  stopAccess = () => off.forEach((f) => f());
+  if (!user.emailVerified) { set({ access: 'unverified' }); return; }
+  if (user.uid === ADMIN_UID) {
+    grant(user);
+    off.push(fb.watchRequests((requests) => set({ requests }), () => {}));
+    off.push(fb.watchApprovedList((approved) => set({ approved }), () => {}));
+    return;
+  }
+  let okNow = null; let reqStatus = null; // lo último que dijo la nube
+  const refresh = () => {
+    if (okNow === null) return;
+    if (okNow) { grant(user); return; }
+    stopEngine?.(); stopEngine = null;
+    set({ access: reqStatus === 'rechazada' ? 'rejected' : 'pending' });
+  };
+  if (wasOk(user.uid)) grant(user); else set({ access: 'checking' }); // ya aceptada antes: abre aunque no haya internet
+  off.push(fb.watchApproval(user.uid, (ok) => {
+    okNow = ok; rememberOk(user.uid, ok); refresh();
+    if (!ok) fb.ensureRequest(user.uid, user.email).catch(() => {});
+  }, () => {}));
+  off.push(fb.watchRequest(user.uid, (status) => { reqStatus = status; refresh(); }, () => {}));
+}
 
 const MESSAGES = {
   'auth/invalid-credential': 'Correo o contraseña incorrectos.',
@@ -39,13 +80,12 @@ export function initAccount() {
       m.onAuth((user) => {
         stopEngine?.();
         stopEngine = null;
+        stopAccess?.(); stopAccess = null;
         if (user) {
-          startEngine(user);
-          keepPushAlive(user.uid);
-          m.deleteCloudKeys(user.uid).catch(() => {});
-          set({ status: 'in', user: { uid: user.uid, email: user.email, emailVerified: user.emailVerified }, error: '' });
+          set({ status: 'in', user: { uid: user.uid, email: user.email, emailVerified: user.emailVerified }, error: '', isAdmin: user.uid === ADMIN_UID, requests: [], approved: [] });
+          beginAccess(user);
         } else {
-          set({ status: 'out', user: null });
+          set({ status: 'out', user: null, access: 'checking', isAdmin: false });
         }
       });
     })
@@ -60,8 +100,8 @@ function keepPushAlive(uid, force = false) {
   ensurePush(uid, fb);
 }
 if (typeof document !== 'undefined') {
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && state.user) keepPushAlive(state.user.uid); });
-  navigator.serviceWorker?.addEventListener('message', (e) => { if (e.data?.type === 'push-changed' && state.user) keepPushAlive(state.user.uid, true); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && state.user && state.access === 'ok') keepPushAlive(state.user.uid); });
+  navigator.serviceWorker?.addEventListener('message', (e) => { if (e.data?.type === 'push-changed' && state.user && state.access === 'ok') keepPushAlive(state.user.uid, true); });
 }
 
 function startEngine(user) {
@@ -95,7 +135,15 @@ export const account = {
     return ok;
   },
   resendVerification: run(() => fb.sendVerification()),
-  refreshVerification: run(async () => { const r = await fb.refreshUser(); set({ user: { ...state.user, emailVerified: r.emailVerified } }); }),
+  refreshVerification: run(async () => {
+    const r = await fb.refreshUser();
+    set({ user: { ...state.user, emailVerified: r.emailVerified } });
+    if (r.emailVerified) beginAccess({ uid: state.user.uid, email: state.user.email, emailVerified: true });
+  }),
+  /** Solo Rafa: aceptar, rechazar o quitar el acceso a una cuenta. */
+  approve: run((uid, email) => fb.approveUser(uid, email)),
+  reject: run((uid) => fb.rejectUser(uid)),
+  revoke: run((uid) => fb.revokeUser(uid)),
   /** Borra la cuenta y todo lo que hay en la nube (pide la contraseña). */
   deleteAccount: async (password) => {
     set({ error: '' });

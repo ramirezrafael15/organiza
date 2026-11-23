@@ -4,14 +4,12 @@ import { actions, useAppState } from '../data/index.js';
 import { VAPID_PUBLIC_KEY } from '../sync/config.js';
 import { account, useAccount } from '../sync/account.js';
 import { currentSubscription, disablePush, enablePush, localTest, pushSupport } from '../sync/push.js';
-import { Field } from './forms/fields.jsx';
+import AuthForm from './AuthForm.jsx';
 
 const HOURS = Array.from({ length: 17 }, (_, i) => i + 6); // 6:00 – 22:00
 
 export function AccountCard() {
   const acc = useAccount();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
   const sendReset = async (to) => {
@@ -19,14 +17,7 @@ export function AccountCard() {
     setBusy(true);
     const ok = await account.reset(to);
     setBusy(false);
-    setNote(ok ? `Te hemos enviado un correo a ${to} para elegir una contraseña nueva (mira también en spam).` : '');
-  };
-
-  const submit = (fn) => async (e) => {
-    e.preventDefault();
-    setBusy(true);
-    await fn(email.trim(), password);
-    setBusy(false);
+    setNote(ok ? 'Si ese correo tiene cuenta, te llegará un enlace para elegir una contraseña nueva (mira también en spam). Caduca en poco tiempo y solo sirve una vez.' : '');
   };
 
   return (
@@ -41,20 +32,7 @@ export function AccountCard() {
       )}
       {acc.status === 'loading' && <p className="muted small">Conectando…</p>}
 
-      {acc.status === 'out' && (
-        <form className="stack" onSubmit={submit(account.signIn)}>
-          <p className="muted small">Entra con tu cuenta para tener los mismos datos en el iPhone y en Windows. Todo se guarda también sin conexión.</p>
-          <Field label="Correo"><input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
-          <Field label="Contraseña"><input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
-          {acc.error && <p className="small" style={{ color: 'var(--danger)', margin: 0 }}>{acc.error}</p>}
-          <div className="row wrap">
-            <button className="btn primary" type="submit" disabled={busy}>Entrar</button>
-          </div>
-          <p className="small muted" style={{ margin: 0 }}>Solo con invitación: la cuenta te la crea Rafa.</p>
-          <button className="link-btn" type="button" style={{ alignSelf: 'flex-start' }} disabled={busy} onClick={() => sendReset(email.trim())}>¿Has olvidado la contraseña?</button>
-          {note && <p className="small muted" style={{ margin: 0 }}>{note}</p>}
-        </form>
-      )}
+      {acc.status === 'out' && <AuthForm />}
 
       {acc.status === 'in' && (
         <>
@@ -161,6 +139,51 @@ export function NotificationsCard() {
           {!VAPID_PUBLIC_KEY && <p className="small muted" style={{ margin: 0 }}>Falta la clave VAPID pública en src/sync/config.js.</p>}
         </>
       )}
+    </section>
+  );
+}
+
+/** Solo lo ve Rafa: quién ha pedido acceso y quién tiene ya la cuenta aceptada. */
+export function AccessCard() {
+  const acc = useAccount();
+  if (!acc.isAdmin || acc.status !== 'in') return null;
+  const mine = acc.user.uid;
+  const when = (t) => (t ? new Date(t).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : '');
+  const waiting = acc.requests.filter((r) => r.status !== 'rechazada');
+  const rejected = acc.requests.filter((r) => r.status === 'rechazada');
+  return (
+    <section className="card stack">
+      <h2>Quién puede entrar</h2>
+      <p className="muted small">Quien se registra y verifica su correo aparece aquí. Hasta que lo aceptes no puede usar Seiri ni guardar nada.</p>
+      {acc.error && <p className="small" style={{ color: 'var(--danger)', margin: 0 }}>{acc.error}</p>}
+
+      <h3 style={{ margin: 0 }}>Solicitudes{waiting.length ? ` (${waiting.length})` : ''}</h3>
+      {!waiting.length && <p className="muted small" style={{ margin: 0 }}>Ninguna pendiente.</p>}
+      {waiting.map((r) => (
+        <div key={r.uid} className="row wrap" style={{ justifyContent: 'space-between', gap: 8 }}>
+          <span><b>{r.email}</b> <span className="muted small">· {when(r.at)}</span></span>
+          <span className="row" style={{ gap: 6 }}>
+            <button className="btn small primary" onClick={() => account.approve(r.uid, r.email)}>Aceptar</button>
+            <button className="btn small" onClick={() => window.confirm(`¿Rechazar a ${r.email}?`) && account.reject(r.uid)}>Rechazar</button>
+          </span>
+        </div>
+      ))}
+      {rejected.map((r) => (
+        <div key={r.uid} className="row wrap" style={{ justifyContent: 'space-between', gap: 8 }}>
+          <span className="muted small">{r.email} · rechazada</span>
+          <button className="btn small" onClick={() => account.approve(r.uid, r.email)}>Aceptar</button>
+        </div>
+      ))}
+
+      <h3 style={{ margin: '8px 0 0' }}>Con acceso ({acc.approved.length})</h3>
+      {acc.approved.map((u) => (
+        <div key={u.uid} className="row wrap" style={{ justifyContent: 'space-between', gap: 8 }}>
+          <span>{u.email || u.uid}{u.uid === mine ? ' (tú)' : ''}</span>
+          {u.uid !== mine && (
+            <button className="btn small" onClick={() => window.confirm(`¿Quitar el acceso a ${u.email || u.uid}? Sus datos no se borran.`) && account.revoke(u.uid)}>Quitar acceso</button>
+          )}
+        </div>
+      ))}
     </section>
   );
 }

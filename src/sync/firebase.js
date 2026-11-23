@@ -6,7 +6,7 @@ import {
   signInWithEmailAndPassword, signOut as fbSignOut,
 } from 'firebase/auth';
 import {
-  collection, deleteDoc, doc, getDocs, initializeFirestore, memoryLocalCache, onSnapshot, setDoc, writeBatch,
+  collection, deleteDoc, doc, getDoc, getDocs, initializeFirestore, memoryLocalCache, onSnapshot, setDoc, updateDoc, writeBatch,
 } from 'firebase/firestore';
 import { firebaseConfig } from './config.js';
 
@@ -62,6 +62,27 @@ export async function wipeCloudAndDelete() {
   }
   await deleteUser(user);
 }
+
+// ---- acceso (aprobación de cuentas nuevas) ----
+/** ¿Ya ha aceptado Rafa esta cuenta? */
+export const watchApproval = (uid, cb, onErr) => onSnapshot(doc(services().db, 'approved', uid), (s) => cb(s.exists()), onErr);
+/** Estado de mi solicitud: 'pendiente' | 'rechazada' | null (si aún no la he hecho). */
+export const watchRequest = (uid, cb, onErr) => onSnapshot(doc(services().db, 'requests', uid), (s) => cb(s.exists() ? s.data().status : null), onErr);
+export async function ensureRequest(uid, email) {
+  const ref = doc(services().db, 'requests', uid);
+  if (!(await getDoc(ref)).exists()) await setDoc(ref, { email, at: Date.now(), status: 'pendiente' });
+}
+// Solo para Rafa (las reglas lo comprueban):
+const sortAt = (a) => a.sort((x, y) => (x.at ?? 0) - (y.at ?? 0));
+export const watchRequests = (cb, onErr) => onSnapshot(collection(services().db, 'requests'), (s) => cb(sortAt(s.docs.map((d) => ({ uid: d.id, ...d.data() })))), onErr);
+export const watchApprovedList = (cb, onErr) => onSnapshot(collection(services().db, 'approved'), (s) => cb(sortAt(s.docs.map((d) => ({ uid: d.id, ...d.data() })))), onErr);
+export async function approveUser(uid, email) {
+  const { db } = services();
+  await setDoc(doc(db, 'approved', uid), { email: email ?? '', at: Date.now() });
+  await deleteDoc(doc(db, 'requests', uid));
+}
+export const rejectUser = (uid) => updateDoc(doc(services().db, 'requests', uid), { status: 'rechazada' });
+export const revokeUser = (uid) => deleteDoc(doc(services().db, 'approved', uid));
 
 // Firestore no admite `undefined`: se limpia antes de guardar.
 const clean = (obj) => JSON.parse(JSON.stringify(obj));

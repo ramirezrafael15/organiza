@@ -28,8 +28,16 @@ function track(ref) {
   log(`Siguiendo al usuario ${ref.id}`);
 }
 
+// Solo se avisa a las cuentas que Rafa ha aceptado. La primera vez (colección vacía) se aceptan las que ya existían.
 async function discoverUsers() {
-  for (const ref of await db.collection('users').listDocuments()) if (!tracked.has(ref.id)) track(ref);
+  const users = await db.collection('users').listDocuments();
+  if ((await db.collection('approved').limit(1).get()).empty) {
+    for (const ref of users) await db.collection('approved').doc(ref.id).set({ email: '', at: Date.now(), grandfathered: true });
+    log(`Cuentas que ya existían: ${users.length} aceptadas.`);
+  }
+  const ok = new Set((await db.collection('approved').listDocuments()).map((r) => r.id));
+  for (const id of [...tracked.keys()]) if (!ok.has(id)) { tracked.delete(id); log(`Acceso quitado: ${id}`); }
+  for (const ref of users) if (ok.has(ref.id) && !tracked.has(ref.id)) track(ref);
 }
 
 const view = (u) => {

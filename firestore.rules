@@ -1,14 +1,35 @@
 // Pega esto en Firebase -> Firestore Database -> Reglas -> Publicar.
-// Cada usuario solo puede leer y escribir SUS datos, y solo con el correo verificado.
+// - Cada usuario solo lee y escribe SUS datos, con el correo verificado Y aprobado por Rafa.
+// - Quien se registra queda como solicitud (requests); solo Rafa la acepta (approved).
 // (El servidor de avisos usa una cuenta de servicio que se salta las reglas.)
-// IMPORTANTE: verifica antes tu propio correo en la app (Ajustes -> Cuenta), o dejarás de sincronizar.
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isAdmin() { return signedIn() && request.auth.uid == 'LCvJgz3jP2Z7lwKH0cgSFCK6GGp2' && request.auth.token.email_verified == true; }
+    function approved() { return exists(/databases/$(database)/documents/approved/$(request.auth.uid)); }
+
     match /users/{uid}/{document=**} {
-      allow read, write: if request.auth != null
+      allow read, write: if signedIn()
                          && request.auth.uid == uid
-                         && request.auth.token.email_verified == true;
+                         && request.auth.token.email_verified == true
+                         && (approved() || isAdmin());
+    }
+
+    // Cuentas aceptadas: cada uno puede ver si la suya lo está; solo Rafa las crea y las quita.
+    match /approved/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Solicitudes de acceso: se crean solas al verificar el correo; solo Rafa las lee todas y decide.
+    match /requests/{uid} {
+      allow create: if signedIn() && request.auth.uid == uid && request.auth.token.email_verified == true
+                    && request.resource.data.keys().hasOnly(['email', 'at', 'status'])
+                    && request.resource.data.status == 'pendiente'
+                    && request.resource.data.email == request.auth.token.email;
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow update, delete: if isAdmin();
     }
   }
 }
