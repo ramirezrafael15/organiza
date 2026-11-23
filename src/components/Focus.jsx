@@ -26,7 +26,7 @@ export function startFocusFor({ label, subjectId }, techId = 'pomodoro') {
   return true;
 }
 
-const PHASE_NAME = { focus: 'Foco', rest: 'Descanso', long: 'Descanso largo' };
+const PHASE_NAME = { focus: 'Foco', rest: 'Descanso', long: 'Descanso largo', done: '¡Completa!' };
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
 
 function beep() {
@@ -127,7 +127,7 @@ export default function Techniques() {
   const [full, setFull] = useState(false);
 
   const log = (settings.focusLog ?? {})[todayKey()];
-  const left = run ? (run.running ? run.endAt - Date.now() : run.left) : 0;
+  const left = run ? (run.running ? run.endAt - Date.now() : run.left ?? 0) : 0;
   const total = run && tech ? dur(tech, run.phase) : 1;
   const C = 2 * Math.PI * 46;
   const colors = { focus: 'var(--primary-2)', rest: 'var(--u-0)', long: 'var(--u-0)' };
@@ -146,16 +146,28 @@ export default function Techniques() {
           </div>
           {run.label && <p style={{ textAlign: 'center', margin: '0 0 4px', fontWeight: 600 }}>{run.label}</p>}
           <p className="small muted" style={{ textAlign: 'center' }}>{tech.name} · ronda {run.round}{tech.cycles > 1 ? ` de ${tech.cycles}` : ''}</p>
-          <div className="row-gap" style={{ justifyContent: 'center' }}>
-            <button className="btn primary" onClick={toggle}>{run.running ? 'Pausa' : 'Seguir'}</button>
-            <button className="btn" onClick={() => next(true)}>Saltar</button>
-            <button className="btn" onClick={stop}>Terminar</button>
-          </div>
-          <button className="link-btn" onClick={() => setFull(true)}>⛶ Ver en pantalla completa</button>
+          {run.finished ? (
+            <>
+              <p style={{ textAlign: 'center', margin: '6px 0' }}>Has hecho {tech.cycles > 1 ? `las ${tech.cycles} rondas` : 'la ronda'}. ¡Buen trabajo! 🎉</p>
+              <div className="row-gap" style={{ justifyContent: 'center' }}>
+                <button className="btn primary" onClick={() => start(tech)}>Otra sesión</button>
+                <button className="btn" onClick={stop}>Cerrar</button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="row-gap" style={{ justifyContent: 'center' }}>
+                <button className="btn primary" onClick={toggle}>{run.running ? 'Pausa' : 'Seguir'}</button>
+                <button className="btn" onClick={() => next(true)}>Saltar</button>
+                <button className="btn" onClick={stop}>Terminar</button>
+              </div>
+              <button className="link-btn" onClick={() => setFull(true)}>⛶ Ver en pantalla completa</button>
+            </>
+          )}
         </section>
       )}
 
-      {full && run && tech && <FocusScreen run={run} tech={tech} left={left} total={total} color={colors[run.phase]} onToggle={toggle} onClose={() => setFull(false)} />}
+      {full && run && tech && !run.finished && <FocusScreen run={run} tech={tech} left={left} total={total} color={colors[run.phase]} onToggle={toggle} onClose={() => setFull(false)} />}
 
       <div className="tech-list">
         {all.map((t) => (

@@ -5,11 +5,11 @@ const pomo = DEFAULTS[0];
 const start = (at = 0) => ({ techId: 'pomodoro', phase: 'focus', round: 1, left: 25 * 60000, endAt: at + 25 * 60000, running: true });
 
 describe('focus', () => {
-  it('foco -> descanso -> foco, y descanso largo tras 4 rondas', () => {
+  it('foco -> descanso -> foco, y descanso largo tras 4 rondas, y termina', () => {
     let r = start();
     const phases = [];
     for (let i = 0; i < 8; i++) { r = advance(pomo, r.run ?? r, (r.run ?? r).endAt); phases.push(r.run.phase); }
-    expect(phases).toEqual(['rest', 'focus', 'rest', 'focus', 'rest', 'focus', 'long', 'focus']);
+    expect(phases).toEqual(['rest', 'focus', 'rest', 'focus', 'rest', 'focus', 'long', 'done']);
   });
   it('catchUp avanza sin deriva y cuenta los bloques hechos', () => {
     const { run, blocks } = catchUp(pomo, start(0), 70 * 60000);
@@ -40,5 +40,31 @@ describe('saltar fase', () => {
     const r = advance(t, run, now).run;
     expect(r.phase).toBe('rest');
     expect(r.endAt).toBe(now + 5 * 60000); // descanso de 5 min desde ahora
+  });
+});
+
+describe('la sesión termina sola', () => {
+  const T = DEFAULTS[0];
+  it('Pomodoro: tras 4 rondas y el descanso largo, termina', () => {
+    let run = startRun(T, 0); let at = 0; let blocks = 0;
+    for (let i = 0; i < 20 && !run.finished; i++) { const r = advance(T, run, run.endAt); run = r.run; if (r.doneFocus) blocks++; at = run.endAt; }
+    expect(run.finished).toBe(true);
+    expect(run.running).toBe(false);
+    expect(blocks).toBe(4);
+  });
+  it('si la app estuvo cerrada horas, no inventa rondas de más', () => {
+    const { run, blocks } = catchUp(T, startRun(T, 0), 10 * 3600 * 1000);
+    expect(run.finished).toBe(true);
+    expect(blocks).toBe(4);
+  });
+  it('técnica de una ronda (52/17): foco, descanso y fin', () => {
+    const t = DEFAULTS[1]; let run = startRun(t, 0);
+    run = advance(t, run, run.endAt).run; expect(run.phase).toBe('rest');
+    run = advance(t, run, run.endAt).run; expect(run.finished).toBe(true);
+  });
+  it('el servidor no recibe avisos de más', () => {
+    const plan = schedule(T, startRun(T, 0), 0, { max: 50, horizonMs: 100 * 3600 * 1000 });
+    expect(plan.length).toBe(8); // 4 fines de foco + 3 descansos + aviso final
+    expect(plan.at(-1).title).toBe('Sesión completa');
   });
 });

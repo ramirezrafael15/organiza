@@ -10,7 +10,8 @@ export const phaseMs = (t, phase) => (phase === 'focus' ? t.focus : phase === 'l
 
 /** Mensaje del aviso que suena cuando EMPIEZA la fase `to`. */
 export const messageFor = (to) =>
-  to === 'focus' ? { title: 'A estudiar', body: 'Vuelve al foco.' }
+  to === 'done' ? { title: 'Sesión completa', body: 'Has terminado todas las rondas. Buen trabajo.' }
+    : to === 'focus' ? { title: 'A estudiar', body: 'Vuelve al foco.' }
     : to === 'long' ? { title: 'Descanso largo', body: 'Buen trabajo. Desconecta un buen rato.' }
       : { title: 'Descanso', body: 'Buen bloque. Respira un rato.' };
 
@@ -20,6 +21,8 @@ export function advance(t, run, at) {
     const phase = t.cycles > 1 && run.round % t.cycles === 0 ? 'long' : 'rest';
     return { run: { ...run, phase, left: phaseMs(t, phase), endAt: at + phaseMs(t, phase), running: true }, doneFocus: true };
   }
+  // Al acabar el descanso de la última ronda, la sesión termina sola (antes seguía para siempre).
+  if (run.round >= Math.max(1, t.cycles || 1)) return { run: { ...run, phase: 'done', left: 0, endAt: null, running: false, finished: true }, doneFocus: false };
   return { run: { ...run, phase: 'focus', round: run.round + 1, left: phaseMs(t, 'focus'), endAt: at + phaseMs(t, 'focus'), running: true }, doneFocus: false };
 }
 
@@ -37,7 +40,7 @@ export function catchUp(t, run, now) {
 export function schedule(t, run, now, { max = 12, horizonMs = 6 * 3600 * 1000 } = {}) {
   if (!run?.running) return [];
   const out = []; let cur = run;
-  while (out.length < max && cur.endAt - now <= horizonMs) {
+  while (out.length < max && cur.running && cur.endAt - now <= horizonMs) {
     const r = advance(t, cur, cur.endAt);
     out.push({ id: `${cur.endAt}`, at: cur.endAt, ...messageFor(r.run.phase), tag: 'seiri-focus' });
     cur = r.run;
