@@ -33,23 +33,28 @@ function track(ref) {
 // y no tienen aprobación, aunque ya se hubiera aprobado a alguien: así nadie que ya usaba la app se queda fuera.
 async function discoverUsers() {
   const users = await db.collection('users').listDocuments();
-  const flag = db.collection('config').doc('acceso-inicial');
-  if (!(await flag.get()).exists) {
-    let n = 0;
-    for (const ref of users) {
-      const doc = db.collection('approved').doc(ref.id);
-      if ((await doc.get()).exists) continue;
-      let email = '';
-      try { email = (await admin.auth().getUser(ref.id)).email ?? ''; } catch { /* sin correo */ }
-      await doc.set({ email, at: Date.now(), grandfathered: true });
-      n++;
+  let ok = null; // null = no se pudo comprobar: en ese caso se avisa a todos, como antes (los avisos nunca se paran por esto)
+  try {
+    const flag = db.collection('config').doc('acceso-inicial');
+    if (!(await flag.get()).exists) {
+      let n = 0;
+      for (const ref of users) {
+        const doc = db.collection('approved').doc(ref.id);
+        if ((await doc.get()).exists) continue;
+        let email = '';
+        try { email = (await admin.auth().getUser(ref.id)).email ?? ''; } catch { /* sin correo */ }
+        await doc.set({ email, at: Date.now(), grandfathered: true });
+        n++;
+      }
+      await flag.set({ at: Date.now() });
+      log(`Cuentas que ya existían: ${n} aprobadas.`);
     }
-    await flag.set({ at: Date.now() });
-    log(`Cuentas que ya existían: ${n} aprobadas.`);
+    ok = new Set((await db.collection('approved').listDocuments()).map((r) => r.id));
+  } catch (e) {
+    onError('acceso')(e);
   }
-  const ok = new Set((await db.collection('approved').listDocuments()).map((r) => r.id));
-  for (const id of [...tracked.keys()]) if (!ok.has(id)) { tracked.delete(id); log(`Acceso quitado: ${id}`); }
-  for (const ref of users) if (ok.has(ref.id) && !tracked.has(ref.id)) track(ref);
+  if (ok) for (const id of [...tracked.keys()]) if (!ok.has(id)) { tracked.delete(id); log(`Acceso quitado: ${id}`); }
+  for (const ref of users) if ((!ok || ok.has(ref.id)) && !tracked.has(ref.id)) track(ref);
 }
 
 const view = (u) => {
