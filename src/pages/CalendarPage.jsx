@@ -125,7 +125,7 @@ function MonthView({ state, today, cursor, selected, onSelect, onOpenDay, onAdd 
         {WEEKDAYS_3.map((d) => <div key={d} className="month-head">{d}</div>)}
         {days.map((iso) => {
           const entries = byDay[iso];
-          const cls = ['day-cell', !iso.startsWith(month) && 'out', iso === today && 'today', iso === selected && 'sel']
+          const cls = ['day-cell', !iso.startsWith(month) && 'out', iso === today && 'today', iso < today && 'past', iso === selected && 'sel']
             .filter(Boolean).join(' ');
           return (
             <button key={iso} className={cls} onClick={() => (iso === selected ? onOpenDay(iso) : onSelect(iso))} aria-label={fmt(iso, "d 'de' MMMM")}>
@@ -163,7 +163,7 @@ function WeekView({ state, today, cursor, onOpenDay }) {
   return (
     <div className="week">
       {days.map((iso, i) => (
-        <section key={iso} className={`week-col ${iso === today ? 'today' : ''}`}>
+        <section key={iso} className={`week-col ${iso === today ? 'today' : ''} ${iso < today ? 'past' : ''}`}>
           <button className="week-head" onClick={() => onOpenDay(iso)} aria-label={fmt(iso, "EEEE d 'de' MMMM")}>
             <span className="wd">{WEEKDAYS_3[i]}</span>
             <span className="num">{Number(iso.slice(8))}</span>

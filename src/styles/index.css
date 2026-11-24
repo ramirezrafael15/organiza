@@ -248,6 +248,11 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
   display: flex; flex-direction: column; gap: 2px; overflow: hidden;
 }
 .day-cell.out { opacity: 0.45; }
+.day-cell.past { background: color-mix(in srgb, var(--muted) 12%, var(--bg)); border-style: dashed; }
+.day-cell.past .num { color: var(--muted); text-decoration: line-through; text-decoration-thickness: 1.5px; }
+.day-cell.past .dots, .day-cell.past .mini, .day-cell.past .more { filter: grayscale(0.85); opacity: 0.55; }
+.week-col.past { opacity: 0.6; }
+.week-col.past .week-head .num { text-decoration: line-through; color: var(--muted); }
 .day-cell.today .num { background: var(--primary); color: var(--primary-ink); }
 .day-cell.sel { border-color: var(--primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 30%, transparent); }
 .num { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 0.74rem; font-weight: 700; align-self: center; }
