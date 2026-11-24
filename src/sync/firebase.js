@@ -64,7 +64,7 @@ export async function wipeCloudAndDelete() {
 }
 
 // ---- acceso (aprobación de cuentas nuevas) ----
-/** ¿Ya ha aceptado Rafa esta cuenta? */
+/** ¿Está aprobada esta cuenta? */
 export const watchApproval = (uid, cb, onErr) => onSnapshot(doc(services().db, 'approved', uid), (s) => cb(s.exists()), onErr);
 /** Estado de mi solicitud: 'pendiente' | 'rechazada' | null (si aún no la he hecho). */
 export const watchRequest = (uid, cb, onErr) => onSnapshot(doc(services().db, 'requests', uid), (s) => cb(s.exists() ? s.data().status : null), onErr);

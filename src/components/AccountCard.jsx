@@ -143,7 +143,7 @@ export function NotificationsCard() {
   );
 }
 
-/** Solo lo ve Rafa: quién ha pedido acceso y quién tiene ya la cuenta aceptada. */
+/** Solo lo ve el administrador: quién ha pedido acceso y quién tiene ya la cuenta aceptada. */
 export function AccessCard() {
   const acc = useAccount();
   if (!acc.isAdmin || acc.status !== 'in') return null;
@@ -154,7 +154,7 @@ export function AccessCard() {
   return (
     <section className="card stack">
       <h2>Quién puede entrar</h2>
-      <p className="muted small">Quien se registra y verifica su correo aparece aquí. Hasta que lo aceptes no puede usar Seiri ni guardar nada.</p>
+      <p className="muted small">Quien se registra y verifica su correo aparece aquí. Hasta que lo apruebes no puede usar Seiri ni guardar nada.</p>
       {acc.error && <p className="small" style={{ color: 'var(--danger)', margin: 0 }}>{acc.error}</p>}
 
       <h3 style={{ margin: 0 }}>Solicitudes{waiting.length ? ` (${waiting.length})` : ''}</h3>

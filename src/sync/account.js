@@ -7,7 +7,7 @@ import { ADMIN_UID, isConfigured } from './config.js';
 import { ensurePush } from './push.js';
 import { SyncEngine } from './engine.js';
 
-// access: unverified | checking | pending | rejected | ok  (ok = Rafa ha aceptado la cuenta)
+// access: unverified | checking | pending | rejected | error | ok  (ok = el equipo de Seiri ha aprobado la cuenta)
 let state = { status: isConfigured() ? 'loading' : 'off', user: null, error: '', sync: {}, access: 'checking', isAdmin: false, requests: [], approved: [] }; // off | loading | out | in
 const listeners = new Set();
 const set = (patch) => {
@@ -20,7 +20,7 @@ let started = false;
 let stopEngine = null;
 let stopAccess = null;
 
-// ¿Puede usar la app? Solo con el correo verificado y la cuenta aceptada por Rafa (él entra siempre).
+// ¿Puede usar la app? Solo con el correo verificado y la cuenta aprobada (el administrador entra siempre).
 const accessKey = (uid) => `organiza:access:${uid}`;
 const wasOk = (uid) => { try { return localStorage.getItem(accessKey(uid)) === '1'; } catch { return false; } };
 const rememberOk = (uid, ok) => { try { ok ? localStorage.setItem(accessKey(uid), '1') : localStorage.removeItem(accessKey(uid)); } catch { /* nada */ } };
@@ -55,7 +55,7 @@ function beginAccess(user) {
   off.push(fb.watchApproval(user.uid, (ok) => {
     okNow = ok; rememberOk(user.uid, ok); refresh();
     if (!ok) fb.ensureRequest(user.uid, user.email).catch(() => {});
-  }, () => {}));
+  }, () => { if (state.access !== 'ok') set({ access: 'error' }); })); // no se puede comprobar: se avisa y se puede reintentar
   off.push(fb.watchRequest(user.uid, (status) => { reqStatus = status; refresh(); }, () => {}));
 }
 
@@ -140,7 +140,9 @@ export const account = {
     set({ user: { ...state.user, emailVerified: r.emailVerified } });
     if (r.emailVerified) beginAccess({ uid: state.user.uid, email: state.user.email, emailVerified: true });
   }),
-  /** Solo Rafa: aceptar, rechazar o quitar el acceso a una cuenta. */
+  /** Vuelve a comprobar el acceso (pantalla de espera). */
+  recheck: () => { if (state.user) beginAccess(state.user); },
+  /** Solo el administrador: aprobar, rechazar o quitar el acceso a una cuenta. */
   approve: run((uid, email) => fb.approveUser(uid, email)),
   reject: run((uid) => fb.rejectUser(uid)),
   revoke: run((uid) => fb.revokeUser(uid)),

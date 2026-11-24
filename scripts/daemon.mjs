@@ -4,6 +4,7 @@
 //
 // HEALTHCHECK_URL (opcional): URL de healthchecks.io; se pide cada minuto. Si el servidor se apaga, ellos te avisan por correo.
 import { randomUUID } from 'node:crypto';
+import admin from 'firebase-admin';
 import { parseIcs, planCalendarImport } from '../src/lib/ics.js';
 import { dispatchDue } from '../src/lib/dispatch.js';
 import { buildState, init, sendToAll } from './common.mjs';
@@ -28,12 +29,23 @@ function track(ref) {
   log(`Siguiendo al usuario ${ref.id}`);
 }
 
-// Solo se avisa a las cuentas que Rafa ha aceptado. La primera vez (colección vacía) se aceptan las que ya existían.
+// Solo se avisa a las cuentas aprobadas. Una única vez (marca config/acceso-inicial) se aprueban todas las que ya existían
+// y no tienen aprobación, aunque ya se hubiera aprobado a alguien: así nadie que ya usaba la app se queda fuera.
 async function discoverUsers() {
   const users = await db.collection('users').listDocuments();
-  if ((await db.collection('approved').limit(1).get()).empty) {
-    for (const ref of users) await db.collection('approved').doc(ref.id).set({ email: '', at: Date.now(), grandfathered: true });
-    log(`Cuentas que ya existían: ${users.length} aceptadas.`);
+  const flag = db.collection('config').doc('acceso-inicial');
+  if (!(await flag.get()).exists) {
+    let n = 0;
+    for (const ref of users) {
+      const doc = db.collection('approved').doc(ref.id);
+      if ((await doc.get()).exists) continue;
+      let email = '';
+      try { email = (await admin.auth().getUser(ref.id)).email ?? ''; } catch { /* sin correo */ }
+      await doc.set({ email, at: Date.now(), grandfathered: true });
+      n++;
+    }
+    await flag.set({ at: Date.now() });
+    log(`Cuentas que ya existían: ${n} aprobadas.`);
   }
   const ok = new Set((await db.collection('approved').listDocuments()).map((r) => r.id));
   for (const id of [...tracked.keys()]) if (!ok.has(id)) { tracked.delete(id); log(`Acceso quitado: ${id}`); }

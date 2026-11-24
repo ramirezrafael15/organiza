@@ -10,8 +10,8 @@ describe('acceso con aprobación', () => {
     expect(screen.queryByText(/No uses la contraseña/i)).toBeNull();
     expect(screen.getByText('¿Has olvidado la contraseña?')).toBeTruthy();
     fireEvent.click(screen.getByRole('tab', { name: 'Pedir acceso' }));
-    expect(screen.getByText(/No uses la contraseña que usas en otros sitios/i)).toBeTruthy();
-    expect(screen.getByText(/Rafa tiene que aceptar tu cuenta/i)).toBeTruthy();
+    expect(screen.getByText(/No utilices una contraseña que ya uses en otros servicios/i)).toBeTruthy();
+    expect(screen.getByText(/equipo de Seiri deberá aprobar tu cuenta/i)).toBeTruthy();
     expect(screen.getByPlaceholderText('Repite la contraseña')).toBeTruthy();
     expect(screen.queryByText('¿Has olvidado la contraseña?')).toBeNull();
   });

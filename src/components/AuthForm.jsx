@@ -1,4 +1,4 @@
-// Entrar o pedir acceso. Las cuentas nuevas las acepta Rafa una a una.
+// Entrar o pedir acceso. Las cuentas nuevas las aprueba el equipo de Seiri una a una.
 import { useState } from 'react';
 import { account, useAccount } from '../sync/account.js';
 
@@ -42,10 +42,10 @@ export default function AuthForm() {
         <>
           <input type="password" required autoComplete="new-password" placeholder="Repite la contraseña" value={again} onChange={(e) => setAgain(e.target.value)} />
           <p className="small" style={{ margin: 0 }}>
-            🔒 <b>No uses la contraseña que usas en otros sitios</b> (correo, Instagram, banco…). Crea una solo para Seiri: mínimo 8 caracteres, con letras y números.
+            <b>No utilices una contraseña que ya uses en otros servicios</b> (correo, redes sociales, banco…). Crea una exclusiva para Seiri, de al menos 8 caracteres, con letras y números.
           </p>
           <p className="small muted" style={{ margin: 0 }}>
-            Te enviaremos un correo para verificar tu email. Después, Rafa tiene que aceptar tu cuenta antes de que puedas usar Seiri.
+            Te enviaremos un correo para verificar tu dirección. Después, el equipo de Seiri deberá aprobar tu cuenta antes de que puedas usar la aplicación.
           </p>
         </>
       )}
