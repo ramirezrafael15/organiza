@@ -1,5 +1,6 @@
 // Entregas (trabajos): fechas, estado, progreso y urgencia.
 import { useState } from 'react';
+import { burst } from '../components/motion.jsx';
 import { Empty, Progress, ProgressSlider, SubjectChip, UrgencyBadge } from '../components/bits.jsx';
 import Icon from '../components/Icon.jsx';
 import { pick, SelectBar, SelectButton, useSelect } from '../components/select.jsx';
@@ -55,6 +56,15 @@ function Deliveries({ sel }) {
             return (
               <article key={t.id} className="card item-card" {...pick(sel, t.id)} style={{ '--c': urgency?.color ?? 'var(--u-0)', opacity: t.status === 'entregado' ? 0.7 : 1 }}>
                 <div className="item-top">
+                  <button
+                    className={`todo-check task-check ${t.status === 'entregado' ? 'on' : ''}`}
+                    aria-label={t.status === 'entregado' ? 'Marcar como no entregada' : 'Marcar como entregada'}
+                    aria-pressed={t.status === 'entregado'}
+                    onClick={(e) => {
+                      if (t.status !== 'entregado') burst(e.currentTarget);
+                      actions.setTaskStatus(t, t.status === 'entregado' ? ((t.progress ?? 0) > 0 ? 'en_curso' : 'pendiente') : 'entregado');
+                    }}
+                  >{t.status === 'entregado' ? '✓' : ''}</button>
                   <button className="grow" style={{ textAlign: 'left' }} onClick={() => openForm('task', t)}>
                     <div className="item-title">{t.title}</div>
                     <div className="small muted">

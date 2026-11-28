@@ -597,6 +597,7 @@ h2 { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transfor
 .swipe { position: relative; overflow: hidden; border-top: 1px solid var(--border); transition: max-height 0.3s var(--ease), opacity 0.25s; max-height: 120px; }
 .swipe:first-child { border-top: none; }
 .swipe.gone { max-height: 0; opacity: 0; }
+.task-check.on { background: var(--text); border-color: var(--text); color: var(--bg); }
 .swipe .todo-row { position: relative; background: var(--bg); border-top: none; touch-action: pan-y; padding-left: 2px; transition: transform 0.35s var(--ease); }
 .swipe-bg { position: absolute; inset: 0; display: flex; align-items: center; padding: 0 20px; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; color: var(--bg); opacity: calc(0.2 + var(--p) * 0.8); }
 .swipe-bg.ok { background: var(--u-0); justify-content: flex-start; }
